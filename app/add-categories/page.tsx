@@ -13,7 +13,7 @@ import { useForm } from 'react-hook-form';
 import { toast, Toaster } from 'sonner';
 import * as yup from 'yup';
 import { auth, db } from '../src/firebase';
-
+ 
 interface Category {
   id: string;
   name: string;

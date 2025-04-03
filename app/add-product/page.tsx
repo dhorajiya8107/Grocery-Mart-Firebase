@@ -10,7 +10,7 @@ const AddProduct = () => {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  
+   
   // Checking login user role
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {

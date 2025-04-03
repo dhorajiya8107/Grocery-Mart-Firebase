@@ -93,7 +93,7 @@ const SubHeader = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showMore]);
-
+ 
   return (
     <div className="xl:pl-48 lg:pl-36 md:pl-24 sm:pl-16 pl-7 shadow-md overflow-visible text-gray-600">
       <div className="flex gap-2 text-sm scroll-smooth snap-x">

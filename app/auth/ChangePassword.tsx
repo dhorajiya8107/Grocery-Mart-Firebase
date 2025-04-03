@@ -13,7 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import successAnimation from '@/animation/Animation - 1742460011298.json';
 import dynamic from 'next/dynamic';
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
-
+ 
 // 494 577
 // Validation schema using Zod
 const schema = z

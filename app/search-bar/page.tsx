@@ -61,6 +61,25 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
     fetchProducts()
   }, [])
 
+  useEffect(() => {
+    window.scrollTo(0, 0)
+    }, [searchTerm])
+
+  // Filtered products by search term
+  const filteredProducts = searchTerm
+    ? products.filter((product) => {
+        const term = searchTerm.toLowerCase();
+        return (
+          product.category?.toLowerCase().includes(term) ||
+          product.productName?.toLowerCase().includes(term) ||
+          product.description?.toLowerCase().includes(term) ||
+          product.discountedPrice?.toString().includes(term) ||
+          product.price?.toString().includes(term)
+        )
+      })
+    : [];
+
+
   const updateCart = async (updatedCart: Product[]) => {
     try {
       const auth = getAuth();
@@ -123,21 +142,6 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
       }
     }
   }
-
-  // Filtered products by search term
-  const filteredProducts = searchTerm
-    ? products.filter((product) => {
-        const term = searchTerm.toLowerCase();
-        return (
-          product.category?.toLowerCase().includes(term) ||
-          product.productName?.toLowerCase().includes(term) ||
-          product.description?.toLowerCase().includes(term) ||
-          product.discountedPrice?.toString().includes(term) ||
-          product.price?.toString().includes(term)
-        )
-      })
-    : [];
-
   // If user is not login then it  navigate to login and by clicking redirect to checkout
   const addToCart = (product: Product) => {
     const auth = getAuth();
@@ -206,7 +210,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
   return (
     <>
       <Toaster />
-      <div className="w-full">
+      <div className="w-full min-h-screen">
         <div className="container mx-auto px-10 md:pl-5 lg:pl-5 xl:pl-40 xl:pr-40 pt-5">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {filteredProducts.map((product) => {

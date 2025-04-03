@@ -243,8 +243,8 @@ const CategoryPage = () => {
   return (
     <>
     <Toaster className='text-green-500'/>
-    <div className='bg-gray-100 w-full min-h-screen pt-2'>
-      <div className="container mx-auto px-10 md:pl-5 lg:pl-5 xl:pl-40 xl:pr-40">
+    <div className='flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen'>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <h1 className="text-xl font-bold pl-10 mb-3 capitalize justify-start items-center flex bg-white w-full h-12">{formattedCategory}</h1>
       {/* Search Bar */}
       <div className="relative mb-6">
@@ -256,7 +256,7 @@ const CategoryPage = () => {
           className="w-full bg-white border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
           />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-3 pb-20">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
         {products && filteredProducts.map((product) => {
           const productInCart = cart.find(item => item.id === product.id);
           const quantityInCart = productInCart ? parseInt(productInCart.quantity) : 0;
@@ -289,12 +289,12 @@ const CategoryPage = () => {
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-auto h-auto object-cover pl-4 pr-4"
+                  className="w-full h-full object-cover p-2"
                 />
                 <p className='border-b border-gray-200 mt-3 mr-3 ml-3'></p>
               </div>
               <div className="p-3">
-                <h2 className="text-md font-semibold mb-1 truncate">{product.productName}</h2>
+                <h2 className="text-sm font-medium text-gray-800 line-clamp-2 mb-1 h-10">{product.productName}</h2>
                 <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">{product.description}</h3>
                 <div className="flex justify-between items-center mt-2">
                 <div className="flex items-baseline gap-1">

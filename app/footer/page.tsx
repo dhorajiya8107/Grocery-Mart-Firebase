@@ -10,7 +10,7 @@ import Logo from '../../images/Logo.png';
 const Footer = () => {
   const router = useRouter();
   const [year, setYear] = useState('');
-
+ 
   useEffect(() => {
     setYear(new Date().getFullYear().toString());
   }, []);

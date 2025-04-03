@@ -134,6 +134,10 @@ const CheckoutPage = () => {
             }));
   
             setAddresses(addressesData);
+            const defaultAddress = addressesData.find((address) => address.defaultAddress);
+            if (defaultAddress) {
+              setSelectedAddressId(defaultAddress.addressId);
+            }
             setMode("view");
           } else {
             setMode("add");
@@ -232,7 +236,6 @@ const CheckoutPage = () => {
           createdAt: new Date().toISOString(),
         });
   
-        // Reduce quantity of each product in the order
         for (const product of order.products) {
           const productRef = doc(db, 'products', product.id);
           await runTransaction(db, async (transaction) => {
@@ -249,10 +252,6 @@ const CheckoutPage = () => {
             }
           });
         }
-
-        // localStorage.removeItem('lastOrderId');
-  
-        // Clear the cart
         const cartRef = doc(db, 'cart', order.userId);
         await setDoc(cartRef, { products: [] });
   
@@ -327,11 +326,11 @@ const CheckoutPage = () => {
                   key={address.addressId || index}
                   className={`border rounded-lg p-1 relative hover:shadow-md transition-shadow bg-white cursor-pointer ${
                     selectedAddressId === address.addressId 
-                   ? address.defaultAddress 
-                   ? "border-green-700"
-                   : "border-green-500"
-                   : "border-gray-300"
-                  }`}
+                      ? address.defaultAddress 
+                        ? "border-green-700"
+                        : "border-green-500"
+                      : "border-gray-300"
+                  }`}                  
                   onClick={() => handleSelectAddress(address.addressId)}
                 >
                               <div className="flex items-start gap-2">
@@ -408,7 +407,6 @@ const CheckoutPage = () => {
           {/* Popover will be open when user click on Proceed to Payment button */}
           <Dialog open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             {/* <DialogTrigger asChild> */}
-              {/* By clicking to pay now it trigger */}
               <div className='justify-center flex p-4'>
                 <button
                   className={`w-100 h-14 text-white py-2 rounded-md transition duration-300 shadow-md ${

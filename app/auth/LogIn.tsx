@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import TextInput from '@/components/form-fields/TextInput';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ForgotPasswordPage from '../forget-password/page';
-
+ 
 // Validation schema using Zod
 const schema = z.object({
   email: z.string().email("Enter a valid email"),

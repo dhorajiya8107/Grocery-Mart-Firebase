@@ -1,6 +1,6 @@
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc, orderBy } from 'firebase/firestore';
 import { db } from './firebase';
-
+ 
 const categories = [
   'Vegetables & Fruits',
   'Dairy & Breakfast',

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import Link from "next/link";
 import Image from 'next/image';
 import Logo from '../../images/Logo.png';
-
+ 
 interface InvoicePdfProps {
   orderId: string;
   paymentStatus?: string;

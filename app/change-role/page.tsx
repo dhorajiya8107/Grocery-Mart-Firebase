@@ -7,7 +7,7 @@ import { auth, db } from '../src/firebase';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast, Toaster } from 'sonner';
-
+ 
 type User = {
   id: string;
   email: string;

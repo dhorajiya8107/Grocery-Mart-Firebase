@@ -7,6 +7,14 @@ import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'fireb
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+type User = {
+  email: string;
+  name: string;
+  role: string;
+  lastOrderId?: string;
+  userId: string;
+};
+
 type Product = {
     id: string;
     description: string;
@@ -18,6 +26,7 @@ type Product = {
   };
   
   type Order = {
+    userId: string;
     orderId: string;
     createdAt: string;
     totalAmount: number;
@@ -26,11 +35,32 @@ type Product = {
     products?: Product[];
   };
 
+  interface Address {
+    userId: string;
+    defaultAddress: boolean;
+    address: string;
+    floor: string;
+    area: string;
+    landmark: string;
+    name: string;
+    phoneNumber: string;
+    addressId: string;
+    createdAt: number;
+    updatedAt: number;
+    addressType: "home" | "work" | "hotel" | "other";
+    pinCode: string;
+    block: string;
+    state: string;
+    country: string;
+  }
+
 const OrderStatus = () => {
   const router = useRouter();
   const [role, setRole] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [address, setAddress] = useState<Address[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Checking login user role
@@ -65,6 +95,27 @@ const OrderStatus = () => {
     return () => unsubscribe();
   }, [router]);
 
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersRef = collection(db, "users");
+        const querySnapshot = await getDocs(usersRef);
+  
+        if (!querySnapshot.empty) {
+          const usersList: User[] = querySnapshot.docs.map((doc) => ({
+            userId: doc.id,
+            ...(doc.data() as Omit<User, "userId">),
+          }));
+          setUsers(usersList);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+  
+    fetchUsers();
+  }, []);
+
   // Fetch user orders from firestore
   useEffect(() => {
     const fetchOrders = async () => {
@@ -98,6 +149,33 @@ const OrderStatus = () => {
       }
   }, [role]);
 
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const addressRef = collection(db, "addresses");
+        const querySnapshot = await getDocs(addressRef);
+  
+        if (!querySnapshot.empty) {
+          const addressesData: Address[] = querySnapshot.docs.map((doc) => {
+            const data = doc.data() as Address
+            return {
+              id: doc.id,
+              ...data,
+            };
+          });
+  
+          setAddress(addressesData);
+        }
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+      }
+    };
+  
+    if (role === "admin") {
+      fetchAddresses();
+    }
+  }, [role]);
+
   // Update order status in firestore
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
@@ -118,13 +196,19 @@ const OrderStatus = () => {
     }
   };
 
-  const filteredOrders = orders.filter(
-    (order) =>
-      order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      order.orderStatus?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Status filtering logic
+  const filteredOrders = orders.filter((order) => {
+    const userAddress = address.find((address) => address.userId === order.userId);
+    const foundUser = users.find((u) => u.userId === order.userId);
+  
+    return (
+      order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.orderStatus?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      userAddress?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      userAddress?.phoneNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      foundUser?.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+  
   const getNextStatus = (currentStatus: string) => {
     switch (currentStatus) {
       case 'Processing':
@@ -174,7 +258,11 @@ const OrderStatus = () => {
           />
         </div>
         <div className="grid grid-cols-1">
-          {filteredOrders.map((order) => (
+        {filteredOrders.map((order) => {
+          const userAddress = address.find((address) => address.userId === order.userId);
+          const foundUser = users.find((u) => u.userId === order.userId);
+
+          return (
             <div
               key={order.orderId}
               className="relative border-gray-200 transition-all duration-300"
@@ -183,12 +271,15 @@ const OrderStatus = () => {
                 <div className="flex items-center justify-between">
                   <div className='flex'>
                     <img
+                      // onClick={() => router.push(`/orders/${order.orderId}`)}
                       src="https://blinkit.com/8d522e40eef136ba3498.png"
                       alt="Order"
                       className="w-10 h-10 rounded-md object-cover mr-4 cursor-pointer"
                     />
                     <div>
-                      <p className="text-md font-bold whitespace-nowrap">Order ID: {order.orderId}</p>
+                      <p className="text-md font-bold whitespace-nowrap">
+                        Order ID: {order.orderId}
+                      </p>
                       <p className="text-sm text-gray-600">
                         Total: ₹{order.totalAmount.toFixed(2)}
                       </p>
@@ -198,26 +289,36 @@ const OrderStatus = () => {
                             {order.orderStatus}
                           </span>
                       </p>
+                      <p className="text-sm text-gray-600">
+                        Name: {userAddress ? userAddress.name : "Name Not Found"}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Email: {foundUser ? foundUser.email : "Email Not Found"}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Phone Number: {userAddress ? userAddress.phoneNumber : "Phone Number Not Found"}
+                      </p>
                     </div>
                   </div>
-                <div className="flex relative mt-7">
-                  <Button
-                    onClick={() => handleOrderStatus(order.orderStatus || '', order.orderId)}
-                    disabled={!getNextStatus(order.orderStatus || '')}
-                    className={`p-2 border rounded-md ml-auto text-xs transition ${
-                      !getNextStatus(order.orderStatus || '')
-                        ? 'bg-gray-200 cursor-not-allowed text-gray-500'
-                        : 'bg-red-500 hover:bg-red-600 text-white'
-                    }`}
-                  >
-                    {getNextStatus(order.orderStatus || '') || 'Delivered'}
-                  </Button>
-                </div>
+                  <div className="flex relative mt-7">
+                    <Button
+                      onClick={() => handleOrderStatus(order.orderStatus || '', order.orderId)}
+                      disabled={!getNextStatus(order.orderStatus || '')}
+                      className={`p-2 border rounded-md ml-auto text-xs transition ${
+                        !getNextStatus(order.orderStatus || '')
+                          ? 'bg-gray-200 cursor-not-allowed text-gray-500'
+                          : 'bg-red-500 hover:bg-red-600 text-white'
+                      }`}
+                    >
+                      {getNextStatus(order.orderStatus || '') || 'Delivered'}
+                    </Button>
+                  </div>
                 </div>
               </div>
               <p className='border-b border-gray-200 mr-10 ml-10'></p>
             </div>
-          ))}
+            );
+            })}
 
             {filteredOrders.length === 0 && (
               <p className="text-gray-500 py-6 text-xl text-center">

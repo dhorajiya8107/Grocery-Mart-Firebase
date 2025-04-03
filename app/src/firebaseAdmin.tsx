@@ -11,5 +11,5 @@ if (!admin.apps.length) {
 }
 
 const bucket = admin.storage().bucket();
-
+ 
 export { bucket };

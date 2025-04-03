@@ -8,7 +8,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"
 import LogInPage from "@/app/auth/LogIn"
 import { toast } from "sonner"
 import { Toaster } from "sonner"
-
+ 
 interface Product {
   id: string;
   productName: string;
@@ -25,7 +25,7 @@ const CategoryPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const params = useParams();
-  const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | null>(null);
+  const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
   const productName = params["productName"];
 
   const category = Array.isArray(params?.categories)

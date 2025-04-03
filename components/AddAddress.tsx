@@ -237,20 +237,30 @@ const AddAddressPage: React.FC<AddAddressPageProps> = ({ activeDialog, setActive
 
   // By selecting, it set as the default address
   const handleSelectAddress = async (selectedAddressId: string) => {
+    if (!userId) return;
+  
     setSelectedAddress(selectedAddressId);
+  
     try {
-      const addressesSnapshot = await getDocs(collection(db, "addresses"));
-      const updatePromises = addressesSnapshot.docs.map((addressDoc) => {
+      // Get only the addresses of the current user
+      const addressesSnapshot = await getDocs(query(collection(db, "addresses"), where("userId", "==", userId)));
+  
+      const batch = writeBatch(db);
+  
+      addressesSnapshot.docs.forEach((addressDoc) => {
         const isSelected = addressDoc.id === selectedAddressId;
-        return updateDoc(doc(db, "addresses", addressDoc.id), { defaultAddress: isSelected });
+        batch.update(addressDoc.ref, { defaultAddress: isSelected });
       });
-      await Promise.all(updatePromises);
+  
+      await batch.commit();
+  
       setActiveDialog(null);
       toast.success("Delivery address has been selected.");
     } catch (error) {
       console.error("Error updating default address:", error);
     }
-  };  
+  };
+  
 
   // Fetch postal data by pincode
   const pinCode = watch("pinCode")

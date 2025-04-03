@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import TextInput from '@/components/form-fields/TextInput';
 import { useSearchParams } from 'next/navigation';
-
+ 
 // Validation schema using Zod
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
