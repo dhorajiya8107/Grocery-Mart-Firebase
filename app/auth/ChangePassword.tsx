@@ -9,7 +9,7 @@ import { signInWithEmailAndPassword, signOut, updatePassword } from "firebase/au
 import { Button } from "@/components/ui/button";
 import TextInput from "@/components/form-fields/TextInput";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import successAnimation from '@/animation/Animation - 1742460011298.json';
 import dynamic from 'next/dynamic';
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });

@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { signOut, type User, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/app/src/firebase";
 import Link from "next/link";
@@ -40,6 +40,7 @@ const Header = ({ user }: { user: User | null }) => {
   const [role, setRole] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
+  const { useSearchParams } = require("next/navigation");
   const searchParams = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [placeholderText, setPlaceholderText] = useState('Search by "Butter"');

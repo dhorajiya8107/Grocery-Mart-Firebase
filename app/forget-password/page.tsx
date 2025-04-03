@@ -9,7 +9,6 @@ import { auth } from '../src/firebase';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import TextInput from '@/components/form-fields/TextInput';
-import { useSearchParams } from 'next/navigation';
  
 // Validation schema using Zod
 const schema = z.object({
@@ -25,8 +24,7 @@ interface ForgotPasswordPageProps {
 const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, setActiveDialog, preFilledEmail }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [open, setOpen] = useState(false); // Popover state
-  const searchParams = useSearchParams();
+  const [open, setOpen] = useState(false);
 
   // Apply validation
   const form = useForm({
