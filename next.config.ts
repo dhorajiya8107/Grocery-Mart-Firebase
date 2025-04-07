@@ -6,11 +6,14 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  skipTrailingSlashRedirect: true,
-  skipMiddlewareUrlNormalize: true,
+  output: 'standalone',
+  optimizeFonts: false,
   experimental: {
     excludeDefaultMomentLocales: true,
-    optimizeCss: false,
+    optimizeCss: true,
+    outputStandalone: true,
+    skipMiddlewareUrlNormalize: true,
+    skipTrailingSlashRedirect: true,
     outputFileTracingExcludes: {
       '**/_not-found/**': true
     }},
