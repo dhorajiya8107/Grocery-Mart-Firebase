@@ -128,9 +128,10 @@ const Categories = () => {
             ))}
           </div>
           {filteredCategories.length === 0 && !loading && (
-            <p className="text-gray-500 py-6 text-3xl text-center">
-              No category found.
-            </p>
+            <div className="flex flex-col items-center justify-center py-16">
+              <div className="text-xl font-medium text-gray-700 mb-2">No category found</div>
+              <p className="text-gray-500">We couldn't find any category matching "{searchTerm}"</p>
+          </div>
           )}
           {loading && (
             <p className="text-gray-500 py-6 text-xl text-center">

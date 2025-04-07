@@ -32,7 +32,7 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
 
   // If user is login then set userId otherwise null
@@ -187,7 +187,7 @@ const Orders = () => {
                 setItemsPerPage(Number(newSize));
                 setCurrentPage(1);
               }}
-              pageSizeOptions={[1, 3, 5, 10, 15, 20, 50]}
+              pageSizeOptions={[3, 5, 10, 15, 20, 50]}
             />
           )}
           </div>

@@ -282,7 +282,7 @@ const App = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Product Categories</h2>
             <button
-              className="text-sm text-emerald-600 font-medium hover:text-emerald-700"
+              className="text-sm text-gray-700 font-medium hover:text-emerald-700 cursor-pointer"
               onClick={() => router.push("/categories")}
             >
               View All
@@ -330,8 +330,8 @@ const App = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Featured Products</h2>
             <button
-              className="text-sm text-emerald-600 font-medium hover:text-emerald-700"
-              // onClick={() => router.push("/products")}
+              className="text-sm text-gray-700 font-medium hover:text-emerald-700 cursor-pointer"
+              onClick={() => router.push("/products")}
             >
               View All
             </button>

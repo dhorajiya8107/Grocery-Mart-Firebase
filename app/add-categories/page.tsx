@@ -39,7 +39,7 @@ const AddCategories = () => {
   const router = useRouter();
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const { register, handleSubmit, reset, setValue, formState: { errors }, } = useForm<{ name: string }>({
     resolver: yupResolver(schema),

@@ -21,7 +21,7 @@ interface Product {
   category: string;
 }
 
-const CategoryPage = () => {
+const Products = () => {
   const [cart, setCart] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,10 +29,6 @@ const CategoryPage = () => {
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
-
-  const category = Array.isArray(params?.categories)
-    ? decodeURIComponent(params.categories[0]) 
-    : decodeURIComponent(params?.categories || '');
 
     useEffect(() => {
       const auth = getAuth();
@@ -67,13 +63,11 @@ const CategoryPage = () => {
 
   // Fetch data from the products
   useEffect(() => {
-    const fetchProducts = async (category: string) => {
+    const fetchProducts = async () => {
       setLoading(true);
       try {
-          const formattedCategory = category.replace(/-/g, ' ');
           const productQuery = query(
           collection(db, 'products'),
-          where('category', '==', formattedCategory)
         );
         const productSnapshot = await getDocs(productQuery);
         const productList = productSnapshot.docs.map(doc => {
@@ -96,10 +90,8 @@ const CategoryPage = () => {
       }
     };
 
-    if (category) {
-      fetchProducts(category);
-    }
-  }, [category]);
+      fetchProducts();
+  }, []);
 
   // Filtered products by searching
   const filteredProducts = products.filter(
@@ -220,8 +212,6 @@ const CategoryPage = () => {
   }
   };
 
-  const formattedCategory = category.replace(/-/g, ' ');
-
   // On clicking, it will redirect to product details page
   const handleProductClick = (product: { productName: string; id: any; }) => {
     const formattedProductName = product.productName.replace(/\s+/g, '-');
@@ -237,15 +227,15 @@ const CategoryPage = () => {
   }
 
   if (!products.length) {
-    return <p className="text-center pt-2">No products found for "{formattedCategory}"</p>;
+    return <p className="text-center pt-2">No products found.</p>;
   }
 
   return (
     <>
     <Toaster className='text-green-500'/>
-    <div className='flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen'>
+    <div className='flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen pb-20'>
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <h1 className="text-xl font-bold pl-10 mb-3 capitalize justify-start items-center flex bg-white w-full h-12">{formattedCategory}</h1>
+      <h1 className="text-xl font-bold pl-10 mb-3 capitalize justify-start items-center flex bg-white w-full h-12">Featured Products</h1>
       {/* Search Bar */}
       <div className="relative mb-6">
         <Input
@@ -364,12 +354,12 @@ const CategoryPage = () => {
           );
         })}
         </div>
-        {filteredProducts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="text-xl font-medium text-gray-700 mb-2">No products found</div>
-              <p className="text-gray-500">We couldn't find any products matching "{searchTerm}"</p>
-            </div>
-            )}
+        {filteredProducts.length === 0 && !loading && (
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="text-xl font-medium text-gray-700 mb-2">No products found</div>
+            <p className="text-gray-500">We couldn't find any products matching "{searchTerm}"</p>
+          </div>
+        )}
       </div>
     </div>
 
@@ -384,4 +374,4 @@ const CategoryPage = () => {
   );
 };
 
-export default CategoryPage;
+export default Products;

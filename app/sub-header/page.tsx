@@ -95,7 +95,7 @@ const SubHeader = () => {
   }, [showMore]);
  
   return (
-    <div className="xl:pl-48 lg:pl-36 md:pl-24 sm:pl-16 pl-7 shadow-md overflow-visible text-gray-600">
+    <div className="shadow-none overflow-visible text-gray-600 mx-auto">
       <div className="flex gap-2 text-sm scroll-smooth snap-x">
         {categories.slice(0, visibleCount).map((category) => (
           <button
