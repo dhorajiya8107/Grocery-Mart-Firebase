@@ -6,6 +6,14 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  skipTrailingSlashRedirect: true,
+  skipMiddlewareUrlNormalize: true,
+  experimental: {
+    excludeDefaultMomentLocales: true,
+    optimizeCss: true,
+    outputFileTracingExcludes: {
+      '**/_not-found/**': true
+    }},
   async headers() {
     return [
       {

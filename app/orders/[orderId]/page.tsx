@@ -309,7 +309,7 @@ const OrderDetails = () => {
              <TooltipProvider>
                <Tooltip>
                  <TooltipTrigger asChild>
-                   <Button variant="outline" className='border-none p-0 -ml-2 shadow-none hover:bg-white'>
+                   <Button variant="outline" className='border p-0 -ml-2 shadow-none hover:bg-white'>
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 24 24" className="ml-1">
                        <circle cx="12" cy="12" r="10" stroke="black" strokeWidth="2" fill="none" />
                          <path d="M12 7v6" stroke="black" strokeWidth="2" strokeLinecap="round" />
