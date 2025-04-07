@@ -41,7 +41,6 @@ const Header = ({ user }: { user: User | null }) => {
   const [role, setRole] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
-  // const { useSearchParams } = require("next/navigation");
   const searchParams = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [placeholderText, setPlaceholderText] = useState('Search by "Butter"');

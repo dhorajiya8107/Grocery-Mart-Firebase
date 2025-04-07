@@ -13,7 +13,6 @@ import { useRouter } from "next/navigation";
 import successAnimation from '@/animation/Animation - 1742460011298.json';
 import dynamic from 'next/dynamic';
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
-import { useSearchParams } from 'next/navigation';
  
 // 494 577
 // Validation schema using Zod
@@ -44,8 +43,6 @@ const ChangePasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, s
   const router = useRouter();
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const searchParams = useSearchParams();
-  const prefilledEmail = searchParams.get("email") || "";
 
   // Apply validation
   const form = useForm({
