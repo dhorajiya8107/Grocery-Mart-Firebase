@@ -20,7 +20,7 @@ interface Product {
   description: string;
   category: string;
 }
-
+ 
 const Products = () => {
   const [cart, setCart] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
