@@ -9,4 +9,4 @@ export default function NotFound() {
       <a href="/">Return to Home</a>
     </div>
   );
-}
+} 
