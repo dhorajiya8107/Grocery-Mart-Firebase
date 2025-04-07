@@ -5,7 +5,11 @@ Grocery Mart is an online grocery store where users can browse products, add the
 ---
 
 **Live Preview**
+<<<<<<< HEAD
 👉 [Live Demo](https://grocery-mart-dev-dhorajiyas-projects.vercel.app/)
+=======
+👉 [Live Demo](https://grocery-mart-git-main-dev-dhorajiya-projects.vercel)
+>>>>>>> 0efc86b6ee801ad25a437566e4c2fbb88659d404
 
 ---
 
