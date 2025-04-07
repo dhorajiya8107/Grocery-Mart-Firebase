@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Briefcase, Check, Home, Hotel, MapPin } from 'lucide-react';
 import AddAddressPage from '@/components/AddAddress';
 import { toast, Toaster } from 'sonner';
+import { useSearchParams } from 'next/navigation';
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 interface Product {
@@ -64,7 +65,7 @@ const CheckoutPage = () => {
   const router = useRouter();
   const auth = getAuth();
   // const searchParams = useSearchParams();
-  const { useSearchParams } = require('next/navigation');
+  // const { useSearchParams } = require('next/navigation');
   const searchParams = useSearchParams();
   const orderId = searchParams?.get('orderId');
   const [order, setOrder] = useState<any>(null);
