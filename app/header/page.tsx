@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import SearchBar from "../search-bar/page";
 import AddAddressPage from "@/components/AddAddress";
-import { useSearchParams } from 'next/navigation';
+
 
 interface Product {
   id: string;
@@ -36,12 +36,15 @@ const Header = ({ user }: { user: User | null }) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [cart, setCart] = useState<Product[]>([]);
-  const [cartQuantity, setCartQuantity] = useState<number>(0);
+  const [cartQuantity, setCartQuantity] = useState<number>(0);  
   const [cartAmount, setCartAmount] = useState<number>(0);
   const [role, setRole] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
+
+  const { useSearchParams } = require('next/navigation');
   const searchParams = useSearchParams();
+
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [placeholderText, setPlaceholderText] = useState('Search by "Butter"');
   const placeholders = [
