@@ -11,12 +11,9 @@ const nextConfig = {
   experimental: {
     excludeDefaultMomentLocales: true,
     optimizeCss: true,
-<<<<<<< HEAD
     outputStandalone: true,
     skipMiddlewareUrlNormalize: true,
     skipTrailingSlashRedirect: true,
-=======
->>>>>>> 3922d9e0053e87bdfb73f4334429081875dc544e
     outputFileTracingExcludes: {
       '**/_not-found/**': true
     }},
