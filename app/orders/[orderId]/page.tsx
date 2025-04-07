@@ -306,15 +306,16 @@ const OrderDetails = () => {
          <div className="flex justify-between mb-4">
            <p className="flex items-center">
              Delivery charges
-             {/* <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 24 24" className="ml-1">
-               <circle cx="12" cy="12" r="10" stroke="black" strokeWidth="2" fill="none" />
-               <path d="M12 7v6" stroke="black" strokeWidth="2" strokeLinecap="round" />
-               <circle cx="12" cy="16" r="1.5" fill="black" />
-             </svg> */}
              <TooltipProvider>
                <Tooltip>
                  <TooltipTrigger asChild>
-                   <Button variant="outline">Hover</Button>
+                   <Button variant="outline">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 24 24" className="ml-1">
+                       <circle cx="12" cy="12" r="10" stroke="black" strokeWidth="2" fill="none" />
+                         <path d="M12 7v6" stroke="black" strokeWidth="2" strokeLinecap="round" />
+                       <circle cx="12" cy="16" r="1.5" fill="black" />
+                     </svg>
+                    </Button>
                  </TooltipTrigger>
                  <TooltipContent>
                    <p>Add to library</p>

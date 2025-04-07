@@ -72,10 +72,10 @@ const CheckoutPage = () => {
   const Payment_Methods = ['Credit Card', 'Debit Card', 'UPI', 'Net Banking'];
   const [addresses, setAddresses] = useState<Address[]>([])
   const [mode, setMode] = useState<"view" | "add" | "edit">("view")
-  const [addressType, setAddressType] = useState<"home" | "work" | "hotel" | "other">("home")
+  // const [addressType, setAddressType] = useState<"home" | "work" | "hotel" | "other">("home")
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
-  const [currentAddressId, setCurrentAddressId] = useState<string | null>(null)
-  const [isEditing, setIsEditing] = useState(false)
+  // const [currentAddressId, setCurrentAddressId] = useState<string | null>(null)
+  // const [isEditing, setIsEditing] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   
 
