@@ -10,7 +10,7 @@ const nextConfig = {
   skipMiddlewareUrlNormalize: true,
   experimental: {
     excludeDefaultMomentLocales: true,
-    optimizeCss: true,
+    optimizeCss: false,
     outputFileTracingExcludes: {
       '**/_not-found/**': true
     }},
