@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import { collection, doc, getDoc, getDocs, getFirestore, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, getFirestore, onSnapshot, query, where } from 'firebase/firestore';
 import { auth, db } from '@/app/src/firebase';
 import InvoicePdf, { InvoicePdfRef } from '@/app/src/invoicePdf';
 import jsPDF from 'jspdf';
@@ -22,12 +22,35 @@ type Product = {
 };
 
 type Order = {
+  userId: string;
   orderId: string;
   createdAt: string;
   totalAmount: number;
   paymentStatus?: string;
   products?: Product[];
+  selectedAddressId: string;
+  totalItems: number;
 };
+
+interface Address {
+  id: string;
+  userId: string;
+  defaultAddress: boolean;
+  address: string;
+  floor: string;
+  area: string;
+  landmark: string;
+  name: string;
+  phoneNumber: string;
+  addressId: string;
+  createdAt: number;
+  updatedAt: number;
+  addressType: "home" | "work" | "hotel" | "other";
+  pinCode: string;
+  block: string;
+  state: string;
+  country: string;
+}
 
 const OrderDetails = () => {
   const params = useParams();
@@ -38,6 +61,7 @@ const OrderDetails = () => {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [address, setAddress] = useState<Address[]>([]);
 
   // If user is login then set userId otherwise null
     useEffect(() => {
@@ -86,6 +110,44 @@ const OrderDetails = () => {
   
       fetchOrder();
   }, [orderId, userId]);
+
+  useEffect(() => {
+    // const auth = getAuth();
+  
+    const subscribeToAddresses = (userId: string) => {
+      try {
+        const addressRef = collection(db, "addresses");
+        const q = query(addressRef, where("userId", "==", userId));
+  
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+          if (!snapshot.empty) {
+            const addressesData = snapshot.docs.map((doc) => ({
+              ...(doc.data() as Address),
+              id: doc.id,
+            }));
+  
+            setAddress(addressesData);
+          }
+        });
+  
+        return unsubscribe;
+      } catch (error) {
+        console.error("Error subscribing to addresses:", error);
+      }
+    };
+  
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+        const unsubscribeAddresses = subscribeToAddresses(user.uid);
+  
+        return () => unsubscribeAddresses?.();
+      }
+    });
+  
+    return () => unsubscribeAuth();
+  }, []);
+
 
     const totalAmount = order?.products?.reduce((total, product) => {
       const discountedPrice = isNaN(Number(product.discountedPrice)) 
@@ -225,6 +287,7 @@ const OrderDetails = () => {
               deliveryCharges="FREE"
               totalPrice={totalAmount}
               totalItem={String(order.products?.reduce((total, product) => total + Number(product.quantity), 0))} 
+              selectedAddressId={''}              
               />
           )}
       </div>
@@ -309,16 +372,17 @@ const OrderDetails = () => {
              <TooltipProvider>
                <Tooltip>
                  <TooltipTrigger asChild>
-                   <Button variant="outline" className='border-none p-1 -ml-2 shadow hover:bg-white'>
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 24 24" className="ml-1">
+                   <Button variant="outline" className='border-none p-1 -ml-2 shadow-none hover:bg-white'>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 24 24" className="-ml-1">
                        <circle cx="12" cy="12" r="10" stroke="black" strokeWidth="2" fill="none" />
                          <path d="M12 7v6" stroke="black" strokeWidth="2" strokeLinecap="round" />
                        <circle cx="12" cy="16" r="1.5" fill="black" />
                      </svg>
                     </Button>
                  </TooltipTrigger>
-                 <TooltipContent>
-                   <p>Add to library</p>
+                 <TooltipContent className=''>
+                   <h1 className='font-bold mb-1'>Delivery charge</h1>
+                   <p><span className='text-blue-500 text-bold'>FREE</span> for first few orders</p>
                  </TooltipContent>
                </Tooltip>
              </TooltipProvider>
@@ -341,6 +405,30 @@ const OrderDetails = () => {
           <p className='text-black mb-2'>{order.orderId}</p>
           <p>Payment</p>
           <p className='text-black mb-2'>{order.paymentStatus}</p>
+          <p>Deliver to</p>
+          {order.selectedAddressId && (
+            <div className="text-black mb-2">
+              {(() => {
+                const selectedAddress = address.find(address => address.id === order.selectedAddressId);
+                return (
+                  <p>
+                    { selectedAddress ? [
+                        selectedAddress.floor,
+                        selectedAddress.address,
+                        selectedAddress.landmark,
+                        selectedAddress.area,
+                        selectedAddress.block,
+                        selectedAddress.state,
+                        selectedAddress.country,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")
+                      : "Not Found"}
+                  </p>
+                );
+              })()}
+            </div>
+          )}
           <p>Order placed</p>
           <p className='text-black mb-2'>placed on {formatDate(order.createdAt)}</p>
       </div>

@@ -6,6 +6,7 @@ import { auth, db } from '../src/firebase';
 import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { CustomPagination } from '@/components/CustomPagination';
 
 type User = {
   email: string;
@@ -62,6 +63,8 @@ const OrderStatus = () => {
   const [address, setAddress] = useState<Address[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Checking login user role
   useEffect(() => {
@@ -208,6 +211,10 @@ const OrderStatus = () => {
       foundUser?.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
+
+  const indexOfLastCategory = currentPage * itemsPerPage;
+  const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirstCategory, indexOfLastCategory);
   
   const getNextStatus = (currentStatus: string) => {
     switch (currentStatus) {
@@ -258,7 +265,7 @@ const OrderStatus = () => {
           />
         </div>
         <div className="grid grid-cols-1">
-        {filteredOrders.map((order) => {
+        {currentOrders.map((order) => {
           const userAddress = address.find((address) => address.userId === order.userId);
           const foundUser = users.find((u) => u.userId === order.userId);
 
@@ -290,13 +297,13 @@ const OrderStatus = () => {
                           </span>
                       </p>
                       <p className="text-sm text-gray-600">
-                        Name: {userAddress ? userAddress.name : "Name Not Found"}
+                        Name: {userAddress ? userAddress.name : "Not Found"}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Email: {foundUser ? foundUser.email : "Email Not Found"}
+                        Email: {foundUser ? foundUser.email : "Not Found"}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Phone Number: {userAddress ? userAddress.phoneNumber : "Phone Number Not Found"}
+                        Phone Number: {userAddress ? userAddress.phoneNumber : "Not Found"}
                       </p>
                     </div>
                   </div>
@@ -325,7 +332,21 @@ const OrderStatus = () => {
                 No orders found.
               </p>
             )}
-        </div> 
+        </div>
+        <p className='border-b'></p>
+        {filteredOrders.length > 0 && (
+          <CustomPagination
+            totalCount={filteredOrders.length}
+            page={currentPage}
+            pageSize={itemsPerPage}
+            onPageChange={(newPage) => setCurrentPage(newPage)}
+            onPageSizeChange={(newSize) => {
+              setItemsPerPage(Number(newSize));
+              setCurrentPage(1);
+            }}
+            pageSizeOptions={[1, 3, 5, 10, 15, 20, 50]}
+          />
+        )}
       </div>
     </div>
   );

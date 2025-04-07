@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { toast, Toaster } from 'sonner';
 import * as yup from 'yup';
 import { auth, db } from '../src/firebase';
+import { CustomPagination } from '@/components/CustomPagination';
  
 interface Category {
   id: string;
@@ -38,7 +39,7 @@ const AddCategories = () => {
   const router = useRouter();
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(3);
   const [currentPage, setCurrentPage] = useState(1);
   const { register, handleSubmit, reset, setValue, formState: { errors }, } = useForm<{ name: string }>({
     resolver: yupResolver(schema),
@@ -293,6 +294,9 @@ const AddCategories = () => {
   if (!userId) {
     return <div>Please log in to add categories.</div>;
   }
+  
+  const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
+
 
   return (
     <>
@@ -443,80 +447,17 @@ const AddCategories = () => {
           <p className='border-b'></p>
 
           {filteredCategories.length > 0 && (
-            <div className='justify-between items-center flex mt-8'>
-              <div className='flex'>
-                <label className="mr-2">Show :</label>
-                <Select onValueChange={(value) => {
-                  setItemsPerPage(Number(value));
-                  setCurrentPage(1);
-                }}>
-                  <SelectTrigger className="w-20 h-7 text-sm rounded-[4px]">
-                    <SelectValue placeholder={itemsPerPage.toString()} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {[5, 10, 15, 20, 50, 100].map(val => (
-                        <SelectItem key={val} value={val.toString()}>{val}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex">
-                <div className=''>
-                  <Button onClick={handleFirst} disabled={currentPage === 1}
-                    className='text-black bg-white hover:bg-white font-bold shadow-none cursor-pointer p-0 mr-2'>
-                    {'<<'}
-                  </Button>
-                  <Button onClick={handlePrevious} disabled={currentPage === 1}
-                    className='text-black bg-white hover:bg-white font-bold shadow-none cursor-pointer p-0'>
-                    {'<'}
-                  </Button>
-                </div>
-
-                <div className="flex items-center">
-                  {Array.from(
-                    { length: Math.ceil(filteredCategories.length / itemsPerPage) },
-                    (_, index) => index + 1
-                  )
-                    .filter((number) => {
-                      const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
-                      let startPage = Math.max(currentPage - 1, 1);
-                      let endPage = Math.min(currentPage + 1, totalPages);
-
-                      if (endPage - startPage < 2) {
-                        if (startPage === 1) {
-                          endPage = Math.min(startPage + 2, totalPages);
-                        } else if (endPage === totalPages) {
-                          startPage = Math.max(endPage - 2, 1);
-                        }
-                      }
-
-                      return number >= startPage && number <= endPage;
-                    })
-                    .map((number) => (
-                      <Button
-                        key={number}
-                        onClick={() => paginate(number)}
-                        className={`px-3 py-1 mx-1 rounded shadow-none bg-white hover:bg-white cursor-pointer p-0 pl-2 pr-2 ${currentPage === number ? 'text-green-700' : 'text-gray-500'}`}
-                      >
-                        {number}
-                      </Button>
-                    ))}
-                </div>
-                <div className=''>
-                  <Button onClick={handleNext} disabled={currentPage === Math.ceil(filteredCategories.length / itemsPerPage)}
-                    className='text-black bg-white hover:bg-white font-bold shadow-none cursor-pointer p-0 mr-2'>
-                    {'>'}
-                  </Button>
-                  <Button onClick={handleLast} disabled={currentPage === Math.ceil(filteredCategories.length / itemsPerPage)}
-                    className='text-black bg-white hover:bg-white font-bold shadow-none cursor-pointer p-0'>
-                    {'>>'}
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <CustomPagination
+              totalCount={filteredCategories.length}
+              page={currentPage}
+              pageSize={itemsPerPage}
+              onPageChange={(newPage) => setCurrentPage(newPage)}
+              onPageSizeChange={(newSize) => {
+                setItemsPerPage(Number(newSize));
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[3, 5, 10, 15, 20, 50]}
+            />
           )}
         </div>
       </div>

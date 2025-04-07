@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/app/src/firebase';
 import { useRouter, usePathname } from 'next/navigation';
@@ -38,10 +38,28 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header user={user} />
-      <main className="flex-grow">{children}</main>
-      <Footer />
+      <Suspense>
+        <Header user={user} />
+        <main className="flex-grow">{children}</main>
+        <Footer />
+      </Suspense>
     </div>
   );
 }
 // if (!loading && user && ["/log-in", "/sign-up", "/forget-password"].includes(pathname)) {
+
+// import {
+//   ContextProductsProvider,
+//   SimpleFallback,
+// } from "@/components/ContextProductsProvider";
+// ...
+
+// <body className={saira.className} style={{ scrollBehavior: "smooth" }}>
+//   <Suspense fallback={<SimpleFallback />}>
+//     <ContextProductsProvider>
+//       <Header />
+//       {children}
+//     </ContextProductsProvider>
+//   </Suspense>
+//   <Footer />
+// </body>

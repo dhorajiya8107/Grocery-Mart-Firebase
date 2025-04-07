@@ -7,6 +7,7 @@ import { auth, db } from '../src/firebase';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast, Toaster } from 'sonner';
+import { CustomPagination } from '@/components/CustomPagination';
  
 type User = {
   id: string;
@@ -21,6 +22,8 @@ const ChangeRole = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState<boolean>(true);
+  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Checking login user role
   useEffect(() => {
@@ -113,6 +116,9 @@ const ChangeRole = () => {
   if (role !== 'admin') {
     return ;
   }
+  const indexOfLastCategory = currentPage * itemsPerPage;
+  const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
+  const currentUsers = filteredUsers.slice(indexOfFirstCategory, indexOfLastCategory);
 
   return (
     <>
@@ -137,7 +143,7 @@ const ChangeRole = () => {
 
           {/* User List */}
           <ul className="divide-y divide-gray-200">
-            {filteredUsers.map((user) => (
+            {currentUsers.map((user) => (
               <li
                 key={user.id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between py-4 hover:bg-gray-100 transition duration-300 px-4 rounded-lg"
@@ -174,6 +180,19 @@ const ChangeRole = () => {
               </li>
             )}
           </ul>
+            {filteredUsers.length > 0 && (
+              <CustomPagination
+                totalCount={filteredUsers.length}
+                page={currentPage}
+                pageSize={itemsPerPage}
+                onPageChange={(newPage) => setCurrentPage(newPage)}
+                onPageSizeChange={(newSize) => {
+                  setItemsPerPage(Number(newSize));
+                  setCurrentPage(1);
+                }}
+                pageSizeOptions={[1, 3, 5, 10, 15, 20, 50]}
+              />
+            )}
         </div>
       </div>
     </>

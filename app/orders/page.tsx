@@ -6,6 +6,7 @@ import { auth, db } from '../src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { DateTime } from 'luxon';
+import { CustomPagination } from '@/components/CustomPagination';
 
 type Product = {
     id: string;
@@ -31,6 +32,8 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // If user is login then set userId otherwise null
   useEffect(() => {
@@ -114,20 +117,25 @@ const Orders = () => {
     const afterDate = DateTime.fromISO(b.createdAt , {zone: 'utc'}).toMillis() || 0;
     return afterDate - beforeDate;
   });
+
+  const indexOfLastCategory = currentPage * itemsPerPage;
+  const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
+  const currentOrders = orders && sortOrderByDate.slice(indexOfFirstCategory, indexOfLastCategory);
  
   return (
-    <div className="p-4 pb-20 max-w-[900px] mx-auto pt-10">
-      <h2 className="text-2xl font-bold mb-6">Your Orders</h2>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 pt-10 pb-20">
+    <div className='max-w-[900px] mx-auto bg-white shadow-xl rounded-lg p-4'>
+    <h2 className="text-2xl font-bold p-4">Your Orders</h2>
       {/* If user doesn't order items */}
       {orders.length === 0 ? (
         <p className="text-center text-gray-500">No orders found.</p>
       ) : (
         //  If user ordered
         <div className="grid gap- grid-cols-1">
-          {orders && sortOrderByDate.map((order) => (
+          {currentOrders.map((order) => (
             <div
               key={order.orderId}
-              className="relative bg-white shadow-2xl border-gray-200 transition-all duration-300"
+              className="relative bg-white border-gray-200 transition-all duration-300"
             >
               <div className="flex flex-col p-4 md:p-6">
                 <div className="flex items-center">
@@ -167,8 +175,25 @@ const Orders = () => {
               <p className='border-b border-gray-200 mr-10 ml-10'></p>
             </div>
           ))}
+          
+          <div className=''>
+          {orders.length > 0 && (
+            <CustomPagination
+              totalCount={orders.length}
+              page={currentPage}
+              pageSize={itemsPerPage}
+              onPageChange={(newPage) => setCurrentPage(newPage)}
+              onPageSizeChange={(newSize) => {
+                setItemsPerPage(Number(newSize));
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[1, 3, 5, 10, 15, 20, 50]}
+            />
+          )}
+          </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

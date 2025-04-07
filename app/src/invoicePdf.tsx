@@ -3,12 +3,13 @@
 import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
 import html2canvas from 'html2canvas-pro';
 import jsPDF from "jspdf";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { auth, db } from "./firebase";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Link from "next/link";
 import Image from 'next/image';
 import Logo from '../../images/Logo.png';
+import { onAuthStateChanged } from "firebase/auth";
  
 interface InvoicePdfProps {
   orderId: string;
@@ -24,6 +25,7 @@ interface InvoicePdfProps {
   deliveryCharges: string;
   totalPrice: number;
   totalItem: string;
+  selectedAddressId: string;
 }
 
 type Product = {
@@ -37,12 +39,33 @@ type Product = {
 };
 
 type Order = {
+  selectedAddressId: string;
   orderId: string;
   createdAt: string;
   totalAmount: number;
   paymentStatus?: string;
   products?: Product[];
 };
+
+interface Address {
+  id: string;
+  userId: string;
+  defaultAddress: boolean;
+  address: string;
+  floor: string;
+  area: string;
+  landmark: string;
+  name: string;
+  phoneNumber: string;
+  addressId: string;
+  createdAt: number;
+  updatedAt: number;
+  addressType: "home" | "work" | "hotel" | "other";
+  pinCode: string;
+  block: string;
+  state: string;
+  country: string;
+}
 
 export interface InvoicePdfRef {
   generate: () => Promise<void>;
@@ -53,6 +76,8 @@ const InvoicePdf = forwardRef<InvoicePdfRef, InvoicePdfProps>(
     const [invoiceData, setInvoiceData] = useState<InvoicePdfProps | null>(null);
     const invoiceRef = useRef<HTMLDivElement>(null);
     const date = new Date();
+    const [address, setAddress] = useState<Address[]>([]);
+    const [userId, setUserId] = useState<string | null>(null);
 
     useEffect(() => {
       const fetchInvoiceData = async () => {
@@ -81,6 +106,7 @@ const InvoicePdf = forwardRef<InvoicePdfRef, InvoicePdfProps>(
               deliveryCharges: data.totalAmount > 500 ? "FREE" : "₹50",
               totalPrice: data.totalAmount,
               totalItem: data.products?.reduce((total, product) => total + Number(product.quantity), 0)?.toString() || '0',
+              selectedAddressId: data.selectedAddressId,
             };
 
             setInvoiceData(invoice);
@@ -92,6 +118,43 @@ const InvoicePdf = forwardRef<InvoicePdfRef, InvoicePdfProps>(
 
       fetchInvoiceData();
     }, [orderId]);
+
+    useEffect(() => {
+        // const auth = getAuth();
+      
+        const subscribeToAddresses = (userId: string) => {
+          try {
+            const addressRef = collection(db, "addresses");
+            const q = query(addressRef, where("userId", "==", userId));
+      
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+              if (!snapshot.empty) {
+                const addressesData = snapshot.docs.map((doc) => ({
+                  ...(doc.data() as Address),
+                  id: doc.id,
+                }));
+      
+                setAddress(addressesData);
+              }
+            });
+      
+            return unsubscribe;
+          } catch (error) {
+            console.error("Error subscribing to addresses:", error);
+          }
+        };
+      
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            setUserId(user.uid);
+            const unsubscribeAddresses = subscribeToAddresses(user.uid);
+      
+            return () => unsubscribeAddresses?.();
+          }
+        });
+      
+        return () => unsubscribeAuth();
+      }, []);
 
     const downloadInvoice = useCallback(async () => {
       const input = document.getElementById('order-summary');
@@ -178,7 +241,7 @@ const InvoicePdf = forwardRef<InvoicePdfRef, InvoicePdfProps>(
             </div>
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 border-b pb-4">
             <p className="text-gray-600 text-sm">
               <span className="font-medium">Order Placed:</span> {formatDate(orderPlacedDate)}
             </p>
@@ -187,7 +250,45 @@ const InvoicePdf = forwardRef<InvoicePdfRef, InvoicePdfProps>(
             </p>
           </div>
 
-          <Table className="">
+          <div className="mb-4">
+            <p>Invoice To</p>
+            {invoiceData.selectedAddressId && (
+            <div>
+              {(() => {
+                const selectedAddress = address.find(address => address.id === invoiceData.selectedAddressId);
+                return (
+                  <>
+                    <p className="text-gray-600 text-sm">
+                      <span className="font-medium">Name</span> : {selectedAddress ? selectedAddress.name : "Pin code Not Found"}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      <span className="font-medium">Address</span> : { selectedAddress ? [
+                        selectedAddress.floor,
+                        selectedAddress.address,
+                        selectedAddress.landmark,
+                        selectedAddress.area,
+                        selectedAddress.block,
+                        selectedAddress.state,
+                        selectedAddress.country,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")
+                      : "Not Found"}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      <span className="font-medium">Pin code</span> : {selectedAddress ? selectedAddress.pinCode : "Pin code Not Found"}
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      <span className="font-medium">State</span> : {selectedAddress ? selectedAddress.state : "Pin code Not Found"}
+                    </p>
+                    </>
+                  );
+                })()}
+              </div>
+            )}
+          </div>
+
+          <Table className="border-t">
             <TableHeader>
               <TableRow className="font-bold">
                 <TableHead className="w-[%]">Sr. no</TableHead>
