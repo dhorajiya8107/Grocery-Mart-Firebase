@@ -302,7 +302,7 @@ const AddCategories = () => {
     <>
       <Toaster />
       <div className='pt-10 pb-20 bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8'>
-        <div className="p-4 max-w-[900px] bg-white mx-auto shadow-lg">
+        <div className="p-8 max-w-[900px] bg-white mx-auto shadow-lg">
           <div className="gap-2 mb-4">
             <Dialog open={openDialog} onOpenChange={(isOpen) => {
               setOpenDialog(isOpen);

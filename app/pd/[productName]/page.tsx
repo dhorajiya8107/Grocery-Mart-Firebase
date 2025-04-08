@@ -204,19 +204,29 @@ const CategoryPage = () => {
   return (
     <>
       <Toaster />
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto">
         {products.map((product) => {
           const productInCart = cart.find((item) => item.id === product.id)
           const quantityInCart = productInCart ? Number.parseInt(productInCart.quantity) : 0
           const isOutOfStock = Number.parseInt(product.quantity) === 0
 
           return (
-            <div key={product.id} className="bg-white shadow-sm overflow-hidden border-t">
+            <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="grid md:grid-cols-2 gap-8">
+
+                <div className="md:hidden px-6 pt-6">
+                    <nav className="text-sm text-gray-500 mb-4">
+                      <span className="text-gray-900 font-medium">Home</span> /
+                      <span className="text-gray-900 font-medium"> {product.category}</span> /
+                      <span> {product.productName}</span>
+                    </nav>
+                  </div>
+
                 {/* Product Image */}
-                <div className={`flex justify-center items-center p-6 ${isOutOfStock ? 'bg-white opacity-50' : 'bg-white'}`}>
+                <div className={`relative flex justify-center items-center p-8 ${isOutOfStock ? 'bg-white opacity-50' : 'bg-white'}`}>
                   {isOutOfStock && (
-                    <div className="absolute flex items-center z-10">
+                    <div className="absolute flex items-center">
                       <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                     </div>
                   )}
@@ -229,10 +239,12 @@ const CategoryPage = () => {
                 {/* Product Details */}
                 <div className="min-[768px]:border-l min-[768px]:p-2">
                 <div className="space-y-4 p-6">
-                  <div className="text-sm text-gray-500">
-                    <span className="text-black">
-                      Home / {product.category} /
-                    </span> {product.productName}
+                  <div className="hidden md:block">
+                    <nav className="text-sm text-gray-500 mb-4">
+                      <span className="text-gray-900 font-medium">Home</span> /
+                      <span className="text-gray-900 font-medium"> {product.category}</span> /
+                      <span> {product.productName}</span>
+                    </nav>
                   </div>
 
                   <h1 className="text-2xl font-bold text-gray-900">{product.productName}</h1>
@@ -316,6 +328,7 @@ const CategoryPage = () => {
             </div>
           )
         })}
+        </div>
       </div>
 
       {activeDialog === "log-in" && <LogInPage activeDialog={activeDialog} setActiveDialog={setActiveDialog} />}

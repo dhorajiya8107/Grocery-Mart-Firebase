@@ -124,7 +124,7 @@ const Orders = () => {
  
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 pt-10 pb-20">
-    <div className='max-w-[900px] mx-auto bg-white shadow-xl rounded-lg p-4'>
+    <div className='max-w-[900px] mx-auto bg-white shadow-xl rounded-lg p-4 max-[400px]:p-1'>
     <h2 className="text-2xl font-bold p-4">Your Orders</h2>
       {/* If user doesn't order items */}
       {orders.length === 0 ? (
@@ -146,7 +146,7 @@ const Orders = () => {
                     className="w-10 h-10 rounded-md object-cover mr-4 cursor-pointer"
                   />
                   <div className='items-center'>
-                    <p className="text-md font-bold mb-3">
+                    <p className="text-md max-[389px]:text-sm font-bold mb-3">
                       {order.orderId}
                       <span className="mx-2">•</span>
                       ₹{order.totalAmount}

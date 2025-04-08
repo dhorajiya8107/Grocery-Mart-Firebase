@@ -283,7 +283,7 @@ const CartPage = () => {
               <p className="text-md text-gray-500 mb-4">Must add items on the cart before you proceed to chekout.</p>
               <button 
                 className="bg-green-700 hover:bg-green-700 text-white rounded-md pl-2 pr-2 font-bold text-sm flex items-center justify-center cursor-pointer"
-                onClick={() => router.push(`/categories/Vegetables%20%26%20Fruits`)}
+                onClick={() => router.push(`/`)}
               >
                 <svg
                   viewBox="0 0 151.5 154.5"
@@ -348,7 +348,10 @@ const CartPage = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => removeFromCart(product.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFromCart(product.id)
+                  }}
                   className="absolute top-1 right-2 py-2 px-2 rounded-md text-xs hover:bg-gray-200"
                 >
                 X

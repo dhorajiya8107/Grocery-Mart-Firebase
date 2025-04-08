@@ -117,8 +117,8 @@ export function CustomPagination({
   return (
     <div className="flex flex-col md:flex-row items-center justify-between gap-4 w-full mt-4">
       {pageSizeOptions && onPageSizeChange && (
-        <div className="flex items-center gap-4">
-          <span className="whitespace-nowrap text-sm">Show :</span>
+        <div className="flex items-center md:justify-start w-full gap-4">
+          <span className="whitespace-nowrap text-sm ml-2">Show :</span>
           <Select
             value={String(pageSize)}
             onValueChange={(value) => onPageSizeChange(Number(value))}
@@ -148,7 +148,7 @@ export function CustomPagination({
           <PaginationItem>
             <PaginationNext
               onClick={() => onPageChange(Math.min(page + 1, totalPageCount))}
-              className={page === totalPageCount ? "pointer-events-none opacity-50" : ""}
+              className={page === totalPageCount ? "pointer-events-none opacity-50 mr-2" : "mr-2"}
             />
           </PaginationItem>
         </PaginationContent>

@@ -29,7 +29,7 @@ const formSchema = z.object({
     .length(6, 'Buckle number must be exactly 6 digits'),
   quantity: z.string().min(1, 'Quantity is required'),
   categoryId: z.string().min(1, 'Category is required'),
-  image: z.instanceof(File).optional(),
+  image: z.instanceof(File, { message: 'Image is required and must be a file' }),
   manufacturedAt: z.string().min(1, 'Manufactured date is required'),
   expiresAt: z.string().min(1, 'Expires date is required'),
 });
@@ -56,7 +56,7 @@ const AddProductForm = () => {
       categoryId: '',
       manufacturedAt: '',
       expiresAt: '',
-      image: undefined as File | undefined,
+      image: undefined as unknown as File,
     },
   });
 
@@ -64,10 +64,13 @@ const AddProductForm = () => {
     const fetchCategories = async () => {
       try {
         const snapshot = await getDocs(collection(db, 'categories'));
-        const categoryList: Category[] = snapshot.docs.map(doc => ({
+        const categoryList: Category[] = snapshot.docs
+        .map(doc => ({
           id: doc.id,
           name: doc.data().name,
-        }));
+        })
+      )
+        .sort((a, b) => a.name.localeCompare(b.name));
         setCategories(categoryList);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -105,7 +108,7 @@ const AddProductForm = () => {
       const selectedCategory = categories.find(cat => cat.id === data.categoryId);
       const categoryName = selectedCategory ? selectedCategory.name : '';
 
-      await addDoc(collection(db, 'productss'), {
+      await addDoc(collection(db, 'products'), {
         productName: data.productName,
         description: data.description,
         price: data.price,
@@ -171,9 +174,13 @@ const AddProductForm = () => {
           <Input
             type="file"
             accept="image/*"
-            onChange={(e) =>
-              setValue('image', e.target.files ? e.target.files[0] : undefined)
-            }
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setValue('image', file);
+              }
+            }}
+            
           />
             {errors.image && (
               <p className="text-red-500 text-sm">{errors.image.message}</p>

@@ -285,7 +285,7 @@ const App = () => {
               className="text-sm text-gray-700 font-medium hover:text-emerald-700 cursor-pointer"
               onClick={() => router.push("/categories")}
             >
-              View All
+              View all
             </button>
           </div>
 
@@ -333,7 +333,7 @@ const App = () => {
               className="text-sm text-gray-700 font-medium hover:text-emerald-700 cursor-pointer"
               onClick={() => router.push("/products")}
             >
-              View All
+              View all
             </button>
           </div>
 
@@ -353,11 +353,7 @@ const App = () => {
                   className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg relative ${isOutOfStock ? 'bg-white opacity-50' : 'bg-white'}`}
                   onClick={() => handleProductClick(product)}
                 >
-                  {isOutOfStock && (
-                    <div className="absolute inset-0 flex -top-10 items-center justify-center z-10">
-                      <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
-                    </div>
-                  )}
+
 
                   {discountPercentage > 0 && (
                     <div className="absolute bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded-br-md rounded-tl-md z-10">
@@ -366,6 +362,11 @@ const App = () => {
                   )}
 
                   <div className="relative w-full aspect-square bg-gray-50">
+                    {isOutOfStock && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
+                      </div>
+                    )}
                     <img
                       src={product.imageUrl}
                       alt={product.productName}

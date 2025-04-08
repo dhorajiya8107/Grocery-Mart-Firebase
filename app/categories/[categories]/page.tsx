@@ -274,17 +274,17 @@ const CategoryPage = () => {
 
               {/* If products is out of stock then this will display */}
               <div>
-              {isOutOfStock && (
-                <div className="absolute inset-0 flex -top-10 items-center justify-center z-10">
-                  <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
-                </div>
-              )}
               </div>
               <div className="relative">
                 {discountPercentage > 0 && (
                   <span className="absolute bg-emerald-100 text-emerald-700 text-xs font-bold py-1 px-2 rounded-br-md rounded-tl-md">
                     {discountPercentage}% OFF
                   </span>
+                )}
+                {isOutOfStock && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
+                   </div>
                 )}
                 <img
                   src={product.imageUrl}

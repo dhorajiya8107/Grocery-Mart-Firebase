@@ -173,6 +173,7 @@ const ChangeRole = () => {
                 </div>
               </li>
             ))}
+            <p className='broder-b'></p>
 
             {filteredUsers.length === 0 && (
               <li className="text-gray-500 py-6 text-xl text-center">
