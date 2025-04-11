@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { collection, doc, getDocs, query, setDoc, getDoc, where } from 'firebase/firestore';
+import { collection, doc, getDocs, query, setDoc, getDoc, where, orderBy } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '@/app/src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -20,6 +20,11 @@ interface Product {
   description: string;
   category: string;
 }
+interface MostSeller {
+  id: string;
+  productName: string;
+  quantity: string;
+}
   
 const Products = () => {
   const [cart, setCart] = useState<Product[]>([]);
@@ -28,6 +33,7 @@ const Products = () => {
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
 
     useEffect(() => {
       const auth = getAuth();
@@ -212,6 +218,47 @@ const Products = () => {
   }
   };
 
+  useEffect(() => {
+    const fetchMostSeller = async () => {
+      try {
+        const mostSellerQuery = query(
+          collection(db, 'mostseller'),
+          orderBy('quantity', 'desc'),
+          // limit(10)
+        );
+  
+        const querySnapshot = await getDocs(mostSellerQuery);
+  
+        const mostSellerData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as MostSeller[];
+  
+        // console.log('Most Seller Data:', mostSellerData);
+        setMostSeller(mostSellerData);
+      } catch (error) {
+        console.error('Error fetching most seller data:', error);
+      }
+    };
+    
+    fetchMostSeller();
+  }, []);
+
+
+const mostSellerMap = new Map( mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
+  
+// filter and sort featured products by most sold quantity
+const filterMostSeller = products
+  .filter(product => mostSellerMap.has(product.id))
+  .sort((a, b) => {
+    const aQuantity = mostSellerMap.get(a.id) || 0;
+    const bQuantity = mostSellerMap.get(b.id) || 0;
+    return bQuantity - aQuantity;
+  })
+  .slice(0, 3);
+
+const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
+
   // On clicking, it will redirect to product details page
   const handleProductClick = (product: { productName: string; id: any; }) => {
     const formattedProductName = product.productName.replace(/\s+/g, '-');
@@ -254,6 +301,7 @@ const Products = () => {
           const discountPercentage = product.price > product.discountedPrice
             ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
             : 0
+          const isMostSeller = mostSellerIds.has(product.id);
 
           return (
             <div key={product.id} className='pt-2' 
@@ -271,6 +319,11 @@ const Products = () => {
                     {discountPercentage}% OFF
                   </span>
                 )}
+                {isMostSeller && (
+                    <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md z-10">
+                      Most seller
+                    </div>
+                  )}
                 {isOutOfStock && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
@@ -292,7 +345,7 @@ const Products = () => {
                       {product.description}
                     </h3>
                     <div className="flex justify-between items-center mt-2">
-                      <div className="flex items-baseline gap-1">
+                      <div className="md:flex items-baseline gap-1">
                         {product.price > product.discountedPrice ? (
                           <>
                             <p className="text-sm font-bold">₹{product.discountedPrice}</p>

@@ -1,6 +1,6 @@
 "use client"
 
-import { Facebook, Instagram, Mail, MapPin, Phone, Send } from "lucide-react"
+import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Twitter } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type React from "react"
@@ -66,7 +66,7 @@ const Footer = () => {
               Your one-stop destination for fresh produce, pantry essentials, and specialty foods. We're committed to
               quality and sustainability.
             </p> */}
-            <div className="flex items-center space-x-2 mt-4">
+            {/* <div className="flex items-center space-x-2 mt-4">
               <Link
                 href="https://www.facebook.com"
                 className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
@@ -85,16 +85,16 @@ const Footer = () => {
               >
                 <Mail className="h-4 w-4" />
               </Link>
-            </div>
+            </div> */}
           </div>
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold border-b pb-2">Company</h3>
+            <h3 className="text-lg font-bold border-b pb-2 text-green-700">Company</h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/aboutus"
+                  href="/about-us"
                   className="text-sm hover:text-green-700 transition-colors duration-300 flex items-center gap-2"
                 >
                   About Us
@@ -118,7 +118,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/FAQS"
+                  href="/faqs"
                   className="text-sm hover:text-green-700 transition-colors duration-300 flex items-center gap-2"
                 >
                   FAQs
@@ -137,12 +137,12 @@ const Footer = () => {
 
           {/* Categories */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold border-b pb-2">Categories</h3>
+            <h3 className="text-lg font-bold border-b pb-2 text-green-700">Categories</h3>
             <div className="grid grid-cols-2 gap-2">
               {categories.slice(0, 8).map((category) => (
                 <Link
                   key={category.id}
-                  href={`/categories/${category.name}`}
+                  href={`/categories/${category.name.replace(/\s+/g, '-')}`}
                   className="text-sm hover:text-green-700 transition-colors duration-300 flex items-center gap-2"
                 >
                   {category.name}
@@ -158,7 +158,7 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold border-b pb-2">Contact Us</h3>
+            <h3 className="text-lg font-bold border-b pb-2 text-green-700">Contact Us</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-green-700 flex-shrink-0 mt-0.5" />
@@ -166,11 +166,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-green-700 flex-shrink-0" />
-                <span className="text-sm">+91 9876543210</span>
+                <Link href="tel:+919876543210" className="text-sm">+91 9876543210</Link>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-green-700 flex-shrink-0" />
-                <span className="text-sm">support@grocerymart.com</span>
+                <Link href="mailto:support@grocerymart.com" className="text-sm">support@grocerymart.com</Link>
               </li>
             </ul>
             <div className="pt-4">
@@ -189,10 +189,36 @@ const Footer = () => {
               Commerce Private Limited".
             </p>
             <div className="flex items-center gap-4">
-              <img src="/placeholder.svg?height=30&width=50" alt="Payment Method" className="h-6" />
-              <img src="/placeholder.svg?height=30&width=50" alt="Payment Method" className="h-6" />
-              <img src="/placeholder.svg?height=30&width=50" alt="Payment Method" className="h-6" />
-              <img src="/placeholder.svg?height=30&width=50" alt="Payment Method" className="h-6" />
+              <Link
+                href="https://www.facebook.com"
+                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
+              >
+                <Facebook className="h-4 w-4" />
+              </Link>
+              <Link
+                href="https://x.com"
+                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
+              >
+                <Twitter className="h-4 w-4" />
+              </Link>
+              <Link
+                href="https://www.instagram.com"
+                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
+              >
+                <Instagram className="h-4 w-4" />
+              </Link>
+              <Link
+                href=""
+                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
+              >
+                <Linkedin className="h-4 w-4" />
+              </Link>
+              <Link
+                href="mailto:info@grocerymart.com"
+                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
+              >
+                <Mail className="h-4 w-4" />
+              </Link>
             </div>
           </div>
         </div>

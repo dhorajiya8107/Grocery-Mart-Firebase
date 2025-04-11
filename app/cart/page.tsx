@@ -278,7 +278,7 @@ const CartPage = () => {
           {/* If user doesn't add any items */}
           {cart.length === 0 ? (
           <>
-            <div className="flex flex-col items-center justify-center h-screen text-center -mt-40">
+            <div className="flex flex-col items-center justify-center text-center pt-40">
               <p className="text-3xl font-semibold tracking-[.025em] mb-8">Your Cart is <span className='text-red-500'>EMPTY!</span></p>
               <p className="text-md text-gray-500 mb-4">Must add items on the cart before you proceed to chekout.</p>
               <button 

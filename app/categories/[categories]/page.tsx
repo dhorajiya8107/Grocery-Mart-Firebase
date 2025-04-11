@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { collection, doc, getDocs, query, setDoc, getDoc, where } from 'firebase/firestore';
+import { collection, doc, getDocs, query, setDoc, getDoc, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '@/app/src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -9,6 +9,8 @@ import LogInPage from '@/app/auth/LogIn';
 import { toast } from 'sonner';
 import { Toaster } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Filter } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -19,6 +21,12 @@ interface Product {
   quantity: string;
   description: string;
   category: string;
+  expiresAt: string;
+}
+interface MostSeller {
+  id: string;
+  productName: string;
+  quantity: string;
 }
 
 const CategoryPage = () => {
@@ -29,6 +37,8 @@ const CategoryPage = () => {
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const router = useRouter();
+  const [sortOption, setSortOption] = useState("featured");
+  const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0]) 
@@ -67,47 +77,111 @@ const CategoryPage = () => {
 
   // Fetch data from the products
   useEffect(() => {
-    const fetchProducts = async (category: string) => {
-      setLoading(true);
-      try {
-          const formattedCategory = category.replace(/-/g, ' ');
-          const productQuery = query(
-          collection(db, 'products'),
-          where('category', '==', formattedCategory)
-        );
-        const productSnapshot = await getDocs(productQuery);
-        const productList = productSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            productName: data.productName,
-            description: data.description,
-            price: parseFloat(data.price),
-            discountedPrice: parseFloat(data.discountedPrice),
-            imageUrl: data.imageUrl,
-            quantity: data.quantity || '0',
-          } as Product;
-        });
-        setProducts(productList);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (category) {
-      fetchProducts(category);
-    }
-  }, [category]);
+    if (!category) return;
+  
+    const formattedCategory = category.replace(/-/g, ' ');
+    const nowPlus5Days = new Date();
+    nowPlus5Days.setDate(nowPlus5Days.getDate() + 5);
+  
+    setLoading(true);
+  
+    const productQuery = query(
+      collection(db, 'products'),
+      where('category', '==', formattedCategory)
+    );
+  
+    const unsubscribe = onSnapshot(productQuery, (snapshot) => {
+      const productList = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          productName: data.productName,
+          description: data.description,
+          price: parseFloat(data.price),
+          discountedPrice: parseFloat(data.discountedPrice),
+          imageUrl: data.imageUrl,
+          quantity: data.quantity || '0',
+          expiresAt: data.expiresAt,
+        } as Product;
+      })
+      .filter(product => {
+        if (!product.expiresAt) return false;
+        const expiresDate = new Date(product.expiresAt);
+        return expiresDate >= nowPlus5Days;
+      });
+  
+      setProducts(productList);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching real-time products:", error);
+      setLoading(false);
+    });
+  
+    // Cleanup listener on unmount or category change
+    return () => unsubscribe();
+  }, [category]);  
 
   // Filtered products by searching
-  const filteredProducts = products.filter(
-    (product) =>
-      product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      product.description?.toLowerCase().includes(searchTerm.toLowerCase())  ||
-      product.discountedPrice?.toString().toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products
+  .filter((product) =>
+    product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.discountedPrice?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+  )
+  .sort((a, b) => {
+    switch (sortOption) {
+      case "price-low":
+        return a.discountedPrice - b.discountedPrice
+      case "price-high":
+        return b.discountedPrice - a.discountedPrice
+      case "discount":
+        const discountA = (a.price - a.discountedPrice) / a.price
+        const discountB = (b.price - b.discountedPrice) / b.price
+        return discountB - discountA
+      default:
+        return 0
+    }
+  })
+
+    useEffect(() => {
+      const fetchMostSeller = async () => {
+        try {
+          const mostSellerQuery = query(
+            collection(db, 'mostseller'),
+            orderBy('quantity', 'desc'),
+            limit(3)
+          );
+      
+          const querySnapshot = await getDocs(mostSellerQuery);
+      
+          const mostSellerData = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          })) as MostSeller[];
+      
+          // console.log('Most Seller Data:', mostSellerData);
+          setMostSeller(mostSellerData);
+        } catch (error) {
+          console.error('Error fetching most seller data:', error);
+        }
+      };
+        
+      fetchMostSeller();
+    }, []);
+
+    const mostSellerMap = new Map(mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
+
+    const filterMostSeller = products
+      .filter(product => mostSellerMap.has(product.id))
+      .sort((a, b) => {
+        const aQuantity = mostSellerMap.get(a.id) || 0;
+        const bQuantity = mostSellerMap.get(b.id) || 0;
+        return bQuantity - aQuantity;
+      })
+      .slice(0, 3);
+    
+    const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
+    
 
   // useEffect(() => {
   //   if (cart.length > 0) {
@@ -245,7 +319,22 @@ const CategoryPage = () => {
     <Toaster className='text-green-500'/>
     <div className='flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen'>
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <h1 className="text-xl font-bold pl-10 mb-3 capitalize justify-start items-center flex bg-white w-full h-12">{formattedCategory}</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800 capitalize">{formattedCategory}</h1>
+          <div className="flex items-center gap-2">
+            <Select value={sortOption} onValueChange={setSortOption}>
+              <SelectTrigger className="max-w-[200px] h-9 text-sm bg-white">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="featured"><Filter className="w-4 h-4" />Filter</SelectItem>
+                <SelectItem value="price-low">Price: Low to High</SelectItem>
+                <SelectItem value="price-high">Price: High to Low</SelectItem>
+                <SelectItem value="discount">Highest Discount</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       {/* Search Bar */}
       <div className="relative mb-6">
         <Input
@@ -264,7 +353,8 @@ const CategoryPage = () => {
           const discountPercentage = product.price > product.discountedPrice
             ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
             : 0
-
+          const isMostSeller = mostSellerIds.has(product.id);
+            
           return (
             <div key={product.id} className='pt-2' 
             onClick={() => handleProductClick(product)}
@@ -281,6 +371,11 @@ const CategoryPage = () => {
                     {discountPercentage}% OFF
                   </span>
                 )}
+                {isMostSeller && (
+                    <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md z-10">
+                      Most seller
+                    </div>
+                  )}
                 {isOutOfStock && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
@@ -297,7 +392,7 @@ const CategoryPage = () => {
                 <h2 className="text-sm font-medium text-gray-800 line-clamp-2 mb-1 h-10">{product.productName}</h2>
                 <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">{product.description}</h3>
                 <div className="flex justify-between items-center mt-2">
-                <div className="flex items-baseline gap-1">
+                <div className="md:flex items-baseline gap-1">
                   {product.price > product.discountedPrice ? (
                     <>
                             <p className="text-sm font-bold">₹{product.discountedPrice}</p>

@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter  } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { collection, doc, getDoc, getDocs, onSnapshot, query, runTransaction, setDoc, updateDoc, where } from 'firebase/firestore';
 import { db } from '../src/firebase';
@@ -19,7 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Briefcase, Check, Home, Hotel, MapPin } from 'lucide-react';
 import AddAddressPage from '@/components/AddAddress';
 import { toast, Toaster } from 'sonner';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 
 interface Product {
@@ -49,6 +49,11 @@ interface Address {
   country?: string;
 }
 
+interface MostSeller {
+  id: string;
+  quantity: number;
+}
+
 interface PostOffice {
   Block?: string;
   State: string;
@@ -64,20 +69,14 @@ const CheckoutPage = () => {
   const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
   const router = useRouter();
   const auth = getAuth();
-  // const searchParams = useSearchParams();
-  // const { useSearchParams } = require('next/navigation');
   const searchParams = useSearchParams();
   const orderId = searchParams?.get('orderId');
   const [order, setOrder] = useState<any>(null);
   const Payment_Methods = ['Credit Card', 'Debit Card', 'UPI', 'Net Banking'];
   const [addresses, setAddresses] = useState<Address[]>([])
   const [mode, setMode] = useState<"view" | "add" | "edit">("view")
-  // const [addressType, setAddressType] = useState<"home" | "work" | "hotel" | "other">("home")
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
-  // const [currentAddressId, setCurrentAddressId] = useState<string | null>(null)
-  // const [isEditing, setIsEditing] = useState(false)
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
-  
 
   // If user is login then set userId otherwise null
   useEffect(() => {
@@ -236,23 +235,46 @@ const CheckoutPage = () => {
           paymentMethod,
           createdAt: new Date().toISOString(),
         });
-  
+
         for (const product of order.products) {
           const productRef = doc(db, 'products', product.id);
+          const mostSellerRef = doc(db, 'mostseller', product.id);
+  
           await runTransaction(db, async (transaction) => {
             const productDoc = await transaction.get(productRef);
-            if (productDoc.exists()) {
-              const currentQuantity = productDoc.data().quantity || 0;
-              const newQuantity = currentQuantity - product.quantity;
-  
-              if (newQuantity < 0) {
-                throw new Error(`Not enough stock for product ${product.productName}`);
-              }
-  
-              transaction.update(productRef, { quantity: newQuantity });
+            const mostSellerDoc = await transaction.get(mostSellerRef);
+
+            if (!productDoc.exists()) {
+              throw new Error(`Product ${product.id} not found`);
             }
+  
+            const currentQuantity = productDoc.data().quantity || 0;
+            const newQuantity = currentQuantity - product.quantity;
+  
+            if (newQuantity < 0) {
+              toast.info(`Not enough stock for product ${product.productName}. Try after sometime.`);
+              throw new Error(`Not enough stock for product ${product.productName}`);
+            }
+  
+            transaction.update(productRef, { quantity: newQuantity });
+            // updating products total quantity sells
+            if (mostSellerDoc.exists()) {
+              const existingQuantity = Number(mostSellerDoc.data().quantity || 0);
+              const incomingQuantity = Number(product.quantity);
+              transaction.update(mostSellerRef, {
+                quantity: existingQuantity + incomingQuantity,
+              });
+            } else {
+              transaction.set(mostSellerRef, {
+                id: product.id,
+                quantity: Number(product.quantity),
+                productName: product.productName,
+              });
+            }
+            
           });
         }
+  
         const cartRef = doc(db, 'cart', order.userId);
         await setDoc(cartRef, { products: [] });
   
@@ -266,8 +288,10 @@ const CheckoutPage = () => {
       }
     } catch (error) {
       console.error('Payment failed:', error);
+      toast.error('Payment failed. Please try again.');
     }
   };
+  
 
   // useEffect(() => {
   //   if (addresses.length === 0) {
@@ -285,13 +309,76 @@ const CheckoutPage = () => {
     setSelectedAddressId(addressId);
   };
 
-  const handleCheckout = () => {
+
+  // Handle checkout and checking if product is out of stock or not
+  const handleCheckout = async () => {
     if (!selectedAddressId) {
       toast.info("Please select an address before proceeding to checkout.");
       setActiveDialog("address");
       return;
     }
-    setIsPopoverOpen(true);
+  
+    if (!userId) {
+      toast.error("User ID is missing.");
+      return;
+    }
+  
+    try {
+      const cartRef = doc(db, "cart", userId);
+      const cartSnap = await getDoc(cartRef);
+  
+      if (!cartSnap.exists()) {
+        toast.error("Cart not found.");
+        return;
+      }
+  
+      const cartData = cartSnap.data();
+      const updatedProducts: any[] | ((prevState: Product[]) => Product[]) = [];
+      let hasOutOfStock = false;
+  
+      for (const item of cartData.products) {
+        const productRef = doc(db, "products", item.id);
+        const productSnap = await getDoc(productRef);
+  
+        if (productSnap.exists()) {
+          const productData = productSnap.data();
+          const availableQty = productData.quantity || 0;
+  
+          if (availableQty === 0) {
+            hasOutOfStock = true;
+            toast.info(`"${productData.productName}" is out of stock and has been removed from your cart.`);
+          } else {
+            updatedProducts.push(item);
+          }
+        }
+      }
+  
+      await updateDoc(cartRef, { products: updatedProducts });
+  
+      if (hasOutOfStock) {
+        if (orderId) {
+          const orderRef = doc(db, 'orders', orderId);
+
+          const totalItems = updatedProducts.reduce((total, product) => total + (Number(product.quantity) || 0), 0);
+          await updateDoc(orderRef, {
+            products: updatedProducts,
+            totalItems: totalItems,
+          });
+        }
+        
+      
+        setCart(updatedProducts);
+        setOrder((prev: any) => ({ ...prev, products: updatedProducts }));
+        return;
+      }
+      
+  
+      setIsPopoverOpen(true);
+  
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast.error("Something went wrong while checking stock.");
+    }
   };
 
   if (loading) {
@@ -309,13 +396,53 @@ const CheckoutPage = () => {
   return (
     <>
     <Toaster />
-    <div className="bg-gray-50 w-full min-h-screen pt-2 ">
+    <div className="bg-gray-100 w-full min-h-screen pt-2 ">
       <div className="container mx-auto p-4 xl:pl-32 xl:pr-32">
         <h1 className="text-2xl font-bold mb-4">Checkout</h1>
         {/* {addresses.length === 0 && ( <p>
           
         </p> )} */}
-        <div className="">
+        
+        <div className="rounded-lg text-gray-500">
+        <div className="flex-1">
+          {/* If user doesn't add any items */}
+          {cart.length == 0 ? (
+            <>
+            <div className="flex flex-col items-center justify-center h-screen text-center -mt-40">
+              <p className="text-3xl font-semibold tracking-[.025em] mb-8">Your Cart is <span className='text-red-500'>EMPTY!</span></p>
+              <p className="text-md text-gray-500 mb-4">Must add items on the cart before you proceed to chekout.</p>
+              <button 
+                className="bg-green-700 hover:bg-green-700 text-white rounded-md pl-2 pr-2 font-bold text-sm flex items-center justify-center cursor-pointer"
+                onClick={() => router.push(`/`)}
+              >
+                <svg
+                  viewBox="0 0 151.5 154.5"
+                  preserveAspectRatio="xMidYMid meet"
+                  className="max-w-[50px] h-[50px] -ml-2"
+                >
+                  <g>
+                    <path
+                      fillOpacity="1"
+                      fill="green"
+                      d="M 35.5,-0.5 C 62.1667,-0.5 88.8333,-0.5 115.5,-0.5C 135.833,3.16667 147.833,15.1667 151.5,35.5C 151.5,63.1667 151.5,90.8333 151.5,118.5C 147.833,138.833 135.833,150.833 115.5,154.5C 88.8333,154.5 62.1667,154.5 35.5,154.5C 15.1667,150.833 3.16667,138.833 -0.5,118.5C -0.5,90.8333 -0.5,63.1667 -0.5,35.5C 3.16667,15.1667 15.1667,3.16667 35.5,-0.5 Z"
+                    ></path>
+                  </g>
+                  <g>
+                    <path
+                      fillOpacity="0.93"
+                      fill="white"
+                      d="M 41.5,40.5 C 45.8333,40.5 50.1667,40.5 54.5,40.5C 57.0108,51.5431 59.6775,62.5431 62.5,73.5C 74.1667,73.5 85.8333,73.5 97.5,73.5C 99.4916,67.1906 101.492,60.8573 103.5,54.5C 91.8476,53.6675 80.1809,53.1675 68.5,53C 65.8333,51 65.8333,49 68.5,47C 82.1667,46.3333 95.8333,46.3333 109.5,47C 110.578,47.6739 111.245,48.6739 111.5,50C 108.806,60.4206 105.139,70.4206 100.5,80C 88.8381,80.4999 77.1714,80.6665 65.5,80.5C 65.2865,82.1439 65.6198,83.6439 66.5,85C 78.5,85.3333 90.5,85.6667 102.5,86C 111.682,90.8783 113.516,97.7117 108,106.5C 99.0696,112.956 92.0696,111.289 87,101.5C 86.2716,98.7695 86.4383,96.1029 87.5,93.5C 83.2047,92.3391 78.8713,92.1725 74.5,93C 77.4896,99.702 75.8229,105.035 69.5,109C 59.4558,111.977 53.4558,108.31 51.5,98C 51.8236,93.517 53.8236,90.017 57.5,87.5C 58.6309,85.9255 58.7975,84.2588 58,82.5C 55,71.1667 52,59.8333 49,48.5C 46.2037,47.7887 43.3704,47.122 40.5,46.5C 39.2291,44.1937 39.5624,42.1937 41.5,40.5 Z"
+                    ></path>
+                  </g>
+                </svg>
+                RETURN TO SHOP
+              </button>
+            </div>
+          </>
+          ) : (
+          // If user added items in their cart
+          <>
+          <div className="bg-white shadow-md">
           {addresses.length > 0 ? (
             <>
               <div className="grid gap-4 md:grid-cols-4 mb-4">
@@ -379,9 +506,7 @@ const CheckoutPage = () => {
                         </Button>
                       </div>
                     )}
-          </div>
-        <div className="bg-white rounded-lg shadow-md text-gray-500">
-          <div className='text-lg justify-between flex p-8 border-b pr-10 bg-gray-100'>
+            <div className='text-lg justify-between flex p-8 border-b pr-10 bg-gray-100'>
             <p className='font-bold text-xl'>My Cart</p>
             <p>{totalItems} items</p>
           </div>
@@ -399,13 +524,6 @@ const CheckoutPage = () => {
               <p className="text-lg font-bold hidden sm:block">₹{(product.discountedPrice * product.quantity)}</p>
             </div>
           ))}
-
-          {/* <div className="flex justify-between font-bold text-lg p-4 pr-10">
-            <p>Total:</p>
-            <p>₹{totalAmount}</p>
-          </div> */}
-
-          {/* Popover will be open when user click on Proceed to Payment button */}
           <Dialog open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
             {/* <DialogTrigger asChild> */}
               <div className='justify-center flex p-4'>
@@ -454,6 +572,19 @@ const CheckoutPage = () => {
               </div>
             </DialogContent>
           </Dialog>
+          
+          </div>
+            </>
+          )}
+        </div>
+
+          {/* <div className="flex justify-between font-bold text-lg p-4 pr-10">
+            <p>Total:</p>
+            <p>₹{totalAmount}</p>
+          </div> */}
+
+          {/* Popover will be open when user click on Proceed to Payment button */}
+          
         </div>
       </div>
 

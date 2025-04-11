@@ -32,10 +32,26 @@ const formSchema = z.object({
   image: z.instanceof(File, { message: 'Image is required and must be a file' }),
   manufacturedAt: z.string().min(1, 'Manufactured date is required'),
   expiresAt: z.string().min(1, 'Expires date is required'),
+}).refine((data) => {
+  const price = parseFloat(data.price);
+  const discounted = parseFloat(data.discountedPrice);
+  return discounted <= price;
+}, {
+  message: 'Discounted price must be less than or equal to the original price.',
+  path: ['discountedPrice'],
+}).refine((data) => {
+  const manufacturedAt = new Date(data.manufacturedAt);
+  const expiresAt = new Date(data.expiresAt);
+  return manufacturedAt < expiresAt;
+}, {
+  message: 'Expiry date must be after to manufactured date.',
+  path: ['expiresAt'],
 });
 
 const AddProductForm = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [openMD, setOpenMD] = useState(false);
+  const [openED, setOpenED] = useState(false);
 
   const {
     register,
@@ -206,7 +222,7 @@ const AddProductForm = () => {
 
         {/* Product Manufactured Date */}
         <div>
-          <Popover>
+          <Popover open={openMD} onOpenChange={setOpenMD}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-full justify-start">
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -217,9 +233,10 @@ const AddProductForm = () => {
               <Calendar
                 mode="single"
                 selected={watch('manufacturedAt') ? new Date(watch('manufacturedAt')) : undefined}
-                onSelect={(date) =>
+                onSelect={(date) => {
                   setValue('manufacturedAt', date ? format(date, 'yyyy-MM-dd') : '')
-                }
+                  setOpenMD(false)
+                }}
               />
             </PopoverContent>
           </Popover>
@@ -238,7 +255,7 @@ const AddProductForm = () => {
        
         {/* Product Expires Date */}
         <div>
-          <Popover>
+          <Popover open={openED} onOpenChange={setOpenED}>
             <PopoverTrigger asChild>
               <Button variant="outline" className='w-full justify-start'>
                 <CalendarIcon className="mr-2 h-4 w-4" />
@@ -249,9 +266,10 @@ const AddProductForm = () => {
               <Calendar
                 mode="single"
                 selected={watch('expiresAt') ? new Date(watch('expiresAt')) : undefined}
-                onSelect={(date) =>
+                onSelect={(date) => {
                   setValue('expiresAt', date ? format(date, 'yyyy-MM-dd') : '')
-                }
+                  setOpenED(false)
+                }}
               />
             </PopoverContent>
           </Popover>

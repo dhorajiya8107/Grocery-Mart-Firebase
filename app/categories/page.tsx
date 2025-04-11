@@ -107,7 +107,7 @@ const Categories = () => {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
             {filteredCategories.map((category, index) => (
-              <div className='pt-2' key={index} onClick={() => router.push(`/categories/${category.name}`)}>
+              <div className='pt-2' key={index} onClick={() => router.push(`/categories/${category.name.replace(/\s+/g, '-')}`)}>
                 <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 relative cursor-pointer hover:shadow-lg h-64">
                   <div className='w-full h-full flex flex-col'>
                     <div className="flex items-center justify-center pt-4 pb-2 px-2 h-3/4">
