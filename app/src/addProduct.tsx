@@ -241,7 +241,7 @@ const AddProductForm = () => {
                   setValue('manufacturedAt', date ? formatDate(date) : '')
                   setOpenMD(false)
                 }}
-                className='p-1'
+                className='p-0'
               /> 
             </PopoverContent>
           </Popover>
