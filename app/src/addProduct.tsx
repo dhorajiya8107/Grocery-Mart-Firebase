@@ -242,7 +242,7 @@ const AddProductForm = () => {
                   setOpenMD(false)
                 }}
                 className='p-1'
-              />
+              /> 
             </PopoverContent>
           </Popover>
           {errors.manufacturedAt && (
