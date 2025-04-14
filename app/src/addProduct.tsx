@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Select } from '@radix-ui/react-select';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
-import { format } from "date-fns"
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { toast, Toaster } from 'sonner';
@@ -147,6 +146,11 @@ const AddProductForm = () => {
   };
 
 
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-CA').format(date);
+  };
+
+
   return (
     <>
     <Toaster />
@@ -234,9 +238,10 @@ const AddProductForm = () => {
                 mode="single"
                 selected={watch('manufacturedAt') ? new Date(watch('manufacturedAt')) : undefined}
                 onSelect={(date) => {
-                  setValue('manufacturedAt', date ? format(date, 'yyyy-MM-dd') : '')
+                  setValue('manufacturedAt', date ? formatDate(date) : '')
                   setOpenMD(false)
                 }}
+                className='p-1'
               />
             </PopoverContent>
           </Popover>
@@ -267,7 +272,7 @@ const AddProductForm = () => {
                 mode="single"
                 selected={watch('expiresAt') ? new Date(watch('expiresAt')) : undefined}
                 onSelect={(date) => {
-                  setValue('expiresAt', date ? format(date, 'yyyy-MM-dd') : '')
+                  setValue('expiresAt', date ? formatDate(date) : '')
                   setOpenED(false)
                 }}
               />
