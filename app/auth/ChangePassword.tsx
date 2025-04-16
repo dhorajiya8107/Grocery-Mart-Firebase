@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useRouter } from "next/navigation";
 import successAnimation from '@/animation/Animation - 1742460011298.json';
 import dynamic from 'next/dynamic';
+import { Lock } from "lucide-react";
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
  
 // 494 577
@@ -102,7 +103,13 @@ const ChangePasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, s
     <Dialog open={activeDialog === "change-password"} onOpenChange={() => setActiveDialog(null)}>
       <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Change Password</DialogTitle>
+          <div>
+            <div className="flex items-center space-x-2 mb-1 text-gray-700">
+              <Lock className="h-5 w-5 text-gray-600" />
+              <DialogTitle className="text-xl font-semibold">Change Password</DialogTitle>
+            </div>
+            <p className="text-gray-500 text-sm font-normal">Secure your account with a strong password</p>
+          </div>
         </DialogHeader>
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
@@ -123,7 +130,7 @@ const ChangePasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, s
           </div>
         ) : (
           <FormProvider {...form}>
-            <form onSubmit={handleSubmit(handleChangePassword)}>
+            <form onSubmit={handleSubmit(handleChangePassword)} className="text-gray-700">
               {/* <div className="mb-4">
                 <TextInput control={control} name="email" type="email" label="Email" placeHolder="Enter Email" />
               </div> */}
@@ -136,7 +143,7 @@ const ChangePasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, s
               <div className="mb-4">
                 <TextInput control={control} name="confirmPassword" type="password" label="Confirm Password" placeHolder="Confirm New Password" />
               </div><br />
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full bg-green-700 hover:bg-green-800" disabled={isSubmitting}>
                 {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </form>

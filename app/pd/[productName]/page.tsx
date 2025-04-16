@@ -1,7 +1,7 @@
 "use client"
 
 import { useParams, useRouter } from "next/navigation"
-import { collection, doc, getDoc, getDocs, orderBy, query, setDoc } from "firebase/firestore"
+import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react"
 import { db } from "@/app/src/firebase"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
@@ -39,33 +39,36 @@ const CategoryPage = () => {
     : decodeURIComponent(params?.categories || "")
 
   useEffect(() => {
-    const auth = getAuth()
-
-    const fetchCart = async (userId: string) => {
-      try {
-        const cartRef = doc(db, "cart", userId);
-        const cartDoc = await getDoc(cartRef);
-
-        if (cartDoc.exists()) {
-          setCart(cartDoc.data()?.products || []);
-        } else {
-          setCart([]);
-        }
-      } catch (error) {
-        console.error("Error fetching cart:", error);
-      }
-    }
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const auth = getAuth();
+    let unsubscribeFromCart: (() => void) | null = null;
+      
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
-        fetchCart(user.uid);
+        const cartRef = doc(db, 'cart', user.uid);
+      
+        unsubscribeFromCart = onSnapshot(cartRef, (cartDoc) => {
+          if (cartDoc.exists()) {
+            setCart(cartDoc.data()?.products || []);
+          } else {
+            setCart([]);
+          }
+        }, (error) => {
+          console.error('Error in cart snapshot:', error);
+        });
       } else {
         setCart([]);
+        if (unsubscribeFromCart) {
+          unsubscribeFromCart();
+          unsubscribeFromCart = null;
+        }
       }
-    })
-
-    return () => unsubscribe()
-  }, [])
+    });
+      
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeFromCart) unsubscribeFromCart();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchProductById = async () => {

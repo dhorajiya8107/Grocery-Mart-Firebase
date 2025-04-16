@@ -11,6 +11,7 @@ import TextInput from '@/components/form-fields/TextInput';
 import { useRouter } from 'next/navigation';
 import { doc, setDoc } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { UserIcon } from 'lucide-react';
  
 // Validation schema using Zod
 const schema = z
@@ -120,13 +121,16 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
     <Dialog open={activeDialog === 'sign-up'} onOpenChange={() => setActiveDialog(null)}>
       <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">Sign Up</DialogTitle>
+          <div className='flex items-center space-x-2 mb-1 text-gray-700'>
+            <UserIcon className="w-5 h-5 text-gray-600" />
+            <DialogTitle className="text-lg font-semibold">Sign Up</DialogTitle>
+          </div>
         </DialogHeader>
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
         <FormProvider {...form}>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)} className='text-gray-700'>
             {/* Name Field */}
             <div className="mb-4">
               <TextInput control={control} name="name" label="Name" placeHolder="Enter your name" />
@@ -161,8 +165,8 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
               {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
             </div> */}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Submitting...' : 'Sign Up'}
+            <Button type="submit" className="w-full bg-green-700 hover:bg-green-800" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing...' : 'SIGN UP'}
             </Button>
           </form>
         </FormProvider>
@@ -176,7 +180,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
         </div>
 
         <div className="text-center text-sm mt-4">
-          <a className="text-gray-500 hover:underline cursor-pointer" onClick={() => setActiveDialog('log-in')}>
+          <a className="text-gray-700 hover:underline cursor-pointer" onClick={() => setActiveDialog('log-in')}>
             Already have an account? Log In
           </a>
         </div>

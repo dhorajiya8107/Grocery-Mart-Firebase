@@ -47,32 +47,34 @@ const CategoryPage = () => {
 
     useEffect(() => {
       const auth = getAuth();
-      // const userId = auth.currentUser?.uid;
-  
-      const fetchCart = async (userId: string) => {
-        try {
-          const cartRef = doc(db, 'cart', userId);
-          const cartDoc = await getDoc(cartRef);
-
-          if (cartDoc.exists()) {
-            setCart(cartDoc.data()?.products || []);
-          } else {
-            setCart([]);
+      let unsubscribeFromCart: (() => void) | null = null;
+    
+      const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          const cartRef = doc(db, 'cart', user.uid);
+    
+          unsubscribeFromCart = onSnapshot(cartRef, (cartDoc) => {
+            if (cartDoc.exists()) {
+              setCart(cartDoc.data()?.products || []);
+            } else {
+              setCart([]);
+            }
+          }, (error) => {
+            console.error('Error in cart snapshot:', error);
+          });
+        } else {
+          setCart([]);
+          if (unsubscribeFromCart) {
+            unsubscribeFromCart();
+            unsubscribeFromCart = null;
           }
-        } catch (error) {
-          console.error('Error fetching cart:', error);
         }
+      });
+    
+      return () => {
+        unsubscribeAuth();
+        if (unsubscribeFromCart) unsubscribeFromCart();
       };
-  
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchCart(user.uid);
-      } else {
-        setCart([]);
-      }
-    });
-
-    return () => unsubscribe();
     }, []);
 
 
@@ -225,7 +227,7 @@ const CategoryPage = () => {
     
     const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
 
-    console.log('Most Seller IDs:', [...mostSellerIds]);
+    // console.log('Most Seller IDs:', [...mostSellerIds]);
     
 
   // useEffect(() => {
@@ -400,7 +402,7 @@ const CategoryPage = () => {
             ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
             : 0
           const isMostSeller = mostSellerIds.has(product.id);
-          console.log('Checking product ID:', product.id, 'isMostSeller:', isMostSeller);
+          // console.log('Checking product ID:', product.id, 'isMostSeller:', isMostSeller);
             
           return (
             <div key={product.id} className='pt-2' 

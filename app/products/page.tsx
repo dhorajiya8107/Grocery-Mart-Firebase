@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { collection, doc, getDocs, query, setDoc, getDoc, where, orderBy } from 'firebase/firestore';
+import { collection, doc, getDocs, query, setDoc, getDoc, where, orderBy, onSnapshot } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { db } from '@/app/src/firebase';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
@@ -35,35 +35,37 @@ const Products = () => {
   const router = useRouter();
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
 
-    useEffect(() => {
-      const auth = getAuth();
-      // const userId = auth.currentUser?.uid;
-  
-      const fetchCart = async (userId: string) => {
-        try {
-          const cartRef = doc(db, 'cart', userId);
-          const cartDoc = await getDoc(cartRef);
-
+  useEffect(() => {
+    const auth = getAuth();
+    let unsubscribeFromCart: (() => void) | null = null;
+          
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+          const cartRef = doc(db, 'cart', user.uid);
+          
+        unsubscribeFromCart = onSnapshot(cartRef, (cartDoc) => {
           if (cartDoc.exists()) {
             setCart(cartDoc.data()?.products || []);
           } else {
             setCart([]);
           }
-        } catch (error) {
-          console.error('Error fetching cart:', error);
-        }
-      };
-  
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchCart(user.uid);
+        }, (error) => {
+          console.error('Error in cart snapshot:', error);
+        });
       } else {
         setCart([]);
+        if (unsubscribeFromCart) {
+          unsubscribeFromCart();
+          unsubscribeFromCart = null;
+        }
       }
     });
-
-    return () => unsubscribe();
-    }, []);
+          
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeFromCart) unsubscribeFromCart();
+    };
+  }, []);
 
 
   // Fetch data from the products
@@ -357,7 +359,7 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
                       </div>
 
                     {/* If the products is out of stock then ADD button will disappear */}
-                    <div className="flex w-[85px] items-center gap-1 bg-green-700 rounded-md" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex w-[80px] items-center gap-1 bg-green-700 rounded-md" onClick={(e) => e.stopPropagation()}>
                       {isOutOfStock ? (
                         <span className="px-3 py-5 bg-white w-full items-center"></span>
                       ) : (

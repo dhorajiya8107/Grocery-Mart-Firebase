@@ -1,42 +1,42 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { getAuth, onAuthStateChanged, type User } from "firebase/auth"
-import { collection, getDocs, query, limit, orderBy, doc, setDoc, where, getDoc } from "firebase/firestore"
-import { auth, db } from "./src/firebase"
-import { useParams, useRouter } from "next/navigation"
-import Image from "next/image"
-import { Swiper, SwiperSlide } from "swiper/react"
-import { Pagination, Navigation, Autoplay, Parallax } from "swiper/modules"
-import { toast, Toaster } from "sonner"
+import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
+import { collection, getDocs, query, limit, orderBy, doc, setDoc, where, onSnapshot } from "firebase/firestore";
+import { auth, db } from "./src/firebase";
+import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination, Navigation, Autoplay, Parallax } from "swiper/modules";
+import { toast, Toaster } from "sonner";
 
-import Cat1 from "../images/Home/Cat1.png"
-import Cat2 from "../images/Home/Cat2.png"
-import Cat3 from "../images/Home/Cat3.png"
-import Cat4 from "../images/Home/Cat4.png"
-import Cat5 from "../images/Home/Cat5.png"
-import Cat6 from "../images/Home/Cat6.png"
-import Cat7 from "../images/Home/Cat7.png"
-import Cat8 from "../images/Home/Cat8.png"
-import Cat9 from "../images/Home/Cat9.png"
-import BabyCare from "../images/Home/BabyCare.jpg"
-import Protein from "../images/Home/Protien.jpg"
-import Tea from "../images/Home/Tea.jpg"
+import Cat1 from "../images/Home/Cat1.png";
+import Cat2 from "../images/Home/Cat2.png";
+import Cat3 from "../images/Home/Cat3.png";
+import Cat4 from "../images/Home/Cat4.png";
+import Cat5 from "../images/Home/Cat5.png";
+import Cat6 from "../images/Home/Cat6.png";
+import Cat7 from "../images/Home/Cat7.png";
+import Cat8 from "../images/Home/Cat8.png";
+import Cat9 from "../images/Home/Cat9.png";
+import BabyCare from "../images/Home/BabyCare.jpg";
+import Protein from "../images/Home/Protien.jpg";
+import Tea from "../images/Home/Tea.jpg";
 
-import "swiper/css"
-import "swiper/css/pagination"
-import "swiper/css/navigation"
-import { ChevronRight } from "lucide-react"
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { ChevronRight } from "lucide-react";
 
 interface Product {
-  id: string
-  productName: string
-  price: number
-  discountedPrice: number
-  imageUrl: string
-  quantity: string
-  description: string
-  category: string
+  id: string;
+  productName: string;
+  price: number;
+  discountedPrice: number;
+  imageUrl: string;
+  quantity: string;
+  description: string;
+  category: string;
 }
 interface MostSeller {
   id: string;
@@ -57,53 +57,55 @@ const categories = [
 ]
 
 const App = () => {
-  const router = useRouter()
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
-  const [cart, setCart] = useState<Product[]>([])
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [cart, setCart] = useState<Product[]>([]);
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
-  const [categoryProducts, setCategoryProducts] = useState<Record<string, Product[]>>({})
+  const [categoryProducts, setCategoryProducts] = useState<Record<string, Product[]>>({});
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser)
-      setLoading(false)
+      setUser(currentUser);
+      setLoading(false);
     })
 
-    return () => unsubscribe()
+    return () => unsubscribe();
   }, [])
 
   useEffect(() => {
-        const auth = getAuth();
-        // const userId = auth.currentUser?.uid;
-    
-        const fetchCart = async (userId: string) => {
-          try {
-            const cartRef = doc(db, 'cart', userId);
-            const cartDoc = await getDoc(cartRef);
-  
-            if (cartDoc.exists()) {
-              setCart(cartDoc.data()?.products || []);
-            } else {
-              setCart([]);
-            }
-          } catch (error) {
-            console.error('Error fetching cart:', error);
+    const auth = getAuth();
+    let unsubscribeFromCart: (() => void) | null = null;
+      
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const cartRef = doc(db, 'cart', user.uid);
+      
+        unsubscribeFromCart = onSnapshot(cartRef, (cartDoc) => {
+          if (cartDoc.exists()) {
+            setCart(cartDoc.data()?.products || []);
+          } else {
+            setCart([]);
           }
-        };
-    
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          fetchCart(user.uid);
-        } else {
-          setCart([]);
+        }, (error) => {
+          console.error('Error in cart snapshot:', error);
+        });
+      } else {
+        setCart([]);
+        if (unsubscribeFromCart) {
+          unsubscribeFromCart();
+          unsubscribeFromCart = null;
         }
-      });
-  
-      return () => unsubscribe();
-      }, []);
+      }
+    });
+      
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeFromCart) unsubscribeFromCart();
+    };
+  }, []);
 
   // Fetch featured products
   useEffect(() => {
@@ -115,7 +117,7 @@ const App = () => {
           // limit(10),
         )
 
-        const querySnapshot = await getDocs(productsQuery)
+        const querySnapshot = await getDocs(productsQuery);
         const products: Product[] = []
 
         querySnapshot.forEach((doc) => {
@@ -287,6 +289,7 @@ const App = () => {
     }
     }
 
+    // Fetch most seller products
     useEffect(() => {
       const fetchMostSeller = async () => {
         try {
