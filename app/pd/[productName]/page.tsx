@@ -278,11 +278,6 @@ const CategoryPage = () => {
                       <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                     </div>
                   )}
-                  {isMostSeller && (
-                    <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md z-10">
-                      Most seller
-                    </div>
-                  )}
                   <img
                     src={product.imageUrl}
                     alt={product.productName}
@@ -301,6 +296,12 @@ const CategoryPage = () => {
                   </div>
 
                   <h1 className="text-2xl font-bold text-gray-900">{product.productName}</h1>
+                  
+                  {isMostSeller && (
+                    <div className="bg-orange-100 text-orange-700 text-xs w-20 font-bold px-2 py-1 rounded-bl-md rounded-tr-md">
+                      Most seller
+                    </div>
+                  )}
 
                   <div className="border-t border-gray-200"></div>
 
@@ -327,7 +328,7 @@ const CategoryPage = () => {
                   {/* If the products is out of stock then ADD button will disappear */}
                   {isOutOfStock && <p className="text-gray-500 font-bold">Out of Stock</p>}
 
-                  <div className="flex w-[80px] items-center gap-1 bg-green-700 rounded-md">
+                  <div className="flex w-[80px] items-center gap-1 text-white bg-green-700 rounded-md">
                     {isOutOfStock ? (
                       <span></span>
                   ) : (
@@ -335,14 +336,14 @@ const CategoryPage = () => {
                       <>
                         <button
                           onClick={() => decrementQuantity(product)}
-                          className="px-3 py-2 text-white rounded-md"
+                          className="px-3 py-2 rounded-md justify-center items-center"
                         >
                           -
                         </button>
-                        <span className="text-white bg-green-700 text-md font-bold">{quantityInCart}</span>
+                        <span className="text-md font-bold">{quantityInCart}</span>
                         <button
                           onClick={() => incrementQuantity(product)}
-                          className="px-3 py-2 text-white rounded-md"
+                          className="px-3 py-2 rounded-md justify-center items-center"
                         >
                           +
                         </button>

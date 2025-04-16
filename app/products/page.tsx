@@ -357,7 +357,7 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
                       </div>
 
                     {/* If the products is out of stock then ADD button will disappear */}
-                    <div className="flex w-[80px] items-center gap-1 bg-green-700 rounded-md" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex w-[85px] items-center gap-1 bg-green-700 rounded-md" onClick={(e) => e.stopPropagation()}>
                       {isOutOfStock ? (
                         <span className="px-3 py-5 bg-white w-full items-center"></span>
                       ) : (

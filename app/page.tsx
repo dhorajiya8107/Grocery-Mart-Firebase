@@ -285,7 +285,7 @@ const App = () => {
         });
       }
     }
-    };
+    }
 
     useEffect(() => {
       const fetchMostSeller = async () => {
@@ -309,7 +309,6 @@ const App = () => {
           console.error('Error fetching most seller data:', error);
         }
       };
-      
       fetchMostSeller();
     }, []);
 
@@ -437,7 +436,7 @@ const App = () => {
                   onClick={() => router.push(`/categories/${category.path.replace(/\s+/g, '-')}`)}
                 >
                   <div className="relative w-full aspect-square mb-3 overflow-hidden group-hover:scale-105 rounded-full bg-white shadow-md transition-all duration-300 group-hover:shadow-lg">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-emerald-100 opacity-50"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-green-100 opacity-50"></div>
                     <Image
                       src={category.image}
                       alt={category.name}
@@ -625,7 +624,14 @@ const App = () => {
               className="w-full"
             >
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
-            {products.map((product) => {
+                {products.sort((a, b) => {
+
+                  const mostSellerMap = new Map(mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
+                  const quantityA = mostSellerMap.get(a.id) || 0;
+                  const quantityB = mostSellerMap.get(b.id) || 0;
+                  return quantityB - quantityA; 
+                })
+              .map((product) => {
               const isOutOfStock = Number.parseInt(product.quantity) === 0
               const productInCart = cart.find(item => item.id === product.id);
               const quantityInCart = productInCart ? parseInt(productInCart.quantity) : 0;

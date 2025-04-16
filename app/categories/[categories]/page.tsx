@@ -39,6 +39,7 @@ const CategoryPage = () => {
   const router = useRouter();
   const [sortOption, setSortOption] = useState("featured");
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0]) 
@@ -138,6 +139,11 @@ const CategoryPage = () => {
         const discountA = (a.price - a.discountedPrice) / a.price
         const discountB = (b.price - b.discountedPrice) / b.price
         return discountB - discountA
+        case "most-seller":
+          const mostSellerMap = new Map(mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
+          const quantityA = mostSellerMap.get(a.id) || 0;
+          const quantityB = mostSellerMap.get(b.id) || 0;
+          return quantityB - quantityA;
       default:
         return 0
     }
@@ -149,7 +155,7 @@ const CategoryPage = () => {
           const mostSellerQuery = query(
             collection(db, 'mostseller'),
             orderBy('quantity', 'desc'),
-            limit(3)
+            // limit(3)
           );
       
           const querySnapshot = await getDocs(mostSellerQuery);
@@ -169,18 +175,57 @@ const CategoryPage = () => {
       fetchMostSeller();
     }, []);
 
+    // Fetch featured products
+      useEffect(() => {
+        const fetchFeaturedProducts = async () => {
+          try {
+            const productsQuery = query(
+              collection(db, "products"),
+              // orderBy("discountedPrice", "asc"),
+              // limit(10),
+            )
+    
+            const querySnapshot = await getDocs(productsQuery)
+            const products: Product[] = []
+    
+            querySnapshot.forEach((doc) => {
+              const data = doc.data()
+              products.push({
+                id: doc.id,
+                productName: data.productName,
+                description: data.description || "",
+                price: Number.parseFloat(data.price) || 0,
+                discountedPrice: Number.parseFloat(data.discountedPrice) || 0,
+                imageUrl: data.imageUrl || "",
+                quantity: data.quantity || "0",
+                category: data.category || "",
+                expiresAt: data.expiryAt || "",
+              })
+            })
+    
+            setFeaturedProducts(products)
+          } catch (error) {
+            console.error("Error fetching featured products:", error)
+          }
+        }
+    
+        fetchFeaturedProducts()
+      }, [])
+
     const mostSellerMap = new Map(mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
 
-    const filterMostSeller = products
-      .filter(product => mostSellerMap.has(product.id))
-      .sort((a, b) => {
-        const aQuantity = mostSellerMap.get(a.id) || 0;
-        const bQuantity = mostSellerMap.get(b.id) || 0;
-        return bQuantity - aQuantity;
-      })
-      .slice(0, 3);
+    const filterMostSeller = featuredProducts
+    .filter(product => mostSellerMap.has(product.id))
+    .sort((a, b) => {
+      const aQuantity = mostSellerMap.get(a.id) || 0;
+      const bQuantity = mostSellerMap.get(b.id) || 0;
+      return bQuantity - aQuantity;
+    })
+    .slice(0, 3);
     
     const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
+
+    console.log('Most Seller IDs:', [...mostSellerIds]);
     
 
   // useEffect(() => {
@@ -331,6 +376,7 @@ const CategoryPage = () => {
                 <SelectItem value="price-low">Price: Low to High</SelectItem>
                 <SelectItem value="price-high">Price: High to Low</SelectItem>
                 <SelectItem value="discount">Highest Discount</SelectItem>
+                <SelectItem value="most-seller">Most Seller</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -354,6 +400,7 @@ const CategoryPage = () => {
             ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
             : 0
           const isMostSeller = mostSellerIds.has(product.id);
+          console.log('Checking product ID:', product.id, 'isMostSeller:', isMostSeller);
             
           return (
             <div key={product.id} className='pt-2' 
@@ -367,15 +414,17 @@ const CategoryPage = () => {
               </div>
               <div className="relative">
                 {discountPercentage > 0 && (
-                  <span className="absolute bg-emerald-100 text-emerald-700 text-xs font-bold py-1 px-2 rounded-br-md rounded-tl-md">
+                  <span className="absolute bg-green-100 text-green-700 text-xs font-bold py-1 px-2 rounded-br-md rounded-tl-md">
                     {discountPercentage}% OFF
                   </span>
                 )}
+
                 {isMostSeller && (
-                    <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md z-10">
+                    <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md">
                       Most seller
                     </div>
                   )}
+
                 {isOutOfStock && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>

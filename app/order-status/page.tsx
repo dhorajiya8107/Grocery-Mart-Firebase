@@ -288,7 +288,7 @@ const OrderStatus = () => {
                         Order ID: {order.orderId}
                       </p>
                       <p className="text-sm text-gray-600">
-                        Total: ₹{order.totalAmount.toFixed(2)}
+                        Total: ₹{order.totalAmount}
                       </p>
                       <p className="text-sm text-gray-600">
                         Status: <span className={`p-1 rounded-md text-sm

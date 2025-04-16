@@ -1,6 +1,6 @@
 "use client"
 
-import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Twitter } from "lucide-react"
+import { ChevronRight, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Twitter } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type React from "react"
@@ -90,8 +90,8 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold border-b pb-2 text-green-700">Company</h3>
-            <ul className="space-y-2">
+            <h3 className="text-lg font-bold border-l-4 border-green-700 pl-3 text-green-700">Company</h3>
+            <ul className="space-y-2 pl-4">
               <li>
                 <Link
                   href="/about-us"
@@ -137,15 +137,15 @@ const Footer = () => {
 
           {/* Categories */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold border-b pb-2 text-green-700">Categories</h3>
-            <div className="grid grid-cols-2 gap-2">
+            <h3 className="text-lg font-bold border-l-4 border-green-700 pl-3 text-green-700">Categories</h3>
+            <div className="grid grid-cols-2 gap-2 pl-4">
               {categories.slice(0, 8).map((category) => (
                 <Link
                   key={category.id}
                   href={`/categories/${category.name.replace(/\s+/g, '-')}`}
                   className="text-sm hover:text-green-700 transition-colors duration-300 flex items-center gap-2"
                 >
-                  {category.name}
+                  <ChevronRight className="h-3 w-3"/> {category.name}
                 </Link>
               ))}
               {categories.length > 8 && (
@@ -158,8 +158,8 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-bold border-b pb-2 text-green-700">Contact Us</h3>
-            <ul className="space-y-3">
+            <h3 className="text-lg font-bold border-l-4 border-green-700 pl-3 text-green-700">Contact Us</h3>
+            <ul className="space-y-3 pl-4">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-green-700 flex-shrink-0 mt-0.5" />
                 <span className="text-sm">India</span>
