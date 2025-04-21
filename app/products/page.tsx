@@ -9,6 +9,7 @@ import LogInPage from '@/app/auth/LogIn';
 import { toast } from 'sonner';
 import { Toaster } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -210,6 +211,13 @@ const Products = () => {
       updatedCart.push({ ...product, quantity: '1' });
       updateCart(updatedCart);
       toast.success(`Added ${product.productName} to the cart!`, {
+        action: {
+          label: "Checkout",
+            onClick: () => {
+              router.push('/checkout');
+            },
+          },
+        duration: 2000,
         style: { backgroundColor: '', color: 'green' },
       });
     } else {
@@ -287,12 +295,15 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
       <h1 className="text-xl font-bold pl-10 mb-3 capitalize justify-start items-center flex bg-white w-full h-12">Featured Products</h1>
       {/* Search Bar */}
       <div className="relative mb-6">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-400" />
+        </div>
         <Input
           type="text"
           placeholder="Search by products name or description or price..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+          className="w-full bg-white border border-gray-300 pl-10 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
           />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
@@ -306,9 +317,7 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
           const isMostSeller = mostSellerIds.has(product.id);
 
           return (
-            <div key={product.id} className='pt-2' 
-            onClick={() => handleProductClick(product)}
-            >
+            <div key={product.id} className='pt-2' onClick={() => handleProductClick(product)}>
               <div className={`card shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden
                 ${isOutOfStock ? 'bg-white opacity-50' : 'bg-white'} relative`}>
 
@@ -322,7 +331,7 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
                   </span>
                 )}
                 {isMostSeller && (
-                    <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md z-10">
+                    <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md">
                       Most seller
                     </div>
                   )}

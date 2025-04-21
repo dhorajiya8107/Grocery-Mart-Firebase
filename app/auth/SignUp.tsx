@@ -11,7 +11,9 @@ import TextInput from '@/components/form-fields/TextInput';
 import { useRouter } from 'next/navigation';
 import { doc, setDoc } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { UserIcon } from 'lucide-react';
+import { Mail, UserIcon, UserRoundPlus } from 'lucide-react';
+import  AppleLogo  from '../../images/AppleLogo.png';
+import Image from 'next/image';
  
 // Validation schema using Zod
 const schema = z
@@ -122,18 +124,40 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
       <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg">
         <DialogHeader>
           <div className='flex items-center space-x-2 mb-1 text-gray-700'>
-            <UserIcon className="w-5 h-5 text-gray-600" />
+            <div className="bg-green-50 p-2 rounded-full">
+              <UserRoundPlus className="h-5 w-5 text-green-700" />
+            </div>
             <DialogTitle className="text-lg font-semibold">Sign Up</DialogTitle>
           </div>
         </DialogHeader>
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+        
+        <div className="space-y-2 text-center text-sm">
+          <p className='text-start'>Sign up with account</p>
+          <div className='flex justify-between items-center space-x-1'>
+            <Button type="button" onClick={handleGoogleSignIn} className="bg-white w-1/2 text-black border-2 hover:bg-gray-200">
+              <img width="20" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
+              Google
+            </Button>
+            <Button className="bg-white w-1/2 text-black border-2 hover:bg-gray-200">
+              <Image width="50" className='-mr-3' src={AppleLogo} alt="Apple" />
+              Apple
+            </Button>
+          </div>
+        </div>
+
+        <span className='border-b'></span>
+        
+        <div className='text-sm'>
+          <p className="text-start">Or sign up with email</p>
+        </div>
 
         <FormProvider {...form}>
           <form onSubmit={handleSubmit(onSubmit)} className='text-gray-700'>
             {/* Name Field */}
             <div className="mb-4">
-              <TextInput control={control} name="name" label="Name" placeHolder="Enter your name" />
+              <TextInput control={control} name="name" label="Full Name" placeHolder="Enter your name" />
               {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
             </div>
 
@@ -171,18 +195,15 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
           </form>
         </FormProvider>
 
-        <div className="mt-4 text-center text-sm">
-          <p>Or sign up with:</p>
-          <Button type="button" onClick={handleGoogleSignIn} className="w-full mt-2 bg-white text-black border-2 hover:bg-gray-200">
-            <img width="20" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
-            Sign up with Google
-          </Button>
-        </div>
-
-        <div className="text-center text-sm mt-4">
-          <a className="text-gray-700 hover:underline cursor-pointer" onClick={() => setActiveDialog('log-in')}>
-            Already have an account? Log In
-          </a>
+        <div className="text-center text-sm">
+          <span className="text-gray-600">Already have an account? </span>
+            <button
+              type="button"
+              className="text-green-700 hover:text-green-800 font-medium hover:underline cursor-pointer transition-colors"
+              onClick={() => setActiveDialog("log-in")}
+            >
+              Log In
+            </button>
         </div>
       </DialogContent>
     </Dialog>

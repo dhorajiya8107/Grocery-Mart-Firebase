@@ -324,17 +324,13 @@ const CartPage = () => {
                               <h3 className="text-lg font-semibold text-gray-900 mb-1">{product.productName}</h3>
                               <p className="text-sm text-gray-500 line-clamp-2 mb-3">{product.description}</p>
               
-                              <div className="flex items-center mb-3">
-                                {/* <span className="text-lg font-bold text-gray-900">₹{product.discountedPrice}</span> */}
-                                {/* <div className="text-right"> */}
-                                  <div className="text-sm text-gray-700 justify-center text-center">Total Price : 
-                                    <span className="text-lg font-bold text-gray-900"> ₹{(product.discountedPrice * product.quantity)}</span>
-                                  </div>
-                                {/* </div> */}
+                              <div className="flex items-center mb-3 text-sm text-gray-700 flex-wrap gap-x-1">
+                                <p className="block max-[393px]:hidden">Total Price : </p>
+                                <span className="text-lg font-bold text-gray-900"> ₹{(product.discountedPrice * product.quantity)}</span>
                                 {product.price > product.discountedPrice && (
                                   <>
-                                    <span className="ml-2 text-sm text-gray-500 line-through">₹{product.price}</span>
-                                    <span className="ml-2 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded">
+                                    <span className="ml-1 text-sm text-gray-500 line-through">₹{product.price}</span>
+                                    <span className="ml-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded">
                                       {Math.round(((product.price - product.discountedPrice) / product.price) * 100)}%
                                       OFF
                                     </span>
@@ -386,8 +382,8 @@ const CartPage = () => {
                 </div>
               </div>
               <div className="lg:col-span-1 min-[1024px]:pt-[68px]">
-                <Card className="sticky top-[127px]">
-                  <CardContent className="p-6">
+                <Card className="sticky top-[145px]">
+                  <CardContent className="p-6 -mt-3">
                     <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
 
                     <div className="space-y-3 mb-4">
@@ -461,7 +457,7 @@ const CartPage = () => {
                     <Button
                       onClick={handleProceedToCheckout}
                       disabled={isSubmitting}
-                      className="w-full bg-green-700 hover:bg-green-800 text-white py-6 rounded-md flex items-center justify-center gap-2"
+                      className="w-full -mb-3 bg-green-700 hover:bg-green-800 text-white py-6 rounded-md flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? (
                         <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>

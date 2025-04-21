@@ -7,6 +7,7 @@ import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'fireb
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CustomPagination } from '@/components/CustomPagination';
+import { Search } from 'lucide-react';
 
 type User = {
   email: string;
@@ -256,12 +257,15 @@ const OrderStatus = () => {
         <h2 className="text-2xl font-bold p-4">Manage Orders Status</h2>
         {/* Search Bar */}
         <div className="relative mb-6">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
           <Input
             type="text"
             placeholder="Search by orderId..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+            className="w-full border border-gray-300 pl-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
           />
         </div>
         <div className="grid grid-cols-1">

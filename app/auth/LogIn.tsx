@@ -29,7 +29,6 @@ const LogInPage: React.FC<LogInPageProps> = ({ activeDialog, setActiveDialog }) 
   const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
   const [preFilledEmail, setPreFilledEmail] = useState('');
-  const [loginEmail, setLoginEmail] = useState("");
 
   // Apply validation
   const form = useForm({
@@ -49,79 +48,115 @@ useEffect(() => {
   }, [activeDialog]);
   
 
-  const { control, handleSubmit, getValues, formState: { errors, isSubmitting } } = form;
+  const { control, handleSubmit, getValues, formState: { isSubmitting } } = form;
 
   // Handle login
   const handleLogin = async (data: any) => {
-    setError('');
+    setError("");
     try {
       const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
       console.log("Login Successfully!", userCredential.user);
       setActiveDialog(null);
       router.refresh();
-      router.push('/');
+      router.push("/");
     } catch (err: any) {
-      setError(err.message);
+      if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password") {
+        setError("Invalid email or password");
+      } else {
+        setError(err.message);
+      }
     }
   };
 
   const handleForgotPassword = () => {
     const email = getValues("email");
-    setLoginEmail(email);
     if (!email) {
       setError("Please enter your email before proceeding.");
       return;
     }
-    setPreFilledEmail(loginEmail);
+    setPreFilledEmail(email);
     setActiveDialog("forget-password");
   };
   
 
   return (
     <>
-    <Dialog open={activeDialog === "log-in"} onOpenChange={() => setActiveDialog(null)}>
-      {/* <DialogTrigger asChild>
-        <a className="text-gray-500 text-sm mr-2 cursor-pointer">LOG IN</a>
-      </DialogTrigger> */}
-      <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg">
-        <DialogHeader>
-          <div className='flex items-center space-x-2 mb-1 text-gray-700'>
-            <LogIn className='h-5 w-5 text-gray-600'/>
-            <DialogTitle className="text-xl font-semibold">Login</DialogTitle>
-          </div>
-        </DialogHeader>
-
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-
-        <FormProvider {...form}>
-          <form onSubmit={handleSubmit(handleLogin)} className='text-gray-700'>
-            <div className="mb-4">
-              <TextInput control={control} name="email" type="email" label='Email' placeHolder="Enter Email" />
+      <Dialog open={activeDialog === "log-in"} onOpenChange={() => setActiveDialog(null)}>
+        <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg border-0">
+          <DialogHeader>
+            <div className="flex items-center space-x-2 mb-3 text-gray-700">
+              <div className="bg-green-50 p-2 rounded-full">
+                <LogIn className="h-5 w-5 text-green-700" />
+              </div>
+              <DialogTitle className="text-xl font-semibold">Welcome Back</DialogTitle>
             </div>
+            <p className="text-gray-500 text-sm -mt-1 mb-2">Sign in to your account to continue</p>
+          </DialogHeader>
 
-            <div className="mb-4">
-              <TextInput control={control} name="password" type="password" label='Password' placeHolder="Enter Password" />
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-3 rounded mb-4">
+              <p className="text-red-700 text-sm">{error}</p>
             </div>
-            
-            <div className="text-end text-sm mt-4">
-              <a className="text-green-700 hover:underline cursor-pointer" onClick={handleForgotPassword}>
-                Forgot Password?
-              </a>
-            </div><br />
+          )}
 
-            <Button type="submit" className='w-full bg-green-700 hover:bg-green-800' disabled={isSubmitting}>
-              {isSubmitting ? 'Logging...' : 'LOGIN'}
-            </Button>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+          <FormProvider {...form}>
+            <form onSubmit={handleSubmit(handleLogin)} className="text-gray-700">
+              <div className="mb-4">
+                <TextInput control={control} name="email" type="email" label="Email" placeHolder="Enter your email" />
+              </div>
 
-    {/* {activeDialog === "forget-password" && 
-        <ForgotPasswordPage activeDialog={activeDialog} setActiveDialog={setActiveDialog} preFilledEmail={preFilledEmail} />
-      } */}
-  </>
-  );
-};
+              <div className="mb-2">
+                <TextInput
+                  control={control}
+                  name="password"
+                  type="password"
+                  label="Password"
+                  placeHolder="Enter your password"
+                />
+              </div>
+
+              <div className="text-end text-sm mb-5">
+                <button
+                  type="button"
+                  className="text-green-700 hover:text-green-800 hover:underline cursor-pointer transition-colors"
+                  onClick={handleForgotPassword}
+                >
+                  Forgot Password?
+                </button>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-green-700 hover:bg-green-800 transition-colors py-5"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Signing in..." : "Sign In"}
+              </Button>
+
+              <div className="mt-5 text-center text-sm">
+                <span className="text-gray-600">Don't have an account? </span>
+                <button
+                  type="button"
+                  className="text-green-700 hover:text-green-800 font-medium hover:underline cursor-pointer transition-colors"
+                  onClick={() => setActiveDialog("sign-up")}
+                >
+                  Create Account
+                </button>
+              </div>
+            </form>
+          </FormProvider>
+        </DialogContent>
+      </Dialog>
+
+      {activeDialog === "forget-password" && (
+        <ForgotPasswordPage
+          activeDialog={activeDialog}
+          setActiveDialog={setActiveDialog}
+          preFilledEmail={preFilledEmail}
+        />
+      )}
+    </>
+  )
+}
 
 export default LogInPage;

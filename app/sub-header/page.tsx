@@ -95,7 +95,7 @@ const SubHeader = () => {
   }, [showMore]);
  
   return (
-    <div className=''>
+    <div className='sticky z-10 top-[99px] max-[600px]:top-[140px]'>
       <div className="shadow-md bg-white overflow-visible text-gray-600 mx-auto items-center justify-center flex">
       <div className="flex gap-2 text-sm scroll-smooth snap-x">
         {categories.slice(0, visibleCount).map((category) => (

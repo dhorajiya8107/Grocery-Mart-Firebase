@@ -279,6 +279,13 @@ const App = () => {
         updatedCart.push({ ...product, quantity: '1' });
         updateCart(updatedCart);
         toast.success(`Added ${product.productName} to the cart!`, {
+          action: {
+            label: "Checkout",
+              onClick: () => {
+                router.push('/checkout');
+              },
+            },
+          duration: 2000,
           style: { backgroundColor: '', color: 'green' },
         });
       } else {
@@ -602,6 +609,7 @@ const App = () => {
           </Swiper>
         </section>
 
+        {/* Categories wise products */}
         {Object.entries(categoryProducts).map(([category, products]) => (
           <section key={category} className="mb-8 sm:mb-12">
             <div className="flex items-center justify-between mb-4 sm:mb-6">

@@ -18,6 +18,7 @@ import { ChevronDown, KeyRound, LogOut, MapPin, Package, Plus, Search, Settings,
 import SearchBar from "../search-bar/page";
 import AddAddressPage from "@/components/AddAddress";
 import ForgotPasswordPage from "../auth/ForgetPassword";
+import CartPage from "../cart/page";
 
 
 interface Product {
@@ -282,7 +283,7 @@ const Header = ({ user }: { user: User | null }) => {
           onClick={() => setMenuOpen(false)}
         ></div>
       )}
-      <header className={`sticky top-0 z-40 w-full border-b bg-white transition-shadow duration-300 ${isScrolled ? "shadow-md" : ""}`}>
+      <header className={`sticky top-0 z-40 w-full min-h-[99px] border-b bg-white transition-shadow duration-300 ${isScrolled ? "shadow-none" : ""}`}>
         <div className="relative flex flex-wrap justify-between items-center p-4 md:p-6 z-20">
           <div className="flex items-center cursor-pointer">
             <Link href={"/"} className="flex items-center">
@@ -331,21 +332,23 @@ const Header = ({ user }: { user: User | null }) => {
                     <ChevronDown className={`w-4 h-4 ml-1 text-gray-500 transition-transform duration-300 ${menuOpen ? "rotate-180" : ""}`} />
                   </button>
                 </div>
-                <button
-                  className="text-lg rounded-lg gap-2 px-4 py-2 transition-colors duration-300 text-white cursor-pointer flex justify-center items-center bg-green-700"
-                  onClick={() => router.push("/cart")}
-                >
-                  <ShoppingCart className="w-5 h-5"/>
-                  {cartQuantity === 0 ? (
-                    <span className="text-base mt-1 text-white mr-2 font-bold text-center mb-2 text-[13px] lg:text-[14.7px]">
-                      My Cart
-                    </span>
-                  ) : (
-                    <span className="text-base mt-1 text-white mr-2 font-bold text-center mb-2 text-[13px] lg:text-[14.7px]">
-                      {cartQuantity} items
-                    </span>
-                  )}
-                </button>
+                {/* {(role === "superadmin" || role === "user") && ( */}
+                  <button
+                    className="text-lg rounded-lg gap-2 px-4 py-2 transition-colors duration-300 text-white cursor-pointer flex justify-center items-center bg-green-700"
+                    onClick={() => router.push("/cart")}
+                  >
+                    <ShoppingCart className="w-5 h-5"/>
+                    {cartQuantity === 0 ? (
+                      <span className="text-base mt-1 text-white mr-2 font-bold text-center mb-2 text-[13px] lg:text-[14.7px]">
+                        My Cart
+                      </span>
+                    ) : (
+                      <span className="text-base mt-1 text-white mr-2 font-bold text-center mb-2 text-[13px] lg:text-[14.7px]">
+                        {cartQuantity} items
+                      </span>
+                    )}
+                  </button>
+                {/* )} */}
 
                 {menuOpen && (
                   <div
@@ -356,7 +359,7 @@ const Header = ({ user }: { user: User | null }) => {
                       <p className="text-sm text-gray-500 mr-2">{user?.email}</p>
                     </div>
                     <div className="py-1">
-                    {(role === "admin" || role === "user") && (
+                    {/* {(role === "superadmin" || role === "user") && ( */}
                       <div className="border-b-2 border-gray-100">
                         <button
                           className="w-full flex items-center gap-2 text-sm text-left py-2 px-4 hover:bg-gray-100 rounded-md mb-2"
@@ -376,8 +379,8 @@ const Header = ({ user }: { user: User | null }) => {
                           <MapPin className="w-4 h-4 text-gray-500" /> Address
                         </button>
                       </div>
-                    )}
-                    {role === "admin" && (
+                    {/* )} */}
+                    {(role === "superadmin" || role === "admin") && (
                       <div className="border-gray-100 my-1 pt-1 border-b-2">
                         <p className="px-3 py-1 text-xs font-medium text-gray-500">Admin Controls</p>
                         <button
@@ -407,19 +410,20 @@ const Header = ({ user }: { user: User | null }) => {
                         >
                           <Settings className="w-4 h-4 text-gray-500" /> Order Status
                         </button>
-                        <button
-                          className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
-                          onClick={() => {
-                            router.push("/change-role")
-                            setMenuOpen(false)
-                          }}
-                        >
-                          <Settings className="w-4 h-4 text-gray-500" /> Change Role
-                        </button>
+                        {(role === "superadmin") && (
+                          <button
+                            className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
+                            onClick={() => {
+                              router.push("/change-role")
+                              setMenuOpen(false)
+                            }}
+                          >
+                            <Settings className="w-4 h-4 text-gray-500" /> Change Role
+                          </button>
+                        )}
                       </div>
                     )}
                     <div>
-                    {(role === "admin" || role ===  "user") && (
                     <div className="">
                       <button
                         className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
@@ -431,7 +435,6 @@ const Header = ({ user }: { user: User | null }) => {
                       <KeyRound className="w-4 h-4 text-gray-500" /> Change Password
                     </button>
                     </div>
-                    )}
                     <button
                       className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-md mb-2"
                       onClick={handleLogout}
@@ -444,7 +447,7 @@ const Header = ({ user }: { user: User | null }) => {
                 )}
               </>
             ) : (
-              <div className="flex space-x-4 justify-center mt-4 items-center">
+              <div className="flex space-x-4 justify-center mt-2 items-center">
                 <a className="text-gray-500 text-sm cursor-pointer" onClick={() => setActiveDialog("log-in")}>
                   LOG IN
                 </a>

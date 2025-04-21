@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { Toaster } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Filter } from 'lucide-react';
+import { Filter, Search } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -331,6 +331,13 @@ const CategoryPage = () => {
       updatedCart.push({ ...product, quantity: '1' });
       updateCart(updatedCart);
       toast.success(`Added ${product.productName} to the cart!`, {
+        action: {
+          label: "Checkout",
+            onClick: () => {
+              router.push('/checkout');
+            },
+          },
+        duration: 2000,
         style: { backgroundColor: '', color: 'green' },
       });
     } else {
@@ -385,12 +392,15 @@ const CategoryPage = () => {
         </div>
       {/* Search Bar */}
       <div className="relative mb-6">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Search className="h-5 w-5 text-gray-400" />
+        </div>
         <Input
           type="text"
           placeholder="Search by products name or description or price..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+          className="w-full bg-white border border-gray-300 pl-10 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
           />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">

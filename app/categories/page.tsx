@@ -29,6 +29,7 @@ import 'swiper/css/navigation';
 import { Input } from '@/components/ui/input';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { db } from '../src/firebase';
+import { Search } from 'lucide-react';
 
 interface Category {
   name: string;
@@ -97,12 +98,15 @@ const Categories = () => {
           <h1 className="text-xl font-bold pl-10 mb-3 capitalize justify-start items-center flex bg-white w-full h-12">Product Categories</h1>
           {/* Search Bar */}
           <div className="relative mb-6">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
             <Input
               type="text"
               placeholder="Search by category name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
+              className="w-full bg-white border border-gray-300 pl-10 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
             />
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">

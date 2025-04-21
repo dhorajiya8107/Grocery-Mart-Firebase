@@ -105,7 +105,9 @@ const ChangePasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, s
         <DialogHeader>
           <div>
             <div className="flex items-center space-x-2 mb-1 text-gray-700">
-              <Lock className="h-5 w-5 text-gray-600" />
+              <div className="bg-green-50 rounded-full p-2">
+                <Lock className="h-5 w-5 text-green-700" />
+              </div>
               <DialogTitle className="text-xl font-semibold">Change Password</DialogTitle>
             </div>
             <p className="text-gray-500 text-sm font-normal">Secure your account with a strong password</p>
@@ -140,7 +142,7 @@ const ChangePasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, s
               <div className="mb-4">
                 <TextInput control={control} name="newPassword" type="password" label="New Password" placeHolder="Enter New Password" />
               </div>
-              <div className="mb-4">
+              <div className="mb-2">
                 <TextInput control={control} name="confirmPassword" type="password" label="Confirm Password" placeHolder="Confirm New Password" />
               </div><br />
               <Button type="submit" className="w-full bg-green-700 hover:bg-green-800" disabled={isSubmitting}>

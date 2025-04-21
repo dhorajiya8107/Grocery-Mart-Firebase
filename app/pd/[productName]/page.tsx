@@ -33,6 +33,7 @@ const CategoryPage = () => {
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
   const productName = params["productName"];
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
+  const router = useRouter();
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0])
@@ -191,7 +192,16 @@ const CategoryPage = () => {
       if (Number.parseInt(product.quantity) > 0) {
         updatedCart.push({ ...product, quantity: "1" });
         updateCart(updatedCart);
-        toast.success(`Added ${product.productName} to the cart!`);
+        toast.success(`Added ${product.productName} to the cart!`, {
+          action: {
+            label: "Checkout",
+              onClick: () => {
+                router.push('/checkout');
+              },
+            },
+          duration: 2000,
+          style: { backgroundColor: '', color: 'green' },
+        });
       } else {
         toast.error(`${product.productName} is out of stock!`);
       }
@@ -199,36 +209,35 @@ const CategoryPage = () => {
   }
 
   useEffect(() => {
-        const fetchMostSeller = async () => {
-          try {
-            const mostSellerQuery = query(
-              collection(db, 'mostseller'),
-              orderBy('quantity', 'desc'),
-              // limit(10)
-            );
+    const fetchMostSeller = async () => {
+      try {
+        const mostSellerQuery = query(
+        collection(db, 'mostseller'),
+        orderBy('quantity', 'desc'),
+        // limit(10)
+        );
       
-            const querySnapshot = await getDocs(mostSellerQuery);
+        const querySnapshot = await getDocs(mostSellerQuery);
       
-            const mostSellerData = querySnapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data(),
-            })) as MostSeller[];
+        const mostSellerData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as MostSeller[];
       
-            // console.log('Most Seller Data:', mostSellerData);
-            setMostSeller(mostSellerData);
-          } catch (error) {
-            console.error('Error fetching most seller data:', error);
-          }
-        };
+        // console.log('Most Seller Data:', mostSellerData);
+        setMostSeller(mostSellerData);
+      } catch (error) {
+        console.error('Error fetching most seller data:', error);
+      }
+    };
         
-        fetchMostSeller();
-      }, []);
-  
+    fetchMostSeller();
+  }, []);
   
     const mostSellerMap = new Map( mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
       
     // filter and sort featured products by most sold quantity
-    const filterMostSeller = products
+    const filterMostSeller = mostSeller
       .filter(product => mostSellerMap.has(product.id))
       .sort((a, b) => {
         const aQuantity = mostSellerMap.get(a.id) || 0;

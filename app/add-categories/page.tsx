@@ -14,6 +14,7 @@ import { toast, Toaster } from 'sonner';
 import * as yup from 'yup';
 import { auth, db } from '../src/firebase';
 import { CustomPagination } from '@/components/CustomPagination';
+import { Search } from 'lucide-react';
  
 interface Category {
   id: string;
@@ -61,7 +62,7 @@ const AddCategories = () => {
             const userRole = userSnap.data()?.role;
             setRole(userRole);
   
-            if (userRole !== 'admin') {
+            if (userRole !== 'admin' && userRole !== 'superadmin') {
               router.push('/');
             }
           } else {
@@ -378,12 +379,15 @@ const AddCategories = () => {
 
           {/* Search Bar */}
           <div className="relative mb-6">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
             <Input
               type="text"
               placeholder="Search by categories name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+              className="w-full border pl-10 border-gray-300 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
             />
           </div>
 

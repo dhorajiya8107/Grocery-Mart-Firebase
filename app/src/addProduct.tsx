@@ -4,15 +4,15 @@ import { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '@/app/src/firebase';
 import { Input } from '@/components/ui/input';
-import { Select } from '@radix-ui/react-select';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { toast, Toaster } from 'sonner';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
  
 type Category = {
   id: string;
@@ -59,6 +59,7 @@ const AddProductForm = () => {
     watch,
     formState: { errors },
     reset,
+    control,
   } = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -145,22 +146,19 @@ const AddProductForm = () => {
     }
   };
 
-
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-CA').format(date);
   };
-
 
   return (
     <>
     <Toaster />
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-xl font-semibold mb-4">Add Product</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-6">
-
+      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4">
         {/* Product Name */}
         <div>
-          <Input {...register('productName')} placeholder="Product Name*" />
+          <Input {...register('productName')} placeholder="Product Name*" className='h-11'/>
             {errors.productName && (
               <p className="text-red-500 text-sm">{errors.productName.message}</p>
             )}
@@ -168,22 +166,45 @@ const AddProductForm = () => {
 
         {/* Product Categories Select */}
         <div>
-          <select {...register('categoryId')} className="w-full border p-2 rounded">
+          <Controller
+            name="categoryId"
+            control={control}
+            rules={{ required: "Category is required" }}
+            render={({ field }) => (
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                defaultValue=""
+              >
+                <SelectTrigger className="w-full h-11 border p-2 rounded">
+                  <SelectValue placeholder="Select Category*" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          {/* <select {...register('categoryId')} className="w-full border p-2 rounded">
             <option value="">Select Category*</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
               </option>
             ))}
-          </select>
-            {errors.categoryId && (
-              <p className="text-red-500 text-sm">{errors.categoryId.message}</p>
-            )}
+          </select> */}
+          {errors.categoryId && (
+            <p className="text-red-500 text-sm">{errors.categoryId.message}</p>
+          )}
         </div>
 
         {/* Product Description */}
         <div>
-          <Input {...register('description')} placeholder="Description*" />
+          <Input {...register('description')} placeholder="Description*" className='h-11'/>
             {errors.description && (
               <p className="text-red-500 text-sm">{errors.description.message}</p>
             )}
@@ -200,7 +221,7 @@ const AddProductForm = () => {
                 setValue('image', file);
               }
             }}
-            
+            className='h-11'
           />
             {errors.image && (
               <p className="text-red-500 text-sm">{errors.image.message}</p>
@@ -210,7 +231,7 @@ const AddProductForm = () => {
 
         {/* Product Price */}
         <div>
-          <Input {...register('price')} type="number" placeholder="Price*" min="0"/>
+          <Input {...register('price')} type="number" placeholder="Price*" min="0" className='h-11'/>
             {errors.price && (
               <p className="text-red-500 text-sm">{errors.price.message}</p>
             )}
@@ -218,7 +239,7 @@ const AddProductForm = () => {
 
         {/* Product Discounted Price */}
         <div>
-          <Input {...register('discountedPrice')} type="number" placeholder="Discounted Price*" min="0"/>
+          <Input {...register('discountedPrice')} type="number" placeholder="Discounted Price*" min="0" className='h-11'/>
             {errors.discountedPrice && (
               <p className="text-red-500 text-sm">{errors.discountedPrice.message}</p>
             )}
@@ -228,7 +249,7 @@ const AddProductForm = () => {
         <div>
           <Popover open={openMD} onOpenChange={setOpenMD}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-start">
+              <Button variant="outline" className="w-full justify-start h-11">
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {watch('manufacturedAt') || 'Manufactured Date*'}
               </Button>
@@ -252,7 +273,7 @@ const AddProductForm = () => {
 
         {/* Product Buckle Number */}
         <div>
-          <Input {...register('buckleNumber')} type="number" placeholder="Buckle Number*" min="0" maxLength={6} minLength={6} />
+          <Input {...register('buckleNumber')} type="number" placeholder="Buckle Number*" min="0" maxLength={6} minLength={6} className='h-11'/>
             {errors.buckleNumber && (
               <p className="text-red-500 text-sm">{errors.buckleNumber.message}</p>
             )}
@@ -262,7 +283,7 @@ const AddProductForm = () => {
         <div>
           <Popover open={openED} onOpenChange={setOpenED}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className='w-full justify-start'>
+              <Button variant="outline" className='w-full justify-start h-11'>
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {watch('expiresAt') || 'Expires Date*'}
               </Button>
@@ -285,7 +306,7 @@ const AddProductForm = () => {
 
         {/* Product Quantity */}
         <div>
-          <Input {...register('quantity')} type="number" placeholder="Quantity*" min="0"/>
+          <Input {...register('quantity')} type="number" placeholder="Quantity*" min="0" className='h-11'/>
             {errors.quantity && (
               <p className="text-red-500 text-sm">{errors.quantity.message}</p>
             )}
