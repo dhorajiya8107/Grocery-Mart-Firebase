@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { doc, setDoc } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Mail, UserIcon, UserRoundPlus } from 'lucide-react';
-import  AppleLogo  from '../../images/Applelogo.png';
+import  AppleLogo  from '../../images/AppleLogo.png';
 import Image from 'next/image';
  
 // Validation schema using Zod

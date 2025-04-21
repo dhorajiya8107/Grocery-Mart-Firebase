@@ -80,7 +80,7 @@ const OrderStatus = () => {
             const userRole = userSnap.data()?.role;
             setRole(userRole);
     
-            if (userRole !== 'admin') {
+            if (userRole !== 'admin' && userRole !== 'superadmin') {
               router.push('/');
             }
           } else {
@@ -147,7 +147,7 @@ const OrderStatus = () => {
         }
     };
 
-    if (role === 'admin') {
+    if (role === 'admin' || role === 'superadmin') {
         setLoading(true);
         fetchOrders();
       }
@@ -175,7 +175,7 @@ const OrderStatus = () => {
       }
     };
   
-    if (role === "admin") {
+    if (role === 'admin' || role === 'superadmin') {
       fetchAddresses();
     }
   }, [role]);
@@ -247,7 +247,7 @@ const OrderStatus = () => {
         );
       }
 
-    if (role !== 'admin') {
+    if (role !== 'admin' && role !== 'superadmin') {
       return null;
     }
 

@@ -24,7 +24,7 @@ const AddProduct = () => {
             const userRole = userSnap.data()?.role;
             setRole(userRole);
   
-            if (userRole !== 'admin') {
+            if (userRole !== 'admin' && userRole !== 'superadmin') {
               router.push('/');
             }
           } else {
@@ -52,7 +52,7 @@ const AddProduct = () => {
     );
   }
   
-  if (role !== 'admin') {
+  if (role !== 'admin' && role !== 'superadmin') {
       return null;
     }
 
