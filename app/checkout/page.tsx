@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { getAuth, onAuthStateChanged } from "firebase/auth"
+import { useState, useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   collection,
   doc,
@@ -12,21 +12,23 @@ import {
   setDoc,
   updateDoc,
   where,
-} from "firebase/firestore"
-import { db } from "../src/firebase"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import successAnimation from "../../animation/Animation - 1742460011298.json"
-import dynamic from "next/dynamic"
-import { Button } from "@/components/ui/button"
-import { Briefcase, Check, CreditCard, Home, Hotel, InfoIcon, MapPin, Package, ShieldCheck, Truck, Wallet } from "lucide-react"
-import AddAddressPage from "@/components/AddAddress"
-import { toast, Toaster } from "sonner"
+} from "firebase/firestore";
+import { db } from "../src/firebase";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import successAnimation from "../../animation/Animation - 1742460011298.json";
+import dynamic from "next/dynamic";
+import { Button } from "@/components/ui/button";
+import { Briefcase, Check, CreditCard, Home, Hotel, InfoIcon, MapPin, Package, ShieldCheck, Truck, Wallet } from "lucide-react";
+import AddAddressPage from "@/components/AddAddress";
+import { toast, Toaster } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Label } from "@/components/ui/label"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import Image from 'next/image';
+import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false })
 
@@ -64,18 +66,19 @@ interface PostOffice {
 }
 
 const CheckoutPage = () => {
-  const [cart, setCart] = useState<Product[]>([])
-  const [userId, setUserId] = useState<string | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false)
-  const [paymentMethod, setPaymentMethod] = useState<string>("Credit Card")
-  const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false)
-  const [processingPayment, setProcessingPayment] = useState<boolean>(false)
-  const router = useRouter()
-  const auth = getAuth()
-  const searchParams = useSearchParams()
-  const orderId = searchParams?.get("orderId")
-  const [order, setOrder] = useState<any>(null)
+  const [cart, setCart] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [paymentMethod, setPaymentMethod] = useState<string>("Credit Card");
+  const [paymentSuccess, setPaymentSuccess] = useState<boolean>(false);
+  const [processingPayment, setProcessingPayment] = useState<boolean>(false);
+  const router = useRouter();
+  const auth = getAuth();
+  const searchParams = useSearchParams();
+  const orderId = searchParams?.get("orderId");
+  const [order, setOrder] = useState<any>(null);
   // const Payment_Methods = ["Credit Card", "Debit Card", "UPI", "Net Banking"]
   const Payment_Methods = [
     { id: 'credit', name: 'Credit Card', icon: <CreditCard size={20} /> },
@@ -83,12 +86,10 @@ const CheckoutPage = () => {
     { id: 'upi', name: 'UPI', icon: <Wallet size={20} /> },
     { id: 'netbanking', name: 'Net Banking', icon: <Wallet size={20} /> }
   ];
-  const [addresses, setAddresses] = useState<Address[]>([])
-  const [mode, setMode] = useState<"view" | "add" | "edit">("view")
-  const [activeDialog, setActiveDialog] = useState<
-    "sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null
-  >(null)
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null)
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [mode, setMode] = useState<"view" | "add" | "edit">("view");
+  const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
   // If user is login then set userId otherwise null
   useEffect(() => {
@@ -268,7 +269,9 @@ const CheckoutPage = () => {
             const newQuantity = currentQuantity - product.quantity
 
             if (newQuantity < 0) {
-              toast.info(`Not enough stock for product ${product.productName}. Try after sometime.`)
+              toast.info(`Not enough stock for product ${product.productName}. Try after sometime.`, {
+                style: { color: 'red' },
+              })
               throw new Error(`Not enough stock for product ${product.productName}`)
             }
 
@@ -318,10 +321,46 @@ const CheckoutPage = () => {
     setSelectedAddressId(addressId)
   }
 
+  // Fetch data from the products
+      useEffect(() => {
+        setLoading(true);
+      
+        const productQuery = query(
+          collection(db, 'products'),
+        );
+      
+        const unsubscribe = onSnapshot(productQuery, (snapshot) => {
+          const productList = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              productName: data.productName,
+              description: data.description,
+              price: parseFloat(data.price),
+              discountedPrice: parseFloat(data.discountedPrice),
+              imageUrl: data.imageUrl,
+              quantity: data.quantity || '0',
+              expiresAt: data.expiresAt,
+            } as Product;
+          });
+      
+          setProducts(productList);
+          setLoading(false);
+        }, (error) => {
+          console.error("Error fetching real-time products:", error);
+          setLoading(false);
+        });
+      
+        // Cleanup listener on unmount or category change
+        return () => unsubscribe();
+      }, []);
+
   // Handle checkout and checking if product is out of stock or not
   const handleCheckout = async () => {
     if (!selectedAddressId) {
-      toast.info("Please select an address before proceeding to checkout.")
+      toast.info("Please select an address before proceeding to checkout.", {
+        style: { color: 'red' },
+      })
       setActiveDialog("address")
       return
     }
@@ -354,7 +393,9 @@ const CheckoutPage = () => {
 
           if (availableQty === 0) {
             hasOutOfStock = true
-            toast.info(`"${productData.productName}" is out of stock and has been removed from your cart.`)
+            toast.info(`"${productData.productName}" is out of stock and has been removed from your cart.`, {
+              style: { color: 'red' },
+            })
           } else {
             updatedProducts.push(item)
           }
@@ -386,6 +427,21 @@ const CheckoutPage = () => {
     }
   }
 
+  const getAllProductImages = (productName: string) => {
+    const images = [];
+    const extensions = ['jpg', 'png', 'jpeg'];
+    try {
+      for (const ext of extensions) {
+        try {
+          const image = require(`../../images/Grocery/${productName}/0.${ext}`);
+          images.push(image);
+        } catch {}
+      }
+    } catch {}
+    
+    return images.length > 0 ? images : [tr];
+  };
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -407,7 +463,7 @@ const CheckoutPage = () => {
 
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster />
       <div className="bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {cart.length === 0 ? (
@@ -534,13 +590,28 @@ const CheckoutPage = () => {
                     </div>
 
                     <div className="divide-y">
-                      {cart.map((product) => (
-                        <div key={product.id} className="flex p-6 gap-4">
-                          <div className="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-md overflow-hidden">
-                            <img
+                      {cart.map((product) => {
+                        const matchedProduct = products.find(p => p.id === product.id);
+                        const isOutOfStock = matchedProduct ? Number(matchedProduct.quantity) === 0 : false;
+                        const images = getAllProductImages(product.productName);
+
+                        return(
+                          <div key={product.id} className="flex p-6 gap-4">
+                          <div className={`flex-shrink-0 relative w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-md items-center justify-center ${isOutOfStock ? 'bg-white opacity-50' : 'bg-white'}`}>
+                            {isOutOfStock && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-white bg-black text-xs rounded-xl font-bold p-1">Out of Stock</span>
+                              </div>
+                            )}
+                            {/* <img
                               src={product.imageUrl}
                               alt={product.productName}
                               className="w-full h-full object-cover"
+                            /> */}
+                            <Image 
+                              src={images[0]}
+                              alt={product.productName} 
+                                className="w-full h-full object-cover p-2"
                             />
                           </div>
                           <div className="flex-1">
@@ -565,7 +636,8 @@ const CheckoutPage = () => {
                             </div>
                           </div>
                         </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   </CardContent>
                 </Card>

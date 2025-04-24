@@ -101,7 +101,9 @@ const ChangeRole = () => {
         )
       );
 
-      toast.success(`User role updated to ${newRole}`);
+      toast.success(`User role updated to ${newRole}`, {
+        style: { color: 'green' },
+      });
     } catch (error) {
       console.error('Error updating role:', error);
       toast.error('Failed to update user role');

@@ -10,6 +10,7 @@ import Link from "next/link";
 import Image from 'next/image';
 import Logo from '../../images/Logo.png';
 import { onAuthStateChanged } from "firebase/auth";
+import { Separator } from "@/components/ui/separator";
  
 interface InvoicePdfProps {
   orderId: string;
@@ -287,52 +288,70 @@ const InvoicePdf = forwardRef<InvoicePdfRef, InvoicePdfProps>(
               </div>
             )}
           </div>
-
           <Table className="border-t">
-            <TableHeader>
-              <TableRow className="font-bold">
-                <TableHead className="w-[%]">Sr. no</TableHead>
-                <TableHead className="w-[%]">Item</TableHead>
-                <TableHead className="w-[%]">MRP</TableHead>
-                <TableHead className="w-[%]">Quantity</TableHead>
-                <TableHead className="w-[%]">Total</TableHead>
+          <TableHeader>
+            <TableRow className="bg-gray-50">
+              <TableHead className="w-12 text-center">No.</TableHead>
+              <TableHead>Item</TableHead>
+              <TableHead className="text-right">Price</TableHead>
+              <TableHead className="text-right">Qty</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {invoiceData.items.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell className="text-center">{index + 1}</TableCell>
+                <TableCell>{item.name}</TableCell>
+                <TableCell className="text-right">₹{item.price}</TableCell>
+                <TableCell className="text-right">{item.quantity}</TableCell>
+                <TableCell className="text-right font-medium">
+                  ₹{(item.price * Number(item.quantity))}
+                </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoiceData.items.map((item, index) => (
-                <TableRow key={index} className="hover:bg-gray-50">
-                  <TableCell>{index+1}</TableCell>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.price}</TableCell>
-                  <TableCell className="">{item.quantity}</TableCell>
-                  <TableCell className="font-bold">₹{item.price * Number(item.quantity)}</TableCell>
-                </TableRow>
-              ))}
-              <TableRow className="font-bold">
-                <TableCell className="">Total:</TableCell>
-                <TableCell colSpan={2}></TableCell>
-                <TableCell className="">{invoiceData.totalItem}</TableCell>
-                <TableCell className="">₹{invoiceData.totalPrice}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+            ))}
+            {/* <TableRow className="font-bold">
+              <TableCell className="">Total:</TableCell>
+              <TableCell colSpan={2}></TableCell>
+              <TableCell className="">{invoiceData.totalItem}</TableCell>
+              <TableCell className="">₹{invoiceData.totalPrice}</TableCell>
+            </TableRow> */}
+          </TableBody>
+        </Table>
           <p className="border-b border-gray-200"></p>
 
-          <div className="mt-6 pt-4">
-            <div className="flex justify-between text-gray-600 text-sm mb-2">
-              <span>Discount</span>
-              <span className="font-medium">-₹{invoiceData.discount}</span>
+          <div className="mt-8 flex justify-end">
+          <div className="w-64">
+            <div className="flex justify-between py-2">
+              <span className="text-gray-600">Subtotal</span>
+              <span className="font-medium">₹{(invoiceData.totalPrice + discount)}</span>
             </div>
-            <div className="flex justify-between text-gray-600 text-sm mb-2">
-              <span className="flex items-center">
-                Delivery Charges
-              </span>
-              <span className="text-blue-500 text-sm font-bold">FREE</span>
+
+            {discount > 0 && (
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600">Discount</span>
+                <span className="text-green-600">- ₹{discount}</span>
+              </div>
+            )}
+
+            <div className="flex justify-between py-2">
+              <span className="text-gray-600">Delivery</span>
+              <span className="text-blue-600 font-medium">{deliveryCharges}</span>
             </div>
-            <div className="flex justify-between text-gray-800 text-md font-bold mt-4">
+
+            <Separator className="my-2" />
+
+            <div className="flex justify-between py-2 text-lg font-bold">
               <span>Total</span>
               <span>₹{invoiceData.totalPrice}</span>
             </div>
+          </div>
+        </div>
+          <Separator className="my-8" />
+
+          <div className="text-center text-sm text-gray-500">
+            <p>Thank you for shopping with Grocery Mart!</p>
+            <p className="mt-1">For any questions regarding this invoice, please contact support@grocerymart.com</p>
           </div>
         </div>
       </div>

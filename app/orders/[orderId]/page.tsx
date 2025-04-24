@@ -10,6 +10,11 @@ import html2canvas from 'html2canvas-pro';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Separator } from '@radix-ui/react-separator';
+import { ArrowLeft, Copy, Download, HelpCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { toast, Toaster } from 'sonner';
 
 type Product = {
   id: string;
@@ -26,6 +31,7 @@ type Order = {
   orderId: string;
   createdAt: string;
   totalAmount: number;
+  orderStatus?: string;
   paymentStatus?: string;
   products?: Product[];
   selectedAddressId: string;
@@ -247,21 +253,39 @@ const OrderDetails = () => {
     setIsGeneratingPdf(false);
   };
   
+  const getStatusBadge = (status?: string) => {
+    switch (status) {
+      case "Paid":
+        return <Badge className="bg-green-100 text-green-800">Paid</Badge>
+      case "Pending":
+        return <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
+      case "Processing":
+        return <Badge className="bg-blue-100 text-blue-800">Processing</Badge>
+      case "Shipped":
+        return <Badge className="bg-purple-100 text-purple-800">Shipped</Badge>
+      case "Out for Delivery":
+        return <Badge className="bg-amber-100 text-amber-800">Out for Delivery</Badge>
+      case "Delivered":
+        return <Badge className="bg-green-100 text-green-800">Delivered</Badge>
+      default:
+        return <Badge variant="outline">Unknown</Badge>
+    }
+  }
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(order.orderId);
+    toast.info("Copy to Clipboard",{
+      style: { backgroundColor: '', color: 'green' },
+    }
+
+    )
+  }
+  
   return (
     <>
-    <div className='pt-10 pb-20'>
-    <div className="p-4 text-gray-500 max-w-[800px] mx-auto shadow-lg overflow-visible">
-      <button onClick={() => {router.push('/orders');}}
-      className='text-3xl text-black shadow rounded-md pl-1 pr-1 mb-4'>←</button>
-      <div className='justify-between flex'>
-        <p className='font-bold text-2xl text-black'>Order summary</p>
-        {order.products?.some(product => order.paymentStatus === 'Pending') && (
-          <button className='bg-green-100 text-green-700 rounded-md border-1 px-1 py-1 border-green-700 hover:bg-green-200' 
-          onClick={() => router.push(`/checkout?orderId=${order.orderId}`)} >
-            Pay Now
-          </button>
-        )}
-      </div>
+    <Toaster className='items-center flex justify-center'/>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8">
+      <div className="max-w-4xl mx-auto">
       <div id="order-summary" className='pl-10 pr-10'
         style={{
           position: 'absolute',
@@ -291,152 +315,187 @@ const OrderDetails = () => {
               />
           )}
       </div>
-      <div className='text-green-700 cursor-pointer flex items-center text-xs mb-2'>
-        <button className='flex cursor-pointer' onClick={generateInvoicePdf}>
-          Download Invoice 
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 48 48" fill="#15803d" className='flex pl-[3px]'>
-            <path d="M38 30V38H10V30H6V38C6 40.2 7.8 42 10 42H38C40.2 42 42 40.2 42 38V30H38ZM34 22L30 22V8H18V22H14L24 32L34 22Z" fill="#15803d"/>
-          </svg>
-        </button>
-      </div>
+      <div className="flex items-center mb-6">
+          <Button variant="ghost" size="sm" className="gap-1" onClick={() => router.push("/orders")}>
+            <ArrowLeft className="h-4 w-4" />
+            Back to Orders
+          </Button>
+        </div>
 
-      <p className='text-xs'>Arrived at {formatTime(order.createdAt)}</p> 
-      
-      <p className="text-lg mb-2 text-black font-semibold p-4">
-        {order.products?.reduce((total, product) => total + Number(product.quantity), 0)} item in this order
-      </p>
-
-      {/* Products List */}
-      {order.products?.map((product) => (
-        <div key={product.id}>
-          <div className="relative flex flex-col min-[400px]:flex-row w-full p-4 justify-between items-center mb-4">
-            <div className="flex items-center w-full sm:w-auto">
-              <img
-                src={product.imageUrl}
-                alt={product.productName}
-                className="w-20 h-20 rounded-md object-cover mr-4 border-gray-200 border-1"
-              />
+        <Card className="border-none shadow-lg overflow-hidden">
+          <CardHeader className="bg-white border-b">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="text-md">
-                  {product.productName}
-                </p>
-                <p className="text-sm mb-2 text-gray-500">
-                  {product.description} X {product.quantity}
-                </p>
-                <p className="font-bold text-md text-black hidden max-[640px]:block">
-                  ₹{product.discountedPrice && !isNaN(Number(product.discountedPrice))
-                  ? (product.discountedPrice * product.quantity)
-                  : '0.00'}
-                </p>
-                {/* <p>
-                  {product.discountedPrice}
-                </p> */}
-                <p className="absolute top-14 right-1 py-2 px-2 font-bold text-md mb-2 text-black hidden sm:block whitespace-nowrap">
-                  ₹{product.discountedPrice && !isNaN(Number(product.discountedPrice))
-                  ? (product.discountedPrice * product.quantity)
-                  : '0.00'}
-                </p>
+                <CardTitle className="text-2xl">Order Summary</CardTitle>
+                <CardDescription>Order #{order.orderId}</CardDescription>
+              </div>
+              <div className="flex items-center gap-2">
+                {order.paymentStatus === "Pending" && (
+                  <Button
+                    onClick={() => router.push(`/checkout?orderId=${order.orderId}`)}
+                    className="bg-green-700 hover:bg-green-700"
+                  >
+                    Pay Now
+                  </Button>
+                )}
+                {order.paymentStatus !== "Pending" && (
+                  <Button variant="outline" size="sm" className="gap-1" onClick={generateInvoicePdf}>
+                    <Download className="h-4 w-4" />
+                    Invoice
+                  </Button>
+                )}
               </div>
             </div>
-          </div>
-          <p className="border-gray-100 border-6"></p>
-        </div>
-      ))}
-
-        {/* Order summary */}
-        <div className="bg-white text-sm p-4">
-        <h2 className="text-lg font-semibold mb-4 text-black">Bill details</h2>
-
-         <div className="flex justify-between mb-2">
-           <p>
-             Items total
-           </p>
-           <div className='flex'>
-             <p className="font-bold text-black">₹{totalPrice}</p>
-           </div>
-         </div>
-         {order.products?.some(product => totalSavedAmount != 0 ) && (
-           <div className="flex justify-between mb-2">
-             <p>
-               Discount
-             </p>
-             <div className='flex'>
-               <p className="font-bold">- ₹{totalSavedAmount}</p>
-             </div>
-           </div>
-          )}
-
-         <div className="flex justify-between mb-4">
-           <p className="flex items-center">
-             Delivery charges
-             <TooltipProvider>
-               <Tooltip>
-                 <TooltipTrigger asChild>
-                   <Button variant="outline" className='border-none p-1 -ml-2 shadow-none hover:bg-white'>
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="black" viewBox="0 0 24 24" className="-ml-1">
-                       <circle cx="12" cy="12" r="10" stroke="black" strokeWidth="2" fill="none" />
-                         <path d="M12 7v6" stroke="black" strokeWidth="2" strokeLinecap="round" />
-                       <circle cx="12" cy="16" r="1.5" fill="black" />
-                     </svg>
-                    </Button>
-                 </TooltipTrigger>
-                 <TooltipContent className=''>
-                   <h1 className='font-bold mb-1'>Delivery charge</h1>
-                   <p><span className='text-blue-500 text-bold'>FREE</span> for first few orders</p>
-                 </TooltipContent>
-               </Tooltip>
-             </TooltipProvider>
-           </p>
-           <div className="flex">
-             {/* <p className='line-through text-sm mr-1 text-gray-500'>₹30</p> */}
-             <p className='text-blue-500 text-sm font-bold'>FREE</p>
-           </div>
-         </div>
-         <div className="flex justify-between font-bold mb-4">
-           <p className='text-black'>Bill total</p>
-           <p className='text-black'>₹{totalAmount}</p>
-         </div>
-      </div>
-      <p className='border-gray-100 border-6'></p>
-
-      <div className="bg-white text-sm p-4">
-        <h2 className="text-lg font-semibold mb-4 text-black">Order details</h2>
-          <p>Order id</p>
-          <p className='text-black mb-2'>{order.orderId}</p>
-          <p>Payment</p>
-          <p className='text-black mb-2'>{order.paymentStatus}</p>
-          <p>Deliver to</p>
-          {order.selectedAddressId && (
-            <div className="text-black mb-2">
-              {(() => {
-                const selectedAddress = address.find(address => address.id === order.selectedAddressId);
-                return (
-                  <p>
-                    { selectedAddress ? [
-                        selectedAddress.floor,
-                        selectedAddress.address,
-                        selectedAddress.landmark,
-                        selectedAddress.area,
-                        selectedAddress.block,
-                        selectedAddress.state,
-                        selectedAddress.country,
-                      ]
-                        .filter(Boolean)
-                        .join(", ")
-                      : "Not Found"}
-                  </p>
-                );
-              })()}
+            <div className="flex items-center gap-2 mt-2 text-sm text-gray-500 mb-4">
+              <span>Arrived at {formatTime(order.createdAt)}</span>
+              
+              {order.paymentStatus !== "Pending" && (
+                <>
+                  <span>•</span>
+                  <span>Status: {getStatusBadge(order.orderStatus)}</span>
+                </>
+              )}
+              <span>•</span>
+              <span>Payment: {getStatusBadge(order.paymentStatus)}</span>
             </div>
-          )}
-          <p>Order placed</p>
-          <p className='text-black mb-2'>placed on {formatDate(order.createdAt)}</p>
+          </CardHeader>
+
+          <CardContent className="p-0">
+            <div className="p-6 -mt-4">
+              <h3 className="text-lg font-semibold mb-4">
+                {order.products?.reduce((total, product) => total + Number(product.quantity), 0)} items in this order
+              </h3>
+
+              <div className="space-y-4">
+                {order.products?.map((product) => (
+                  <div key={product.id} className="flex flex-col sm:flex-row gap-4 pb-4 border-b">
+                    <div className="flex-shrink-0">
+                      <img
+                        src={product.imageUrl || "/placeholder.svg"}
+                        alt={product.productName}
+                        className="w-20 h-20 object-cover rounded-md border border-gray-200"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-medium">{product.productName}</h4>
+                      <p className="text-sm text-gray-500 mb-1">{product.description}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">Qty: {product.quantity}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-semibold">
+                        ₹{(product.discountedPrice * product.quantity)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 p-6">
+              <h3 className="text-lg font-semibold mb-4">Bill Details</h3>
+
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Items Total</span>
+                  <span>₹{totalPrice}</span>
+                </div>
+
+                {totalSavedAmount > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Discount</span>
+                    <span className="text-green-600">- ₹{totalSavedAmount}</span>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-1">
+                    <span className="text-gray-600">Delivery Charges</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                            <HelpCircle className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="w-64">
+                            <h4 className="font-semibold mb-1">Delivery Charge</h4>
+                            <p className="text-sm">
+                              <span className="text-blue-500 font-medium">FREE</span> for first few orders
+                            </p>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                  <span className="text-blue-500 font-medium">FREE</span>
+                </div>
+
+                <Separator />
+
+                <div className="flex justify-between font-semibold text-lg pt-2">
+                  <span>Bill Total</span>
+                  <span>₹{totalAmount}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Order Details</h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-500 mb-1">Order ID</h4>
+                  <p className="flex mb-4 items-center cursor-pointer" onClick={handleCopy}>
+                    {order.orderId}
+                    <Copy className='h-4 w-4 ml-1'/>
+                  </p>
+
+                  <h4 className="text-sm font-medium text-gray-500 mb-1">Payment</h4>
+                  <p className="mb-4 flex items-center gap-2">{getStatusBadge(order.paymentStatus)}</p>
+
+                  <h4 className="text-sm font-medium text-gray-500 mb-1">Order Placed</h4>
+                  <p>{formatDate(order.createdAt)}</p>
+                </div>
+
+                {order.paymentStatus !== 'Pending' && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-1">Deliver To</h4>
+                    {order.selectedAddressId && (
+                      <div className="text-black mb-2">
+                        {(() => {
+                          const selectedAddress = address.find(address => address.id === order.selectedAddressId);
+                          return (
+                            <p>
+                                { selectedAddress ? [
+                                  selectedAddress.floor,
+                                  selectedAddress.address,
+                                  selectedAddress.landmark,
+                                  selectedAddress.area,
+                                  selectedAddress.block,
+                                  selectedAddress.state,
+                                  selectedAddress.country,
+                                ]
+                                  .filter(Boolean)
+                                  .join(", ")
+                                : "Not Found"}
+                            </p>
+                          );
+                        })()}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-      {/* <p className='border-gray-100 border-6'></p> */}
     </div>
-    </div>
-    </>
-  );
-};
+  </>
+  )
+}
 
 export default OrderDetails;

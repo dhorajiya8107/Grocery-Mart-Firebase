@@ -255,7 +255,9 @@ const AddAddressPage: React.FC<AddAddressPageProps> = ({ activeDialog, setActive
       await batch.commit();
   
       setActiveDialog(null);
-      toast.success("Delivery address has been selected.");
+      toast.success("Delivery address has been selected.", {
+        style: { backgroundColor: '', color: 'green' },
+      });
     } catch (error) {
       console.error("Error updating default address:", error);
     }
@@ -306,7 +308,7 @@ const AddAddressPage: React.FC<AddAddressPageProps> = ({ activeDialog, setActive
 
 return (
   <Dialog open={activeDialog === "address"} onOpenChange={() => setActiveDialog(null)}>
-    <DialogContent className="max-w-md md:max-w-lg bg-white rounded-lg p-4 md:p-6 shadow-lg">
+    <DialogContent className="md:max-w-lg bg-white rounded-lg p-4 md:p-6 shadow-lg">
       <DialogHeader>
         <DialogTitle className="text-xl font-semibold">
           {mode === "view" ? "Your Addresses" : mode === "edit" ? "Edit Address" : "Add New Address"}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { collection, doc, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, onSnapshot, query, setDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../src/firebase";
 import { toast, Toaster } from "sonner";
@@ -24,6 +24,7 @@ interface Product {
 
 const CartPage = () => {
   const [cart, setCart] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,6 +85,42 @@ const CartPage = () => {
     return () => unsubscribe();
   }, [userId]);
 
+  // Fetch data from the products
+    useEffect(() => {
+      setLoading(true);
+    
+      const productQuery = query(
+        collection(db, 'products'),
+      );
+    
+      const unsubscribe = onSnapshot(productQuery, (snapshot) => {
+        const productList = snapshot.docs.map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            productName: data.productName,
+            description: data.description,
+            price: parseFloat(data.price),
+            discountedPrice: parseFloat(data.discountedPrice),
+            imageUrl: data.imageUrl,
+            quantity: data.quantity || '0',
+            expiresAt: data.expiresAt,
+          } as Product;
+        });
+    
+        setProducts(productList);
+        setLoading(false);
+      }, (error) => {
+        console.error("Error fetching real-time products:", error);
+        setLoading(false);
+      });
+    
+      // Cleanup listener on unmount or category change
+      return () => unsubscribe();
+    }, []);
+
+    
+
   // Updating cart
   const updateCart = async (updatedProducts: Product[]) => {
     if (userId) {
@@ -106,7 +143,9 @@ const CartPage = () => {
         onClick: () => {
           setCart(previousCart);
           updateCart(previousCart);
-          toast.success("Removed item has been added!");
+          toast.success("Removed item has been added!", {
+            style: { color: 'red' },
+          });
         },
       },
       duration: 2000,
@@ -115,14 +154,31 @@ const CartPage = () => {
 
   // Increment item quantity
   const incrementQuantity = async (productId: string) => {
+    const productInStore = products.find(p => p.id === productId);
+    if (!productInStore) return; // Product not found in store
+  
     setCart((prevCart) => {
-      const updatedCart = prevCart.map((product) =>
-        product.id === productId ? { ...product, quantity: Number(product.quantity) + 1 } : product,
-      )
+      const updatedCart = prevCart.map((product) => {
+        if (product.id === productId) {
+          const currentQuantity = Number(product.quantity);
+          const availableStock = Number(productInStore.quantity);
+  
+          if (currentQuantity < availableStock) {
+            return { ...product, quantity: currentQuantity + 1 };
+          } else {
+            toast.error(`${product.productName} is out of stock!`, {
+              style: { backgroundColor: '', color: 'red' },
+            });
+          }
+        }
+        return product;
+      });
+  
       updateCart(updatedCart);
       return updatedCart;
-    })
-  }
+    });
+  };
+  
 
   // Decrement item quantity
   const decrementQuantity = async (productId: string) => {
@@ -245,7 +301,7 @@ const CartPage = () => {
   // On clicking, it will redirect to product details page
   const handleProductClick = (product: { productName: string; id: any }) => {
     const formattedProductName = product.productName.replace(/\s+/g, "-");
-    router.push(`/pd/${product.id}?${formattedProductName}`);
+    router.push(`/product-details/${product.id}?${formattedProductName}`);
   }
 
   if (loading) {
@@ -305,15 +361,25 @@ const CartPage = () => {
                       </span>
                     )}
                   </div>
-                  {cart.map((product) => (
-                    <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300">
+                  {cart.map((product) => {
+                    const matchedProduct = products.find(p => p.id === product.id);
+                    const isOutOfStock = matchedProduct ? Number(matchedProduct.quantity) === 0 : false;
+                    console.log(isOutOfStock);
+
+                    return(
+                      <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300">
                       <CardContent className="p-0">
                         <div className="relative">
                           <div
-                            className="flex flex-co min-[400px]:flex-row p-4 cursor-pointer"
+                            className={`flex flex-co min-[400px]:flex-row p-4 cursor-pointer`}
                             onClick={() => handleProductClick(product)}
                           >
-                            <div className="flex flex-shrink-0 items-center justify-center">
+                            <div className={`flex flex-shrink-0 relative items-center justify-center ${isOutOfStock ? 'bg-white opacity-50' : 'bg-white'}`}>
+                              {isOutOfStock && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
+                                </div>
+                              )}
                               <img
                                 src={product.imageUrl || "/placeholder.svg"}
                                 alt={product.productName}
@@ -378,7 +444,8 @@ const CartPage = () => {
                         </div>
                       </CardContent>
                     </Card>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
               <div className="lg:col-span-1 min-[1024px]:pt-[68px]">

@@ -11,6 +11,7 @@ import { Toaster } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter, Search } from 'lucide-react';
+import Image from "next/image";
 
 interface Product {
   id: string;
@@ -39,7 +40,7 @@ const CategoryPage = () => {
   const router = useRouter();
   const [sortOption, setSortOption] = useState("featured");
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0]) 
@@ -353,7 +354,22 @@ const CategoryPage = () => {
   // On clicking, it will redirect to product details page
   const handleProductClick = (product: { productName: string; id: any; }) => {
     const formattedProductName = product.productName.replace(/\s+/g, '-');
-    router.push(`/pd/${product.id}?${formattedProductName}`);
+    router.push(`/product-details/${product.id}?${formattedProductName}`);
+  };
+
+  const getAllProductImages = (productName: string) => {
+    const images = [];
+    const extensions = ['jpg', 'png', 'jpeg'];
+    try {
+      for (const ext of extensions) {
+        try {
+          const image = require(`../../../images/Grocery/${productName}/0.${ext}`);
+          images.push(image);
+        } catch {}
+      }
+    } catch {}
+    
+    return images.length > 0 ? images : ['path/to/fallback.jpg'];
   };
 
   if (loading) {
@@ -412,6 +428,7 @@ const CategoryPage = () => {
             ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
             : 0
           const isMostSeller = mostSellerIds.has(product.id);
+          const images = getAllProductImages(product.productName);
           // console.log('Checking product ID:', product.id, 'isMostSeller:', isMostSeller);
             
           return (
@@ -442,11 +459,16 @@ const CategoryPage = () => {
                     <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                    </div>
                 )}
-                <img
+                {/* <img
                   src={product.imageUrl}
                   alt={product.productName}
                   className="w-full h-full object-cover p-2"
-                />
+                /> */}
+                <Image 
+                    src={images[0]}
+                    alt={product.productName} 
+                    className="w-full h-full object-cover p-2"
+                  />
                 <p className='border-b border-gray-200 mt-3 mr-3 ml-3'></p>
               </div>
               <div className="p-3">

@@ -3,11 +3,15 @@
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { auth, db } from '../src/firebase';
-import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { CustomPagination } from '@/components/CustomPagination';
-import { Search } from 'lucide-react';
+import { ArrowRight, CheckCircle, Info, Package, Search, Truck } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@radix-ui/react-select';
+import { Badge } from '@/components/ui/badge';
 
 type User = {
   email: string;
@@ -127,6 +131,7 @@ const OrderStatus = () => {
           const ordersQuery = query(
             collection(db, 'orders'),
             where('paymentStatus', '==', 'Paid'),
+            // orderBy('createdAt', 'asc'),
           );
   
           const querySnapshot = await getDocs(ordersQuery);
@@ -232,6 +237,36 @@ const OrderStatus = () => {
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "Processing":
+        return <Package className="h-4 w-4" />
+      case "Shipped":
+        return <ArrowRight className="h-4 w-4" />
+      case "Out for Delivery":
+        return <Truck className="h-4 w-4" />
+      case "Delivered":
+        return <CheckCircle className="h-4 w-4" />
+      default:
+        return <Info className="h-4 w-4" />
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Processing":
+        return "bg-blue-100 text-blue-800"
+      case "Shipped":
+        return "bg-purple-100 text-purple-800"
+      case "Out for Delivery":
+        return "bg-amber-100 text-amber-800"
+      case "Delivered":
+        return "bg-green-100 text-green-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
   const handleOrderStatus = (orderStatus: string, orderId: string) => {
     const nextStatus = getNextStatus(orderStatus || '');
     if (nextStatus) {
@@ -251,109 +286,143 @@ const OrderStatus = () => {
       return null;
     }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 pt-10 pb-20">
-      <div className="max-w-[900px] mx-auto bg-white shadow-xl rounded-lg p-4">
-        <h2 className="text-2xl font-bold p-4">Manage Orders Status</h2>
-        {/* Search Bar */}
-        <div className="relative mb-6">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <Input
-            type="text"
-            placeholder="Search by orderId..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-gray-300 pl-10 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
-          />
-        </div>
-        <div className="grid grid-cols-1">
-        {currentOrders.map((order) => {
-          const userAddress = address.find((address) => address.userId === order.userId);
-          const foundUser = users.find((u) => u.userId === order.userId);
-
-          return (
-            <div
-              key={order.orderId}
-              className="relative border-gray-200 transition-all duration-300"
-            >
-              <div className="flex flex-col p-4 md:p-6">
-                <div className="flex items-center justify-between">
-                  <div className='flex'>
-                    <img
-                      // onClick={() => router.push(`/orders/${order.orderId}`)}
-                      src="https://blinkit.com/8d522e40eef136ba3498.png"
-                      alt="Order"
-                      className="w-10 h-10 rounded-md object-cover mr-4 cursor-pointer"
-                    />
-                    <div>
-                      <p className="text-md font-bold whitespace-nowrap">
-                        Order ID: {order.orderId}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Total: ₹{order.totalAmount}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Status: <span className={`p-1 rounded-md text-sm
-                          ${order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-white'}`} >
-                            {order.orderStatus}
-                          </span>
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Name: {userAddress ? userAddress.name : "Not Found"}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Email: {foundUser ? foundUser.email : "Not Found"}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Phone Number: {userAddress ? userAddress.phoneNumber : "Not Found"}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex relative mt-7">
-                    <Button
-                      onClick={() => handleOrderStatus(order.orderStatus || '', order.orderId)}
-                      disabled={!getNextStatus(order.orderStatus || '')}
-                      className={`p-2 border rounded-md ml-auto text-xs transition ${
-                        !getNextStatus(order.orderStatus || '')
-                          ? 'bg-gray-200 cursor-not-allowed text-gray-500'
-                          : 'bg-red-500 hover:bg-red-600 text-white'
-                      }`}
-                    >
-                      {getNextStatus(order.orderStatus || '') || 'Delivered'}
-                    </Button>
-                  </div>
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 pt-10 pb-20">
+        <div className="max-w-6xl mx-auto">
+          <Card className="border-none shadow-lg">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-2xl font-bold">Manage Orders</CardTitle>
+              <CardDescription>View and update the status of customer orders</CardDescription>
+            </CardHeader>
+  
+            <CardContent>
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search by order ID, customer name, email or phone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 py-2 border-gray-200"
+                  />
                 </div>
               </div>
-              <p className='border-b border-gray-200 mr-10 ml-10'></p>
-            </div>
-            );
-            })}
-
-            {filteredOrders.length === 0 && (
-              <p className="text-gray-500 py-6 text-xl text-center">
-                No orders found.
-              </p>
-            )}
+  
+              {currentOrders.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-1">No orders found</h3>
+                  <p className="text-gray-500">Try adjusting your search criteria</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {currentOrders
+                  .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                  .map((order) => {
+                    const userAddress = address.find((address) => address.userId === order.userId)
+                    const foundUser = users.find((u) => u.userId === order.userId)
+                    const nextStatus = getNextStatus(order.orderStatus || "")
+  
+                    return (
+                      <Card key={order.orderId} className="overflow-hidden hover:shadow-md transition-shadow">
+                        <CardContent className="p-0">
+                          <div className="flex flex-col md:flex-row">
+                            <div className="flex-1 p-4 md:p-6">
+                              <div className="flex items-start gap-4">
+                                <div className="hidden sm:flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+                                  <Package className="h-6 w-6 text-gray-600" />
+                                </div>
+                                <div className="flex-1 space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <h3 className="font-medium text-sm sm:text-base">
+                                      #{order.orderId}
+                                    </h3>
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Badge variant="outline" className={getStatusColor(order.orderStatus || "")}>
+                                            <span className="flex items-center gap-1">
+                                              {getStatusIcon(order.orderStatus || "")}
+                                              <span>{order.orderStatus || "Processing"}</span>
+                                            </span>
+                                          </Badge>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Current order status</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  </div>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-500">
+                                    <p>
+                                      <span className="font-medium text-gray-700">Customer:</span>{" "}
+                                      {userAddress?.name || "Not Found"}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium text-gray-700">Email: </span>
+                                      {foundUser?.email || "Not Found"}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium text-gray-700">Phone: </span>
+                                      {userAddress?.phoneNumber || "Not Found"}
+                                    </p>
+                                    <p>
+                                      <span className="font-medium text-gray-700">Total: </span>₹
+                                      {order.totalAmount}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-end p-4 md:p-6 md:w-60">
+                              <Button
+                                onClick={() => handleOrderStatus(order.orderStatus || "", order.orderId)}
+                                disabled={!nextStatus}
+                                variant={nextStatus ? "default" : "outline"}
+                                className="w-full"
+                              >
+                                {nextStatus ? (
+                                  <>
+                                    Mark as {nextStatus}
+                                    {getStatusIcon(nextStatus)}
+                                  </>
+                                ) : (
+                                  "Delivered"
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
+              )}
+  
+              {/* {filteredOrders.length > itemsPerPage && (
+                <div className="mt-6"> */}
+                  {filteredOrders.length > 0 && (
+                    <CustomPagination
+                      totalCount={filteredOrders.length}
+                      page={currentPage}
+                      pageSize={itemsPerPage}
+                      onPageChange={(newPage) => setCurrentPage(newPage)}
+                      onPageSizeChange={(newSize) => {
+                        setItemsPerPage(Number(newSize));
+                        setCurrentPage(1);
+                      }}
+                      pageSizeOptions={[3, 5, 10, 15, 20, 50]}
+                    />
+                  )}
+                {/* </div>
+              )} */}
+            </CardContent>
+          </Card>
         </div>
-        <p className='border-b'></p>
-        {filteredOrders.length > 0 && (
-          <CustomPagination
-            totalCount={filteredOrders.length}
-            page={currentPage}
-            pageSize={itemsPerPage}
-            onPageChange={(newPage) => setCurrentPage(newPage)}
-            onPageSizeChange={(newSize) => {
-              setItemsPerPage(Number(newSize));
-              setCurrentPage(1);
-            }}
-            pageSizeOptions={[3, 5, 10, 15, 20, 50]}
-          />
-        )}
       </div>
-    </div>
-  );
-};
-
-export default OrderStatus;
+    )
+  }
+  
+  export default OrderStatus;
+  

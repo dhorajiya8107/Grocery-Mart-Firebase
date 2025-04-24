@@ -9,7 +9,7 @@ import { auth, db } from '../src/firebase';
 import { Button } from '@/components/ui/button';
 import TextInput from '@/components/form-fields/TextInput';
 import { useRouter } from 'next/navigation';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Mail, UserIcon, UserRoundPlus } from 'lucide-react';
 import  AppleLogo  from '../../images/Applelogo.png';
@@ -105,13 +105,23 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      await setDoc(doc(db, 'users', user.uid), {
-        name: user.displayName || 'User',
-        email: user.email,
-        role: 'user',
-      });
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
 
-      console.log('SignUp (with Google) Successfully!');
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName || 'User',
+          email: user.email,
+          role: 'user',
+        });
+      } else {
+        await setDoc(userRef, {
+          name: user.displayName || userSnap.data().name,
+          email: user.email,
+        }, { merge: true });
+      }
+
+      console.log('Sign-in (with Google) successful!');
       setActiveDialog(null);
       router.push('/');
     } catch (err: any) {
@@ -121,7 +131,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
 
   return (
     <Dialog open={activeDialog === 'sign-up'} onOpenChange={() => setActiveDialog(null)}>
-      <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg">
+      <DialogContent className="bg-white rounded-lg p-6 shadow-lg">
         <DialogHeader>
           <div className='flex items-center space-x-2 mb-1 text-gray-700'>
             <div className="bg-green-50 p-2 rounded-full">
@@ -134,7 +144,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
         
         <div className="space-y-2 text-center text-sm">
-          <p className='text-start'>Sign up with account</p>
+          <p className='text-start text-gray-500'>Sign up with account</p>
           <div className='flex justify-between items-center space-x-1'>
             <Button type="button" onClick={handleGoogleSignIn} className="bg-white w-1/2 text-black border-2 hover:bg-gray-200">
               <img width="20" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
@@ -149,7 +159,7 @@ const SignUpPage: React.FC<SignUpPageProps> = ({ activeDialog, setActiveDialog }
 
         <span className='border-b'></span>
         
-        <div className='text-sm'>
+        <div className='text-sm text-gray-500'>
           <p className="text-start">Or sign up with email</p>
         </div>
 

@@ -4,14 +4,17 @@ import React, { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../src/firebase';
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { auth, db } from '../src/firebase';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import TextInput from '@/components/form-fields/TextInput';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ForgotPasswordPage from './ForgetPassword';
 import { LogIn } from 'lucide-react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import  AppleLogo  from '../../images/Applelogo.png';
+import Image from 'next/image';
  
 // Validation schema using Zod
 const schema = z.object({
@@ -77,12 +80,43 @@ useEffect(() => {
     setPreFilledEmail(email);
     setActiveDialog("forget-password");
   };
+
+  // Handle Google Sign-in
+  const handleGoogleSignIn = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName || 'User',
+          email: user.email,
+          role: 'user',
+        });
+      } else {
+        await setDoc(userRef, {
+          name: user.displayName || userSnap.data().name,
+          email: user.email,
+        }, { merge: true });
+      }
+
+      console.log('Sign-in (with Google) successful!');
+      setActiveDialog(null);
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };  
   
 
   return (
     <>
       <Dialog open={activeDialog === "log-in"} onOpenChange={() => setActiveDialog(null)}>
-        <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg border-0">
+        <DialogContent className="bg-white rounded-lg p-6 shadow-lg border-0">
           <DialogHeader>
             <div className="flex items-center space-x-2 mb-3 text-gray-700">
               <div className="bg-green-50 p-2 rounded-full">
@@ -98,6 +132,26 @@ useEffect(() => {
               <p className="text-red-700 text-sm">{error}</p>
             </div>
           )}
+
+          <div className="space-y-2 text-center text-sm">
+            {/* <p className='text-start'>Log in with account</p> */}
+              <div className='flex justify-between items-center space-x-1'>
+                <Button type="button" onClick={handleGoogleSignIn} className="bg-white w-1/2 text-black border-2 hover:bg-gray-200">
+                  <img width="20" src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" />
+                  Google
+                </Button>
+                <Button className="bg-white w-1/2 text-black border-2 hover:bg-gray-200">
+                  <Image width="50" className='-mr-3' src={AppleLogo} alt="Apple" />
+                  Apple
+                </Button>
+              </div>
+          </div>
+
+          <span className='border-b'></span>
+        
+          <div className='text-sm text-gray-500'>
+            <p className="text-start">Or sign in with email</p>
+          </div>
 
           <FormProvider {...form}>
             <form onSubmit={handleSubmit(handleLogin)} className="text-gray-700">

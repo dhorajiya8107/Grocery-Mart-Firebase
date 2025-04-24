@@ -353,7 +353,7 @@ const Header = ({ user }: { user: User | null }) => {
                 {menuOpen && (
                   <div
                     ref={menuRef}
-                    className="absolute right-1 top-full -mt-1 bg-white text-gray-700 rounded-bl-xl rounded-br-2xl p-2 w-64 z-50">
+                    className="absolute right-1 top-[102px] max-[600px]:top-[144px] -mt-1 bg-white text-gray-700 rounded-bl-xl rounded-br-2xl p-2 w-64 z-50">
                     <div className="p-3 border-b-2 border-gray-100 mb-1">
                       <p className="font-bold ">My Account</p>
                       <p className="text-sm text-gray-500 mr-2">{user?.email}</p>

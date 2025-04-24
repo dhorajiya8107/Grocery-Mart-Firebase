@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { Toaster } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-
+import Image from 'next/image';
+import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 interface Product {
   id: string;
   productName: string;
@@ -68,38 +69,38 @@ const Products = () => {
     };
   }, []);
 
-
+  
   // Fetch data from the products
   useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-          const productQuery = query(
-          collection(db, 'products'),
-        );
-        const productSnapshot = await getDocs(productQuery);
-        const productList = productSnapshot.docs.map(doc => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            productName: data.productName,
-            description: data.description,
-            price: parseFloat(data.price),
-            discountedPrice: parseFloat(data.discountedPrice),
-            imageUrl: data.imageUrl,
-            quantity: data.quantity || '0',
-            category: data.category || "",
-          } as Product;
-        });
-        setProducts(productList);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-      fetchProducts();
+    
+  setLoading(true);
+    
+  const productQuery = query(
+    collection(db, 'products'),
+  );
+    
+  const unsubscribe = onSnapshot(productQuery, (snapshot) => {
+    const productList = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        productName: data.productName,
+        description: data.description,
+        price: parseFloat(data.price),
+        discountedPrice: parseFloat(data.discountedPrice),
+        imageUrl: data.imageUrl,
+        quantity: data.quantity || '0',
+      } as Product;
+    })
+    
+    setProducts(productList);
+    setLoading(false);
+  }, (error) => {
+    console.error("Error fetching real-time products:", error);
+    setLoading(false);
+  });
+    
+  return () => unsubscribe();
   }, []);
 
   // Filtered products by searching
@@ -272,7 +273,22 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
   // On clicking, it will redirect to product details page
   const handleProductClick = (product: { productName: string; id: any; }) => {
     const formattedProductName = product.productName.replace(/\s+/g, '-');
-    router.push(`/pd/${product.id}?${formattedProductName}`);
+    router.push(`/product-details/${product.id}?${formattedProductName}`);
+  };
+
+  const getAllProductImages = (productName: string) => {
+    const images = [];
+    const extensions = ['jpg', 'png', 'jpeg'];
+    try {
+      for (const ext of extensions) {
+        try {
+          const image = require(`../../images/Grocery/${productName}/0.${ext}`);
+          images.push(image);
+        } catch {}
+      }
+    } catch {}
+    
+    return images.length > 0 ? images : [tr];
   };
 
   if (loading) {
@@ -315,6 +331,7 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
             ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
             : 0
           const isMostSeller = mostSellerIds.has(product.id);
+          const images = getAllProductImages(product.productName);
 
           return (
             <div key={product.id} className='pt-2' onClick={() => handleProductClick(product)}>
@@ -340,9 +357,14 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
                     <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                    </div>
                 )}
-                <img
+                {/* <img
                   src={product.imageUrl}
                   alt={product.productName}
+                  className="w-full h-full object-cover p-2"
+                /> */}
+                <Image 
+                  src={images[0]}
+                  alt={product.productName} 
                   className="w-full h-full object-cover p-2"
                 />
                 <p className='border-b border-gray-200 mt-3 mr-3 ml-3'></p>

@@ -7,6 +7,9 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { DateTime } from 'luxon';
 import { CustomPagination } from '@/components/CustomPagination';
+import { AlertCircle, ArrowRight, Calendar, CheckCircle, ChevronRight, Clock, DollarSign, Info, Package, Truck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { CardContent } from '@/components/ui/card';
 
 type Product = {
     id: string;
@@ -99,6 +102,36 @@ const Orders = () => {
     }).toLowerCase()}`;
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "Processing":
+        return <Package className="h-4 w-4" />
+      case "Shipped":
+        return <ArrowRight className="h-4 w-4" />
+      case "Out for Delivery":
+        return <Truck className="h-4 w-4" />
+      case "Delivered":
+        return <CheckCircle className="h-4 w-4" />
+      default:
+        return <Info className="h-4 w-4" />
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Processing":
+        return "bg-blue-100 text-blue-800"
+      case "Shipped":
+        return "bg-purple-100 text-purple-800"
+      case "Out for Delivery":
+        return "bg-amber-100 text-amber-800"
+      case "Delivered":
+        return "bg-green-100 text-green-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -124,8 +157,9 @@ const Orders = () => {
  
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 pt-10 pb-20">
-    <div className='max-w-[900px] mx-auto bg-white shadow-xl rounded-lg p-4 max-[400px]:p-1'>
-    <h2 className="text-2xl font-bold p-4">Your Orders</h2>
+      <div className='max-w-[900px] mx-auto bg-white shadow-xl rounded-lg p-4 max-[400px]:p-1'>
+        <h2 className="text-2xl font-bold p-4">Your Orders</h2>
+        <p className='border-b mt-5'></p>
       {/* If user doesn't order items */}
       {orders.length === 0 ? (
         <p className="text-center text-gray-500">No orders found.</p>
@@ -136,42 +170,71 @@ const Orders = () => {
             <div
               key={order.orderId}
               className="relative bg-white border-gray-200 transition-all duration-300"
+              onClick={() => router.push(`/orders/${order.orderId}`)}
             >
-              <div className="flex flex-col p-4 md:p-6">
-                <div className="flex items-center">
-                  <img
-                    onClick={() => router.push(`/orders/${order.orderId}`)}
-                    src="https://blinkit.com/8d522e40eef136ba3498.png"
-                    alt="Order"
-                    className="w-10 h-10 rounded-md object-cover mr-4 cursor-pointer"
-                  />
-                  <div className='items-center'>
-                    <p className="text-md max-[389px]:text-sm font-bold mb-3">
-                      {order.orderId}
-                      <span className="mx-2">•</span>
-                      ₹{order.totalAmount}
-                        <span className={`ml-4 p-1 rounded-md text-xs
-                        ${order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-700'
-                                : 'bg-red-100 text-red-500'}`} >
-                          {order.orderStatus || 'Not Paid'}
-                        </span>
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Placed on {formatDate(order.createdAt)}
-                    </p>
+              <div className="p-0">
+                <div className="flex items-start p-4 md:p-6 cursor-pointer">
+                  <div className="flex-shrink-0 mr-4">
+                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
+                      <Package className="h-6 w-6 text-gray-600" />
+                    </div>
                   </div>
-                </div> 
 
-                {/* By clicking, it will navigate to see placed orders details */}
-                <div className="hidden min-[600px]:block justify-end">
-                  <button
-                    onClick={() => router.push(`/orders/${order.orderId}`)}
-                    className="absolute top-5 right-5 py-2 px-2 rounded-md text-xs text-green-700 border-1 border-gray-400 cursor-pointer"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900 truncate">
+                              {order.orderId}
+                            </p>
+                            <div className="mt-1 flex items-center flex-wrap gap-x-2 gap-y-1">
+                              <div className="flex items-center text-sm text-gray-500">
+                                ₹{order.totalAmount}
+                              </div>
+                              <div className="flex items-center text-sm text-gray-500">
+                                <span className="mr-2 text-lg">•</span>
+                                {formatDate(order.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {order.paymentStatus !== 'Pending' && (
+                              <Badge variant="outline" className={getStatusColor(order.orderStatus || "")}>
+                                <span className="flex items-center gap-1">
+                                  {getStatusIcon(order.orderStatus || "")}
+                                  <span>{order.orderStatus || "Processing"}</span>
+                                </span>
+                              </Badge>
+                            )}
+                            {order.paymentStatus == 'Pending' && (
+                              <Badge variant="outline" className="text-gray-700">
+                                <span className="flex items-center gap-1">
+                                  <AlertCircle className='h-4 w-4'/>
+                                  <span>Not Paid</span>
+                                </span>
+                              </Badge>
+                            )}
+                            <ChevronRight className="h-5 w-5 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {/* {order.paymentStatus !== 'Pending' && (
+                          <Badge variant="outline" className={getStatusColor(order.orderStatus || "")}>
+                            <span className="flex items-center gap-1">
+                              {getStatusIcon(order.orderStatus || "")}
+                              <span>{order.orderStatus || "Processing"}</span>
+                            </span>
+                          </Badge>
+                        )}
+                        {order.paymentStatus == 'Pending' && (
+                          <Badge variant="outline" className="text-red-600 bg-red-100">
+                            <span className="flex items-center gap-1">
+                              <AlertCircle className='h-4 w-4'/>
+                              <span>Not Paid</span>
+                            </span>
+                          </Badge>
+                        )} */}
               <p className='border-b border-gray-200 mr-10 ml-10'></p>
             </div>
           ))}

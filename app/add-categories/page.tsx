@@ -145,7 +145,9 @@ const AddCategories = () => {
     );
 
     if (isDuplicate) {
-      toast.info(`Category "${data.name}" already exists!`)
+      toast.info(`Category "${data.name}" already exists!`, {
+        style: { color: 'red' },
+      })
       return;
     }
 
@@ -163,7 +165,9 @@ const AddCategories = () => {
       setOpenDialog(false);
       reset();
       console.log(`Added category: ${data.name}`);
-      toast.success(`Category "${data.name}" added successfully!`);
+      toast.success(`Category "${data.name}" added successfully!`, {
+        style: { color: 'green' },
+      });
     } catch (error) {
       console.error('Error adding category:', error);
     }
@@ -190,7 +194,9 @@ const AddCategories = () => {
 
       setCategories(updatedCategories);
       console.log(`Deleted category and updated order`);
-      toast.info(`Deleted category name ${categoryName}`)
+      toast.info(`Deleted category name ${categoryName}`, {
+        style: { color: 'red' },
+      })
     } catch (error) {
       console.error('Error deleting category:', error);
     }
@@ -228,7 +234,9 @@ const AddCategories = () => {
     );
 
     if (isDuplicate) {
-      toast.info(`Category "${data.name}" already exists!`);
+      toast.info(`Category "${data.name}" already exists!`, {
+        style: { color: 'red' },
+      });
       return;
     }
 
@@ -245,7 +253,9 @@ const AddCategories = () => {
       );
       setOpenDialog(false);
       reset();
-      toast.success(`Updated category: ${data.name}`);
+      toast.success(`Updated category: ${data.name}`, {
+        style: { color: 'green' },
+      });
     } catch (error) {
       console.error('Error updating category:', error);
     }

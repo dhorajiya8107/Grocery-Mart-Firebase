@@ -1,12 +1,14 @@
 "use client";
 
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, doc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { db } from "../src/firebase";
 import { getAuth } from "firebase/auth";
 import { toast, Toaster } from "sonner";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 
 interface Product {
   id: string;
@@ -17,6 +19,11 @@ interface Product {
   quantity: string;
   description: string;
   category: string;
+}
+interface MostSeller {
+  id: string;
+  productName: string;
+  quantity: string;
 }
 
 interface SearchBarProps {
@@ -29,37 +36,70 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
   const [loading, setLoading] = useState(true);
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | null>(null);
   const router = useRouter();
+  const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
 
   // Fetch data from the products
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const productQuery = collection(db, "products");
-        const productSnapshot = await getDocs(productQuery);
-        const productList = productSnapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            productName: data.productName,
-            category: data.category,
-            description: data.description,
-            price: Number.parseFloat(data.price),
-            discountedPrice: Number.parseFloat(data.discountedPrice),
-            imageUrl: data.imageUrl,
-            quantity: data.quantity || "0",
-          } as Product
-        })
-        setProducts(productList);
-      } catch (error) {
-        console.error("Error fetching products:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const productQuery = collection(db, "products");
+  //       const productSnapshot = await getDocs(productQuery);
+  //       const productList = productSnapshot.docs.map((doc) => {
+  //         const data = doc.data();
+  //         return {
+  //           id: doc.id,
+  //           productName: data.productName,
+  //           category: data.category,
+  //           description: data.description,
+  //           price: Number.parseFloat(data.price),
+  //           discountedPrice: Number.parseFloat(data.discountedPrice),
+  //           imageUrl: data.imageUrl,
+  //           quantity: data.quantity || "0",
+  //         } as Product
+  //       })
+  //       setProducts(productList);
+  //     } catch (error) {
+  //       console.error("Error fetching products:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
 
-    fetchProducts()
-  }, [])
+  //   fetchProducts();
+  // }, []);
+
+  useEffect(() => {
+      
+    setLoading(true);
+      
+    const productQuery = query(
+      collection(db, 'products'),
+    );
+      
+    const unsubscribe = onSnapshot(productQuery, (snapshot) => {
+      const productList = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          productName: data.productName,
+          description: data.description,
+          price: parseFloat(data.price),
+          discountedPrice: parseFloat(data.discountedPrice),
+          imageUrl: data.imageUrl,
+          quantity: data.quantity || '0',
+        } as Product;
+      })
+      
+      setProducts(productList);
+      setLoading(false);
+    }, (error) => {
+      console.error("Error fetching real-time products:", error);
+      setLoading(false);
+    });
+      
+    return () => unsubscribe();
+    }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -78,6 +118,46 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
         )
       })
     : [];
+
+
+  useEffect(() => {
+        const fetchMostSeller = async () => {
+          try {
+            const mostSellerQuery = query(
+              collection(db, 'mostseller'),
+              orderBy('quantity', 'desc'),
+              // limit(3)
+            );
+        
+            const querySnapshot = await getDocs(mostSellerQuery);
+        
+            const mostSellerData = querySnapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data(),
+            })) as MostSeller[];
+        
+            // console.log('Most Seller Data:', mostSellerData);
+            setMostSeller(mostSellerData);
+          } catch (error) {
+            console.error('Error fetching most seller data:', error);
+          }
+        };
+          
+        fetchMostSeller();
+      }, []);
+
+      const mostSellerMap = new Map(mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
+
+      const filterMostSeller = products
+      .filter(product => mostSellerMap.has(product.id))
+      .sort((a, b) => {
+        const aQuantity = mostSellerMap.get(a.id) || 0;
+        const bQuantity = mostSellerMap.get(b.id) || 0;
+        return bQuantity - aQuantity;
+      })
+      .slice(0, 3);
+      
+      const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
 
 
   const updateCart = async (updatedCart: Product[]) => {
@@ -186,7 +266,22 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
   // On clicking, it will redirect to product details page
   const handleProductClick = (product: { productName: string; id: any; }) => {
     const formattedProductName = product.productName.replace(/\s+/g, '-');
-    router.push(`/pd/${product.id}?${formattedProductName}`);
+    router.push(`/product-details/${product.id}?${formattedProductName}`);
+  };
+
+  const getAllProductImages = (productName: string) => {
+    const images = [];
+    const extensions = ['jpg', 'png', 'jpeg'];
+    try {
+      for (const ext of extensions) {
+        try {
+          const image = require(`../../images/Grocery/${productName}/0.${ext}`);
+          images.push(image);
+        } catch {}
+      }
+    } catch {}
+    
+    return images.length > 0 ? images : [tr];
   };
 
 
@@ -217,57 +312,73 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
               const productInCart = cart.find((item) => item.id === product.id)
               const quantityInCart = productInCart ? Number.parseInt(productInCart.quantity) : 0
               const isOutOfStock = Number.parseInt(product.quantity) === 0
+              const discountPercentage = product.price > product.discountedPrice
+                ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
+                : 0
+              const isMostSeller = mostSellerIds.has(product.id);
+              const images = getAllProductImages(product.productName);
 
               return (
                 <div key={product.id} className="pt-2" onClick={() => handleProductClick(product)}>
                   <div
                     className={`card shadow-lg transition-shadow duration-300 rounded-lg overflow-hidden
-                ${isOutOfStock ? "bg-white opacity-50" : "bg-white"} relative`}
+                    ${isOutOfStock ? "bg-white opacity-50" : "bg-white"} relative`}
                   >
                     {/* If products is out of stock then this will display */}
-                    <div>
-                      {isOutOfStock && (
-                        <div className="absolute inset-0 flex -top-10 items-center justify-center z-10">
-                          <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
-                        </div>
-                      )}
-                    </div>
                     <div className="relative">
-                      {product.price > product.discountedPrice && (
-                        <span className="absolute bg-green-700 text-white text-xs font-bold py-1 px-2 rounded-br-md rounded-tl-md">
-                          {(((product.price - product.discountedPrice) / product.price) * 100).toFixed(0)}% OFF
+                      {discountPercentage > 0 && (
+                        <span className="absolute bg-green-100 text-green-700 text-xs font-bold py-1 px-2 rounded-br-md rounded-tl-md">
+                          {discountPercentage}% OFF
                         </span>
                       )}
-                      <img
+
+                      {isMostSeller && (
+                          <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md">
+                            Most seller
+                          </div>
+                        )}
+
+                      {isOutOfStock && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
+                         </div>
+                      )}
+                      {/* <img
                         src={product.imageUrl}
                         alt={product.productName}
-                        className="w-auto h-auto object-cover pl-4 pr-4"
+                        className="w-full h-full object-cover pl-4 pr-4"
+                      /> */}
+                      <Image 
+                        src={images[0]}
+                        alt={product.productName} 
+                        className="w-full h-full object-cover p-2"
                       />
-                      <p className="border-b border-gray-200 mt-3 mr-3 ml-3"></p>
+                      <p className='border-b border-gray-200 mt-3 mr-3 ml-3'></p>
                     </div>
                     <div className="p-3">
-                      <h2 className="text-md font-semibold mb-1 truncate">{product.productName}</h2>
+                      <h2 className="text-sm font-medium text-gray-800 line-clamp-2 mb-1 h-10">{product.productName}</h2>
                       <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">{product.description}</h3>
                       <div className="flex justify-between items-center mt-2">
-                        <div>
+                        <div className="md:flex items-baseline gap-1">
                           {product.price > product.discountedPrice ? (
                             <>
-                              <p className="text-md font-bold -mb-1">₹{product.discountedPrice}</p>
-                              <p className="text-sm text-gray-500 line-through">₹{product.price}</p>
+                              <p className="text-sm font-bold">₹{product.discountedPrice}</p>
+                              <p className="text-xs text-gray-500 line-through">₹{product.price}</p>
                             </>
                           ) : (
-                            <p className="text-md font-bold text-gray-900">₹{product.price}</p>
+                            <p className="text-sm font-bold">₹{product.price}</p>
                           )}
                         </div>
 
                         {/* If the products is out of stock then ADD button will disappear */}
-                        <div className="flex items-center gap-1 bg-green-700 rounded-md" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex w-[80px] items-center gap-1 bg-green-700 rounded-md" onClick={(e) => e.stopPropagation()}>
                           {isOutOfStock ? (
-                            <span></span>
-                          ) : quantityInCart > 0 ? (
+                            <span className="px-3 py-5 bg-white w-full items-center"></span>
+                             ) : (
+                          quantityInCart > 0 ? (
                             <>
                               <button
-                                onClick={(e) =>decrementQuantity(product)}
+                                onClick={() => decrementQuantity(product)}
                                 className="px-3 py-2 text-white rounded-md"
                               >
                                 -
@@ -285,9 +396,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
                               onClick={(e) => addToCart(product)}
                               className="flex items-center gap-2 px-3 py-2 bg-green-50 text-green-700 border border-green-700 rounded-md"
                             >
-                              <svg
-                                viewBox="0 0 151.5 154.5"
-                                preserveAspectRatio="xMidYMid meet"
+                              <svg viewBox="0 0 151.5 154.5" preserveAspectRatio="xMidYMid meet" 
                                 className="w-5 h-5 -ml-2"
                               >
                                 <g>
@@ -307,6 +416,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
                               </svg>
                               <span className="text-md font-bold">ADD</span>
                             </button>
+                          )
                           )}
                         </div>
                       </div>

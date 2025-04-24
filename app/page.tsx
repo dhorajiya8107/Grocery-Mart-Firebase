@@ -22,9 +22,10 @@ import Cat9 from "../images/Home/Cat9.png";
 import BabyCare from "../images/Home/BabyCare.jpg";
 import Protein from "../images/Home/Protien.jpg";
 import Tea from "../images/Home/Tea.jpg";
+import tr from "../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 
 import "swiper/css";
-import "swiper/css/pagination";
+import "swiper/css/pagination";``
 import "swiper/css/navigation";
 import { ChevronRight } from "lucide-react";
 
@@ -349,7 +350,22 @@ const App = () => {
   // On clicking, it will redirect to product details page
   const handleProductClick = (product: { productName: string; id: any; }) => {
     const formattedProductName = product.productName.replace(/\s+/g, '-');
-    router.push(`/pd/${product.id}?${formattedProductName}`);
+    router.push(`/product-details/${product.id}?${formattedProductName}`);
+  };
+
+  const getAllProductImages = (productName: string) => {
+    const images = [];
+    const extensions = ['jpg', 'png', 'jpeg'];
+    try {
+      for (const ext of extensions) {
+        try {
+          const image = require(`../images/Grocery/${productName}/0.${ext}`);
+          images.push(image);
+        } catch {}
+      }
+    } catch {}
+    
+    return images.length > 0 ? images : [tr];
   };
 
   if (loading) {
@@ -498,6 +514,7 @@ const App = () => {
                   ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
                   : 0;
               const isMostSeller = mostSellerIds3.has(product.id);
+              const images = getAllProductImages(product.productName);
 
               return (
                 <SwiperSlide
@@ -524,10 +541,15 @@ const App = () => {
                         <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                       </div>
                     )}
-                    <img
+                    {/* <img
                       src={product.imageUrl}
                       alt={product.productName}
                       className="w-full h-full object-contain p-2"
+                    /> */}
+                    <Image 
+                      src={images[0]}
+                      alt={product.productName} 
+                      className="w-full h-full object-cover p-2"
                     />
                   </div>
 
@@ -651,6 +673,8 @@ const App = () => {
                   ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
                   : 0
               const isMostSeller = mostSellerIds.has(product.id);
+              const images = getAllProductImages(product.productName);
+              
 
               return (
                 <SwiperSlide
@@ -676,11 +700,16 @@ const App = () => {
                         <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                       </div>
                     )}
-                    <img
+                    {/* <img
                       src={product.imageUrl}
                       alt={product.productName}
                       className="w-full h-full object-contain p-2"
-                    />
+                    /> */}
+                    <Image 
+                    src={images[0]}
+                    alt={product.productName} 
+                    className="w-full h-full object-cover p-2"
+                  />
                   </div>
 
                   <div className="p-3">

@@ -101,7 +101,7 @@ const ChangePasswordPage: React.FC<ForgotPasswordPageProps> = ({ activeDialog, s
 
   return (
     <Dialog open={activeDialog === "change-password"} onOpenChange={() => setActiveDialog(null)}>
-      <DialogContent className="max-w-md bg-white rounded-lg p-6 shadow-lg">
+      <DialogContent className="bg-white rounded-lg p-6 shadow-lg">
         <DialogHeader>
           <div>
             <div className="flex items-center space-x-2 mb-1 text-gray-700">

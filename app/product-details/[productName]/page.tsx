@@ -1,13 +1,16 @@
-"use client"
+"use client";
 
-import { useParams, useRouter } from "next/navigation"
-import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore"
-import { useEffect, useState } from "react"
-import { db } from "@/app/src/firebase"
-import { getAuth, onAuthStateChanged } from "firebase/auth"
-import LogInPage from "@/app/auth/LogIn"
-import { toast } from "sonner"
-import { Toaster } from "sonner"
+import { useParams, useRouter } from "next/navigation";
+import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { db } from "@/app/src/firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import LogInPage from "@/app/auth/LogIn";
+import { toast } from "sonner";
+import { Toaster } from "sonner";
+
+import Atta from '../../../images/Grocery/Atta.jpg'
+import Image from "next/image";
  
 interface Product {
   id: string;
@@ -34,6 +37,7 @@ const CategoryPage = () => {
   const productName = params["productName"];
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
   const router = useRouter();
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0])
@@ -72,39 +76,49 @@ const CategoryPage = () => {
   }, []);
 
   useEffect(() => {
-    const fetchProductById = async () => {
+    let unsubscribe: (() => void) | undefined;
+  
+    const fetchProductById = () => {
       setLoading(true);
-
+  
       if (typeof productName === "string") {
-        try {
-          const productDoc = await getDoc(doc(db, "products", productName));
-
+        const productRef = doc(db, "products", productName);
+  
+        unsubscribe = onSnapshot(productRef, (productDoc) => {
           if (productDoc.exists()) {
-            const data = productDoc.data()
+            const data = productDoc.data();
             const product = {
               id: productDoc.id,
               productName: data.productName,
               description: data.description,
-              price: Number.parseFloat(data.price),
-              discountedPrice: Number.parseFloat(data.discountedPrice),
+              price: parseFloat(data.price),
+              discountedPrice: parseFloat(data.discountedPrice),
               imageUrl: data.imageUrl,
               quantity: data.quantity || "0",
               category: data.category,
-            } as Product
-
+            } as Product;
+  
             setProducts([product]);
           } else {
             console.log("No such product!");
+            setProducts([]);
           }
-        } catch (error) {
-          console.error("Error fetching product:", error);
-        } finally {
           setLoading(false);
-        }
+        }, (error) => {
+          console.error("Error fetching product:", error);
+          setLoading(false);
+        });
       }
-    }
+    };
+  
     fetchProductById();
-  }, [productName])
+  
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [productName]);
 
   const updateCart = async (updatedCart: Product[]) => {
     try {
@@ -136,14 +150,18 @@ const CategoryPage = () => {
         updatedCart[existingProductIndex].quantity = (currentQuantity + 1).toString();
         updateCart(updatedCart);
       } else {
-        toast.error(`${product.productName} is out of stock!`);
+        toast.error(`${product.productName} is out of stock!`, {
+          style: { backgroundColor: '', color: 'red' },
+        });
       }
     } else {
       if (Number.parseInt(product.quantity) > 0) {
         updatedCart.push({ ...product, quantity: "1" });
         updateCart(updatedCart);
       } else {
-        toast.error(`${product.productName} is out of stock!`);
+        toast.error(`${product.productName} is out of stock!`, {
+          style: { backgroundColor: '', color: 'red' },
+        });
       }
     }
   }
@@ -184,7 +202,9 @@ const CategoryPage = () => {
       if (currentQuantity < Number.parseInt(product.quantity)) {
         updatedCart[existingProductIndex].quantity = (currentQuantity + 1).toString();
         updateCart(updatedCart);
-        toast.success(`Added ${product.productName} to the cart!`);
+        toast.success(`Added ${product.productName} to the cart!`, {
+          style: { backgroundColor: '', color: 'green' },
+        });
       } else {
         toast.error(`${product.productName} is out of stock!`);
       }
@@ -260,6 +280,32 @@ const CategoryPage = () => {
     return <p className="text-center py-8 text-gray-600">No products found for "{category}"</p>
   }
 
+  const getAllProductImages = (productName: string) => {
+    const images = [];
+    const extensions = ['jpg', 'png', 'jpeg'];
+    const productNameLower = productName.toLowerCase();
+    try {
+      // First try the base name
+      for (const ext of extensions) {
+        try {
+          const image = require(`../../../images/Grocery/${productName}/0.${ext}`);
+          images.push(image);
+        } catch {}
+      }
+      
+      for (let i = 1; i <= 10; i++) {
+        for (const ext of extensions) {
+          try {
+            const image = require(`../../../images/Grocery/${productName}/${i}.${ext}`);
+            images.push(image);
+          } catch {}
+        }
+      }
+    } catch {}
+    
+    return images.length > 0 ? images : ['path/to/fallback.jpg'];
+  };
+
   return (
     <>
       <Toaster />
@@ -270,6 +316,7 @@ const CategoryPage = () => {
           const quantityInCart = productInCart ? Number.parseInt(productInCart.quantity) : 0
           const isOutOfStock = Number.parseInt(product.quantity) === 0
           const isMostSeller = mostSellerIds.has(product.id);
+          const images = getAllProductImages(product.productName);
 
           return (
             <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -290,11 +337,46 @@ const CategoryPage = () => {
                       <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                     </div>
                   )}
-                  <img
+                  {/* <img
                     src={product.imageUrl}
                     alt={product.productName}
                     className="w-100 h-auto max-[768px]:ws-120 object-contain rounded-md max-[768px]:-mt-6"
-                  />
+                  /> */}
+
+                  <div className="flex flex-col">
+                    <div className="w-full mb-4">
+                      <Image
+                        src={images[activeIndex]}
+                        alt={`${product.productName}`}
+                        className="w-full h-80 object-contain rounded-md"
+                        width={400}
+                        height={400}
+                      />
+                    </div>
+      
+                    {images.length !== 1 && (
+                      <div className="flex overflow-x-auto gap-2 w-full py-2">
+                      {images.map((image, index) => (
+                        <div 
+                          key={index}
+                          className={`cursor-pointer min-w-16 h-16 border-2 rounded-md ${
+                            activeIndex === index ? 'border-green-700' : 'border-gray-200'
+                          }`}
+                          onClick={() => setActiveIndex(index)}
+                        >
+                          <Image
+                            src={image}
+                            alt={`${product.productName} ${index > 0 ? index : ''}`}
+                            className="w-full h-full object-contain p-1"
+                            width={60}
+                            height={60}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    )}
+                  </div>
+
                 </div>
                 {/* Product Details */}
                 <div className="min-[768px]:border-l min-[768px]:p-2">
