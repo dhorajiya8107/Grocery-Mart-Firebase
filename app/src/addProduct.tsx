@@ -450,7 +450,7 @@ const AddProductForm = () => {
                         size="sm"
                         className="text-red-600 hover:bg-red-50"
                       >
-                        Clear All
+                        Clear All 
                       </Button>
                     )}
                   </div>
