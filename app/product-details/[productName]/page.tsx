@@ -367,7 +367,7 @@ const CategoryPage = () => {
                           <Image
                             src={image}
                             alt={`${product.productName} ${index > 0 ? index : ''}`}
-                            className="w-full h-full object-contain p-1"
+                            className="w-full h-full object-contain"
                             width={60}
                             height={60}
                           />
