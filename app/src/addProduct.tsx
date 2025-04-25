@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import { collection, addDoc, getDocs, doc, setDoc } from "firebase/firestore";
 import { db } from "@/app/src/firebase";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,11 @@ import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 type Category = {
   id: string;
@@ -34,7 +35,7 @@ const formSchema = z
     buckleNumber: z.string().length(6, "Buckle number must be exactly 6 digits"),
     quantity: z.string().min(1, "Quantity is required"),
     categoryId: z.string().min(1, "Category is required"),
-    image: z.instanceof(File, { message: "Image is required and must be a PNG or JPG" }),
+    images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
     manufacturedAt: z.string().min(1, "Manufactured date is required"),
     expiresAt: z.string().min(1, "Expires date is required"),
   })
@@ -65,7 +66,8 @@ const AddProductForm = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [openMD, setOpenMD] = useState(false);
   const [openED, setOpenED] = useState(false);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const router = useRouter();
 
   const {
     register,
@@ -87,7 +89,7 @@ const AddProductForm = () => {
       categoryId: "",
       manufacturedAt: "",
       expiresAt: "",
-      image: undefined as unknown as File,
+      images: [] as File[],
     },
   })
 
@@ -112,7 +114,7 @@ const AddProductForm = () => {
 
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
         resolve(reader.result as string);
       }
@@ -123,21 +125,17 @@ const AddProductForm = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      let imageUrl = ""
-
-      if (data.image) {
-        if (data.image instanceof File) {
-          const base64Image = await convertToBase64(data.image);
-          imageUrl = base64Image;
-        } else {
-          throw new Error("Image is not a valid file");
-        }
+      if (data.images.length === 0) {
+        toast.error("At least one image is required");
+        return;
       }
+
+      const imageBase64Array = await Promise.all(data.images.map((file: File) => convertToBase64(file)));
 
       const selectedCategory = categories.find((cat) => cat.id === data.categoryId);
       const categoryName = selectedCategory ? selectedCategory.name : "";
 
-      await addDoc(collection(db, "products"), {
+      const productRef = await addDoc(collection(db, "products"), {
         productName: data.productName,
         description: data.description,
         price: data.price,
@@ -145,13 +143,25 @@ const AddProductForm = () => {
         buckleNumber: data.buckleNumber,
         quantity: data.quantity,
         category: categoryName,
-        imageUrl,
+        imageUrl: imageBase64Array[0],
         manufacturedAt: data.manufacturedAt,
         expiresAt: data.expiresAt,
       })
 
+      const imagesData: Record<string, string> = {};
+
+      imageBase64Array.forEach((imageUrl, index) => {
+        imagesData[`imageUrl${index === 0 ? "" : index}`] = imageUrl;
+      })
+
+      await setDoc(doc(db, "productImages", productRef.id), {
+        ...imagesData,
+        productId: productRef.id,
+        createdAt: new Date().toISOString(),
+      })
+
       toast.success("Product added successfully");
-      setImagePreview(null);
+      setImagePreviews([]);
       reset()
     } catch (error) {
       console.error("Error adding product:", error);
@@ -160,21 +170,33 @@ const AddProductForm = () => {
   }
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue("image", file);
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const fileArray = Array.from(files);
+      setValue("images", [...watch("images"), ...fileArray]);
+
       try {
-        const base64 = await convertToBase64(file);
-        setImagePreview(base64);
+        const newPreviews = await Promise.all(fileArray.map((file) => convertToBase64(file)));
+        setImagePreviews((prev) => [...prev, ...newPreviews]);
       } catch (error) {
-        console.error("Error creating preview:", error);
+        console.error("Error creating previews:", error);
       }
     }
   }
 
-  const clearImagePreview = () => {
-    setImagePreview(null);
-    setValue("image", undefined as unknown as File);
+  const removeImage = (index: number) => {
+    const updatedImages = [...watch("images")];
+    updatedImages.splice(index, 1);
+    setValue("images", updatedImages);
+
+    const updatedPreviews = [...imagePreviews];
+    updatedPreviews.splice(index, 1);
+    setImagePreviews(updatedPreviews);
+  }
+
+  const clearAllImages = () => {
+    setImagePreviews([]);
+    setValue("images", []);
   }
 
   const formatDate = (date: Date) => {
@@ -383,60 +405,84 @@ const AddProductForm = () => {
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-lg font-medium text-gray-700 border-b pb-2">Product Image</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <h3 className="text-lg font-medium text-gray-700 border-b pb-2">Product Images</h3>
+              <div className="grid grid-cols-1 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="image" className="font-medium">
-                    Product Image <span className="text-red-500">*</span>
+                    Product Images <span className="text-red-500">*</span>
+                    <span className="text-sm text-gray-500 ml-2">(First image will be the main product image)</span>
                   </Label>
                   <div className="flex items-center gap-4">
                     <div
                       className={cn(
                         "border-2 border-dashed rounded-lg p-4 w-full transition-colors",
-                        errors.image
+                        errors.images
                           ? "border-red-400 bg-red-50"
                           : "border-gray-200 hover:border-green-700 hover:bg-green-50",
                       )}
                     >
                       <label htmlFor="image-upload" className="flex flex-col items-center gap-2 cursor-pointer">
                         <Upload className="h-8 w-8 text-gray-400" />
-                        <span className="text-sm text-gray-500">Click to upload</span>
+                        <span className="text-sm text-gray-500">Click to upload multiple images</span>
                         <span className="text-xs text-gray-400">PNG, JPG up to 10MB</span>
                         <input
                           id="image-upload"
                           type="file"
                           accept="image/*"
                           onChange={handleImageChange}
+                          multiple
                           className="sr-only"
                         />
                       </label>
                     </div>
                   </div>
-                  {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
+                  {errors.images && <p className="text-red-500 text-sm">{errors.images.message}</p>}
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="font-medium">Preview</Label>
-                  <div className="border rounded-lg h-[200px] flex items-center justify-center bg-gray-50 overflow-hidden">
-                    {imagePreview ? (
-                      <div className="relative w-full h-full">
-                        <img
-                          src={imagePreview || "/placeholder.svg"}
-                          alt="Product preview"
-                          className="object-contain w-full h-full p-2"
-                        />
-                        <Button
-                          type="button"
-                          onClick={clearImagePreview}
-                          className="absolute top-2 right-2 h-6 w-6 bg-red-100 text-red-600 rounded-full p-1 hover:bg-red-200"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 text-sm">No image selected</span>
+                  <div className="flex justify-between items-center">
+                    <Label className="font-medium">Image Previews</Label>
+                    {imagePreviews.length > 0 && (
+                      <Button
+                        type="button"
+                        onClick={clearAllImages}
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:bg-red-50"
+                      >
+                        Clear All
+                      </Button>
                     )}
                   </div>
+                  {imagePreviews.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={index} className="relative border rounded-lg overflow-hidden h-full w-full">
+                          <img
+                            src={preview || "/placeholder.svg"}
+                            alt={`Product preview ${index + 1}`}
+                            className="object-cover w-full h-full"
+                          />
+                          <Button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-2 right-2 h-6 w-6 bg-red-100 text-red-600 rounded-full p-1 hover:bg-red-200"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                          {index === 0 && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-green-700 text-white text-xs py-1 text-center">
+                              Main Image
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg h-[150px] flex items-center justify-center bg-gray-50">
+                      <span className="text-gray-400 text-sm">No images selected</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -455,7 +501,8 @@ const AddProductForm = () => {
                 className="py-6 px-5 bg-gray-300"
                 onClick={() => {
                   reset()
-                  setImagePreview(null)
+                  setImagePreviews([])
+                  router.push("/")
                 }}
               >
                 Cancel

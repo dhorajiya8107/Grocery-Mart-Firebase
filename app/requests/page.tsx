@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -31,7 +31,7 @@ interface RoleChangeRequest {
   notes?: string
 }
 
-export default function AdminRoleRequestsPage() {
+function YourRequest() {
   const [requests, setRequests] = useState<RoleChangeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<RoleChangeRequest | null>(null);
@@ -176,8 +176,7 @@ export default function AdminRoleRequestsPage() {
      <div className="max-w-6xl mx-auto bg-white border-none shadow-lg p-5">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Role Change Requests</h1>
-          <p className="text-gray-500">Manage and review role change applications</p>
+          <h1 className="text-2xl font-bold">Your Role Change Requests</h1>
         </div>
       </div>
 
@@ -225,10 +224,6 @@ export default function AdminRoleRequestsPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             {getStatusBadge(request.status)}
-                            <Button variant="outline" size="sm" onClick={() => handleViewDetails(request)}>
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Details
-                            </Button>
                           </div>
                         </div>
 
@@ -254,126 +249,9 @@ export default function AdminRoleRequestsPage() {
           );
         })}
       </Tabs>
-
-      {selectedRequest && (
-        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-          <DialogContent className="max-w-7xl">
-            <DialogHeader>
-              <DialogTitle>Role Change Request Details</DialogTitle>
-              <DialogDescription>Review the application details before making a decision</DialogDescription>
-            </DialogHeader>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 text-sm">
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <h3 className="text-lg font-medium text-gray-500">Applicant Information</h3>
-                  <p>
-                    <span className="font-medium">Name:</span> {selectedRequest.name}
-                  </p>
-                  <p>
-                    <span className="font-medium">Email:</span> {selectedRequest.email}
-                  </p>
-                  <p>
-                    <span className="font-medium">Phone:</span> {selectedRequest.phoneNumber}
-                  </p>
-                  <p>
-                    <span className=""></span>
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="text-lg font-medium text-gray-500">Role Information</h3>
-                  <p>
-                    <span className="font-medium">Current Role:</span> {selectedRequest.currentRole}
-                  </p>
-                  <p>
-                    <span className="font-medium">Requested Role:</span> {selectedRequest.requestedRole}
-                  </p>
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="text-lg font-medium text-gray-500">Request Status</h3>
-                  <div className="flex items-center">
-                    {selectedRequest.status === "pending" && <Clock className="h-4 w-4 text-yellow-500 mr-1" />}
-                    {selectedRequest.status === "approved" && <CheckCircle className="h-4 w-4 text-green-700 mr-1" />}
-                    {selectedRequest.status === "rejected" && <XCircle className="h-4 w-4 text-red-500 mr-1" />}
-                    <span className="capitalize">{selectedRequest.status}</span>
-                  </div>
-                  <p>
-                    <span className="font-medium">Submitted:</span> {formatDate(selectedRequest.createdAt)}
-                  </p>
-                  {selectedRequest.updatedAt && (
-                    <p>
-                      <span className="font-medium">Last Updated:</span> {formatDate(selectedRequest.updatedAt)}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-gray-500">Reason for Change</h3>
-                  <div className="bg-gray-50 p-3 rounded-md text-sm break-words">{selectedRequest.reason}</div>
-                </div>
-
-                <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-gray-500">Duties & Responsibilities</h3>
-                  <div className="bg-gray-50 p-3 rounded-md text-sm break-words">{selectedRequest.duties}</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 border-t pt-4">
-              <h3 className="text-lg font-medium text-gray-500">Admin Notes</h3>
-              <Textarea
-                placeholder="Add notes about this request (only visible to admins)"
-                value={adminNotes}
-                onChange={(e) => setAdminNotes(e.target.value)}
-                disabled={selectedRequest.status !== "pending" || isProcessing}
-                className=""
-              />
-            </div>
-
-            <DialogFooter className="flex flex-col sm:flex-row gap-2">
-              {selectedRequest.status === "pending" ? (
-                <>
-                  <Button
-                    variant="outline"
-                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-                    onClick={() => handleUpdateStatus("rejected")}
-                    disabled={isProcessing}
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <XCircle className="mr-2 h-4 w-4" />
-                    )}
-                    Reject Request
-                  </Button>
-                  <Button
-                    className="bg-green-600 hover:bg-green-700"
-                    onClick={() => handleUpdateStatus("approved")}
-                    disabled={isProcessing}
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                    )}
-                    Approve Request
-                  </Button>
-                </>
-              ) : (
-                <Button variant="outline" onClick={() => setOpenDialog(false)}>
-                  Close
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
     </div>
     </>
   )
 }
+export default YourRequest;

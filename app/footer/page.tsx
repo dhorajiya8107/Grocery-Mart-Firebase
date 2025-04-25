@@ -5,8 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState } from "react"
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore"
-import { db } from "../src/firebase"
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from "firebase/firestore"
+import { auth, db } from "../src/firebase"
 import Image from "next/image"
 import Logo from "../../images/Logo.png"
 
@@ -17,9 +17,10 @@ interface Category {
 }
 
 const Footer = () => {
-  const router = useRouter()
-  const [year, setYear] = useState("")
-  const [categories, setCategories] = useState<Category[]>([])
+  const router = useRouter();
+  const [year, setYear] = useState("");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
     const collectionRef = collection(db, "categories")
@@ -39,7 +40,28 @@ const Footer = () => {
 
   useEffect(() => {
     setYear(new Date().getFullYear().toString())
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const userRef = doc(db, 'users', user.uid);
+          const userSnap = await getDoc(userRef);
+  
+          if (userSnap.exists()) {
+            const userRole = userSnap.data()?.role;
+            setRole(userRole);
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
+      }
+    });
+  
+    return () => unsubscribe();
+  }, []);
+  
 
   return (
     <footer className="bg-gradient-to-b text-gray-600 border-t">
@@ -132,6 +154,16 @@ const Footer = () => {
                   Contact Us
                 </Link>
               </li>
+              {/* {(role ==='admin' || role ==='user') && (
+                <li>
+                  <Link
+                    href="/request"
+                    className="text-sm hover:text-green-700 transition-colors duration-300 flex items-center gap-2"
+                  >
+                    Request
+                  </Link>
+                </li>
+              )} */}
             </ul>
           </div>
 

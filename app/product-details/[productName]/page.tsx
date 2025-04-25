@@ -22,6 +22,10 @@ interface Product {
   description: string;
   category: string;
 }
+interface ProductImages {
+  [key: string]: string
+  productId: string
+}
 interface MostSeller {
   id: string;
   productName: string;
@@ -38,6 +42,7 @@ const CategoryPage = () => {
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [productImages, setProductImages] = useState<string[]>([]);
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0])
@@ -84,7 +89,7 @@ const CategoryPage = () => {
       if (typeof productName === "string") {
         const productRef = doc(db, "products", productName);
   
-        unsubscribe = onSnapshot(productRef, (productDoc) => {
+        unsubscribe = onSnapshot(productRef, async (productDoc) => {
           if (productDoc.exists()) {
             const data = productDoc.data();
             const product = {
@@ -99,6 +104,32 @@ const CategoryPage = () => {
             } as Product;
   
             setProducts([product]);
+
+            // Fetch product images from productImages collection
+            try {
+              const productImagesRef = doc(db, "productImages", productDoc.id)
+              const productImagesDoc = await getDoc(productImagesRef)
+
+              if (productImagesDoc.exists()) {
+                const imagesData = productImagesDoc.data() as ProductImages
+                const images: string[] = []
+
+                // Extract all imageUrl fields (imageUrl, imageUrl1, imageUrl2, etc.)
+                let index = 0
+                while (imagesData[`imageUrl${index === 0 ? "" : index}`]) {
+                  images.push(imagesData[`imageUrl${index === 0 ? "" : index}`])
+                  index++
+                }
+
+                setProductImages(images)
+              } else {
+                // If no additional images, just use the main product image
+                setProductImages([product.imageUrl])
+              }
+            } catch (error) {
+              console.error("Error fetching product images:", error)
+              setProductImages([product.imageUrl])
+            }
           } else {
             console.log("No such product!");
             setProducts([]);
@@ -344,7 +375,7 @@ const CategoryPage = () => {
                   /> */}
 
                   <div className="flex flex-col">
-                    <div className="w-full mb-4">
+                    {/* <div className="w-full mb-4">
                       <Image
                         src={images[activeIndex]}
                         alt={`${product.productName}`}
@@ -367,14 +398,44 @@ const CategoryPage = () => {
                           <Image
                             src={image}
                             alt={`${product.productName} ${index > 0 ? index : ''}`}
-                            className="w-full h-full object-contain p-1"
+                            className="w-full h-full object-contain rounded-md"
                             width={60}
                             height={60}
                           />
                         </div>
                       ))}
                     </div>
-                    )}
+                    )} */}
+
+                    <div className="w-full mb-4">
+                        <img
+                          src={productImages[activeIndex] || product.imageUrl}
+                          alt={`${product.productName}`}
+                          className="w-full h-80 object-contain rounded-md"
+                        />
+                      </div>
+
+                      {productImages.length > 1 && (
+                        <div className="flex overflow-x-auto gap-2 w-full py-2">
+                          {productImages.map((image, index) => (
+                            <div
+                              key={index}
+                              className={`cursor-pointer min-w-16 h-16 border-2 rounded-md ${
+                                activeIndex === index ? "border-green-700" : "border-gray-200"
+                              }`}
+                              onClick={() => setActiveIndex(index)}
+                            >
+                              <img
+                                src={image || "/placeholder.svg"}
+                                alt={`${product.productName} ${index > 0 ? index : ""}`}
+                                className="w-full h-full object-contain rounded-md"
+                                width={60}
+                                height={60}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
                   </div>
 
                 </div>

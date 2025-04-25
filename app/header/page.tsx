@@ -271,9 +271,7 @@ const Header = ({ user }: { user: User | null }) => {
       router.push(redirectPath)
       localStorage.removeItem("redirectAfterLogin")
     }
-  }, [user])
-  
-  
+  }, [user]);
 
   return (
     <>
@@ -377,7 +375,17 @@ const Header = ({ user }: { user: User | null }) => {
                           }}
                         >
                           <MapPin className="w-4 h-4 text-gray-500" /> Address
-                        </button>
+                          </button>
+                          {/* {(role === "admin" || role === "user") && (
+                            <button className="w-full flex items-center gap-2 text-sm text-left py-2 px-4 hover:bg-gray-100 rounded-md mb-2"
+                            onClick={() => {
+                              router.push("/requests")
+                              setMenuOpen(false)
+                            }}
+                          >
+                            <MapPin className="w-4 h-4 text-gray-500"/> My Request
+                          </button>
+                        )} */}
                       </div>
                     {/* )} */}
                     {(role === "superadmin" || role === "admin") && (

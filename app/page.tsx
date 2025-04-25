@@ -541,15 +541,10 @@ const App = () => {
                         <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                       </div>
                     )}
-                    {/* <img
+                    <img
                       src={product.imageUrl}
                       alt={product.productName}
                       className="w-full h-full object-contain p-2"
-                    /> */}
-                    <Image 
-                      src={images[0]}
-                      alt={product.productName} 
-                      className="w-full h-full object-cover p-2"
                     />
                   </div>
 
@@ -700,16 +695,16 @@ const App = () => {
                         <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                       </div>
                     )}
-                    {/* <img
+                    <img
                       src={product.imageUrl}
                       alt={product.productName}
                       className="w-full h-full object-contain p-2"
-                    /> */}
-                    <Image 
+                    />
+                    {/* <Image 
                     src={images[0]}
                     alt={product.productName} 
                     className="w-full h-full object-cover p-2"
-                  />
+                  /> */}
                   </div>
 
                   <div className="p-3">

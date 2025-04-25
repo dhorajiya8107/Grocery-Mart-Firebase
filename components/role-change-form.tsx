@@ -108,7 +108,7 @@ export function RoleChangeForm({ userData }: { userData: UserData }) {
       <Toaster position="top-right" />
       <Card className="max-w-2xl mx-auto shadow-lg">
         <CardHeader className="">
-          <CardTitle className="text-xl">Role Change Application</CardTitle>
+          <CardTitle className="text-xl">Role Change Request Application</CardTitle>
           <CardDescription>Submit a request to change your role in the system</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
@@ -184,7 +184,7 @@ export function RoleChangeForm({ userData }: { userData: UserData }) {
               </div>
 
               <div className="space-y-4 pt-2 border-t">
-                <h3 className="text-md font-medium text-gray-700">Phone Verification</h3>
+                <h3 className="text-md font-medium text-gray-700">Phone Number</h3>
                 <FormField
                   control={form.control}
                   name="phoneNumber"

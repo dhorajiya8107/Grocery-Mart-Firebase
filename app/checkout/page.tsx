@@ -603,16 +603,16 @@ const CheckoutPage = () => {
                                 <span className="text-white bg-black text-xs rounded-xl font-bold p-1">Out of Stock</span>
                               </div>
                             )}
-                            {/* <img
+                            <img
                               src={product.imageUrl}
                               alt={product.productName}
                               className="w-full h-full object-cover"
-                            /> */}
-                            <Image 
+                            />
+                            {/* <Image 
                               src={images[0]}
                               alt={product.productName} 
-                                className="w-full h-full object-cover p-2"
-                            />
+                              className="w-full h-full object-cover p-2"
+                            /> */}
                           </div>
                           <div className="flex-1">
                             <h3 className="font-medium text-gray-900">{product.productName}</h3>

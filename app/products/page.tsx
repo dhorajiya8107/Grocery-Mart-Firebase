@@ -357,16 +357,16 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
                     <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                    </div>
                 )}
-                {/* <img
+                <img
                   src={product.imageUrl}
                   alt={product.productName}
                   className="w-full h-full object-cover p-2"
-                /> */}
-                <Image 
+                />
+                {/* <Image 
                   src={images[0]}
                   alt={product.productName} 
                   className="w-full h-full object-cover p-2"
-                />
+                /> */}
                 <p className='border-b border-gray-200 mt-3 mr-3 ml-3'></p>
               </div>
               <div className="p-3">
