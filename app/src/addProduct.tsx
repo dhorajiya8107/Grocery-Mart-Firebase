@@ -451,7 +451,7 @@ const AddProductForm = () => {
                         className="text-red-600 hover:bg-red-50"
                       >
                         Clear All
-                      </Button>
+                      </Button> 
                     )}
                   </div>
                   {imagePreviews.length > 0 ? (
