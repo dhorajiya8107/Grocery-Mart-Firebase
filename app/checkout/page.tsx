@@ -454,7 +454,7 @@ const CheckoutPage = () => {
     return (
       <div className="flex h-screen items-center justify-center flex-col gap-4">
         <div className="text-xl font-medium">Please log in to continue to checkout</div>
-        <Button onClick={() => router.push("/")} className="bg-green-600 hover:bg-green-700">
+        <Button onClick={() => router.push("/")} className="bg-green-700 hover:bg-green-800">
           Return to Home
         </Button>
       </div>
@@ -812,7 +812,7 @@ const CheckoutPage = () => {
             <p className="text-gray-600 text-center mb-6">
               Your order has been placed successfully. You will receive a confirmation shortly.
             </p>
-            <Button onClick={() => router.push("/")} className="w-full bg-green-600 hover:bg-green-800">
+            <Button onClick={() => router.push("/")} className="w-full bg-green-700 hover:bg-green-800">
               Return to Home
             </Button>
           </div>

@@ -316,7 +316,7 @@ const CartPage = () => {
     return (
       <div className="flex h-screen items-center justify-center flex-col gap-4">
         <div className="text-xl font-medium">Please log in to view your cart</div>
-        <Button onClick={() => router.push("/")} className="bg-green-600 hover:bg-green-700">
+        <Button onClick={() => router.push("/")} className="bg-green-700 hover:bg-green-800">
           Return to Home
         </Button>
       </div>

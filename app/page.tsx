@@ -152,7 +152,9 @@ const App = () => {
         const categoryProductsMap: Record<string, Product[]> = {}
 
         for (const category of categoriesToFetch) {
-          const productsQuery = query(collection(db, "products"), where("category", "==", category), limit(8))
+          const productsQuery = query(collection(db, "products"), where("category", "==", category)
+          // , limit(10)
+        )
 
           const querySnapshot = await getDocs(productsQuery)
           const products: Product[] = []
@@ -653,7 +655,6 @@ const App = () => {
             >
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
                 {products.sort((a, b) => {
-
                   const mostSellerMap = new Map(mostSeller.map(ms => [ms.id, parseInt(ms.quantity)]));
                   const quantityA = mostSellerMap.get(a.id) || 0;
                   const quantityB = mostSellerMap.get(b.id) || 0;
