@@ -154,16 +154,16 @@ const Footer = () => {
                   Contact Us
                 </Link>
               </li>
-              {/* {(role ==='admin' || role ==='user') && (
+              {(role ==='admin' || role ==='user') && (
                 <li>
                   <Link
                     href="/request"
                     className="text-sm hover:text-green-700 transition-colors duration-300 flex items-center gap-2"
                   >
-                    Request
+                    Role Request
                   </Link>
                 </li>
-              )} */}
+              )}
             </ul>
           </div>
 

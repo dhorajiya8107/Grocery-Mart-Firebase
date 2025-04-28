@@ -1,6 +1,6 @@
 'use client';
 
-import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import { auth, db } from '../src/firebase';
@@ -63,25 +63,32 @@ const ChangeRole = () => {
 
   // Fetch all users with their roles
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, 'users'));
-        const userList = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          email: doc.data().email,
-          role: doc.data().role,
-          name: doc.data().name,
-        })).filter((user) => user.id !== auth.currentUser?.uid);
+    if (role !== 'superadmin') return;
+  
+    const usersCollection = collection(db, 'users');
+  
+    const unsubscribe = onSnapshot(
+      usersCollection,
+      (querySnapshot) => {
+        const userList = querySnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            email: doc.data().email,
+            role: doc.data().role,
+            name: doc.data().name,
+          }))
+          .filter((user) => user.id !== auth.currentUser?.uid);
+  
         setUsers(userList);
-      } catch (error) {
+      },
+      (error) => {
         console.error('Error fetching users:', error);
       }
-    };
-
-    if (role === 'superadmin') {
-      fetchUsers();
-    }
+    );
+  
+    return () => unsubscribe();
   }, [role]);
+  
 
   const filteredUsers = users.filter(
     (user) =>
@@ -206,26 +213,26 @@ const ChangeRole = () => {
                     {/* <div className="col-span-4 md:col-span-5 text-right md:text-left text-gray-500 text-sm truncate">
                       {user.email}
                     </div> */}
-                    <div className="col-span-2 flex items-center justify-end gap-2">
-                      <Switch
-                        checked={user.role === "admin"}
-                        onCheckedChange={async (checked) => {
-                          const newRole = checked ? "admin" : "user"
-                          await handleRoleToggle(user.id, newRole)
-                        }}
-                        className="data-[state=checked]:bg-green-700"
-                      />
-                      <Badge
-                        variant={user.role === "admin" ? "default" : "outline"}
-                        className={
-                          user.role === "admin"
-                            ? "bg-green-700 hover:bg-green-700"
-                            : "text-gray-500 border-gray-200"
-                        }
-                      >
-                        {user.role}
-                      </Badge>
-                    </div>
+                      <div className="col-span-2 flex items-center justify-end gap-2">
+                        <Switch
+                          checked={user.role === "admin"}
+                          onCheckedChange={async (checked) => {
+                            const newRole = checked ? "admin" : "user"
+                            await handleRoleToggle(user.id, newRole)
+                          }}
+                          className="data-[state=checked]:bg-green-700"
+                        />
+                        <Badge
+                          variant={user.role === "admin" ? "default" : "outline"}
+                          className={
+                            user.role === "admin"
+                              ? "bg-green-700 hover:bg-green-700"
+                              : "text-gray-500 border-gray-200"
+                          }
+                        >
+                          {user.role}
+                        </Badge>
+                      </div>
                   </li>
                 ))}
 

@@ -14,7 +14,7 @@ import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import Image from "next/image";
 import Logo from "../../images/Logo.png";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, KeyRound, LogOut, MapPin, Package, Plus, Search, Settings, ShoppingCart, UserIcon } from "lucide-react";
+import { ChevronDown, KeyRound, LogOut, MapPin, MessageSquare, Package, Pencil, Plus, Search, Settings, ShoppingCart, UserIcon } from "lucide-react";
 import SearchBar from "../search-bar/page";
 import AddAddressPage from "@/components/AddAddress";
 import ForgotPasswordPage from "../auth/ForgetPassword";
@@ -376,16 +376,16 @@ const Header = ({ user }: { user: User | null }) => {
                         >
                           <MapPin className="w-4 h-4 text-gray-500" /> Address
                           </button>
-                          {/* {(role === "admin" || role === "user") && (
+                          {(role === "admin" || role === "user") && (
                             <button className="w-full flex items-center gap-2 text-sm text-left py-2 px-4 hover:bg-gray-100 rounded-md mb-2"
                             onClick={() => {
                               router.push("/requests")
                               setMenuOpen(false)
                             }}
                           >
-                            <MapPin className="w-4 h-4 text-gray-500"/> My Request
+                            <MessageSquare className="w-4 h-4 text-gray-500"/> My Request
                           </button>
-                        )} */}
+                        )}
                       </div>
                     {/* )} */}
                     {(role === "superadmin" || role === "admin") && (
@@ -399,6 +399,15 @@ const Header = ({ user }: { user: User | null }) => {
                           }}
                         >
                           <Plus className="w-4 h-4 text-gray-500" /> Add Product
+                        </button>
+                        <button
+                          className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
+                          onClick={() => {
+                            router.push("/edit-product")
+                            setMenuOpen(false)
+                          }}
+                        >
+                          <Pencil className="w-4 h-4 text-gray-500" /> Product Management
                         </button>
                         <button
                           className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
@@ -419,15 +428,26 @@ const Header = ({ user }: { user: User | null }) => {
                           <Settings className="w-4 h-4 text-gray-500" /> Order Status
                         </button>
                         {(role === "superadmin") && (
-                          <button
-                            className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
-                            onClick={() => {
-                              router.push("/change-role")
-                              setMenuOpen(false)
-                            }}
-                          >
-                            <Settings className="w-4 h-4 text-gray-500" /> Change Role
-                          </button>
+                          <>
+                            <button
+                              className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
+                              onClick={() => {
+                                router.push("/change-role")
+                                setMenuOpen(false)
+                              }}
+                            >
+                              <Settings className="w-4 h-4 text-gray-500" /> Change Role
+                            </button>
+                            <button
+                              className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 hover:bg-gray-100 rounded-md mb-2"
+                              onClick={() => {
+                                router.push("/role-change-requests")
+                                setMenuOpen(false)
+                              }}
+                            >
+                              <Settings className="w-4 h-4 text-gray-500" /> Role Change Request
+                            </button>
+                          </>
                         )}
                       </div>
                     )}

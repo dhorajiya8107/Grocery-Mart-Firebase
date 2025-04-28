@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/app/src/firebase";
+import { auth, db } from "@/app/src/firebase";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Info, CircleCheck } from "lucide-react";
+import { Info, CircleCheck, InfoIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface UserData {
   id: string
@@ -20,7 +21,41 @@ interface UserData {
 const Request = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
+
+  // Checking login user role
+    useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          setLoading(true);
+          try {
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+    
+            if (userSnap.exists()) {
+              const userRole = userSnap.data()?.role;
+              setRole(userRole);
+    
+              if (userRole !== 'admin' && userRole !== 'user') {
+                router.push('/');
+              }
+            } else {
+              router.push('/');
+            }
+          } catch (error) {
+            console.error('Error checking user role:', error);
+            router.push('/');
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          router.push('/');
+        }
+      });
+    
+      return () => unsubscribe();
+    }, [router]);
 
   useEffect(() => {
     const auth = getAuth();
@@ -70,6 +105,10 @@ const Request = () => {
     )
   }
 
+  if (role !== 'admin' && role !== 'user') {
+    return null;
+  }
+
   if (!user) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -79,12 +118,24 @@ const Request = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-3xl">
+    <div className="container mx-auto py-8 px-4 max-w-3xl pb-30">
       <Card className="w-full">
         <CardHeader>
           <div className="flex items-center gap-2">
             <CardTitle className="text-xl">Role Description</CardTitle>
-            <Info className="h-5 w-5 text-green-700" />
+            {/* <Info className="h-5 w-5 text-green-700" /> */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-5 w-5 text-green-700" />
+                </TooltipTrigger>
+                <TooltipContent className="shadow-md">
+                  <div>
+                    <p className="mb-2">For role change description</p>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

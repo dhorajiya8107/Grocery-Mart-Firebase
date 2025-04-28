@@ -14,7 +14,7 @@ import { toast, Toaster } from 'sonner';
 import * as yup from 'yup';
 import { auth, db } from '../src/firebase';
 import { CustomPagination } from '@/components/CustomPagination';
-import { Search } from 'lucide-react';
+import { Edit, Pencil, Search, Trash2 } from 'lucide-react';
  
 interface Category {
   id: string;
@@ -420,6 +420,8 @@ const AddCategories = () => {
                       openEditDialog(category);
                     }}
                   >
+                    {/* Edit */}
+                    <Edit className="h-4 w-4 mr-1" />
                     Edit
                   </Button>
                   <Dialog>
@@ -427,6 +429,8 @@ const AddCategories = () => {
                       <Button
                         className="text-red-500 bg-red-100 hover:bg-red-100 border-red-500 border cursor-pointer"
                       >
+                        {/* Delete */}
+                        <Trash2  className="w-4 h-4 mr-1" />
                         Delete
                       </Button>
                     </DialogTrigger>

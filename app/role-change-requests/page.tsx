@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, where, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, where, getDocs, getDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db } from "@/app/src/firebase";
+import { auth, db } from "@/app/src/firebase";
 import { toast, Toaster } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -31,73 +31,75 @@ interface RoleChangeRequest {
   notes?: string
 }
 
-export default function AdminRoleRequestsPage() {
+const RoleRequestsPage = () =>  {
   const [requests, setRequests] = useState<RoleChangeRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<RoleChangeRequest | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const auth = getAuth()
+  // Checking login user role
+    useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          setLoading(true);
+          try {
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+    
+            if (userSnap.exists()) {
+              const userRole = userSnap.data()?.role;
+              setRole(userRole);
+    
+              if (userRole !== 'superadmin') {
+                router.push('/');
+              }
+            } else {
+              router.push('/');
+            }
+          } catch (error) {
+            console.error('Error checking user role:', error);
+            router.push('/');
+          } finally {
+            fetchRoleRequests();
+            setLoading(false);
+          }
+        } else {
+          router.push('/');
+        }
+      });
+    
+      return () => unsubscribe();
+    }, [router]);
 
-    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-      if (!authUser) {
-        router.push("/")
-        return
-      }
-
-      try {
-        // const userDoc = await getDocs(
-        //   query(collection(db, "users"), where("id", "==", authUser.uid), where("role", "in", ["admin", "superadmin", "user"])),
-        // )
-        
-
-        // if (userDoc.empty) {
-        //   toast.error("You don't have permission to access this page")
-        //   router.push("/")
-        //   return
-        // }
-
-        setIsAdmin(true)
-        fetchRoleRequests()
-      } catch (error) {
-        console.error("Error checking admin status:", error)
-        router.push("/")
-      }
-    })
-
-    return () => unsubscribe()
-  }, [router])
-
-  const fetchRoleRequests = () => {
-    const q = query(collection(db, "roleChangeRequests"), orderBy("createdAt", "desc"))
-
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const requestsData: RoleChangeRequest[] = []
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as Omit<RoleChangeRequest, "id">
-          requestsData.push({
-            id: doc.id,
-            ...data,
+    const fetchRoleRequests = () => {
+      const q = query(collection(db, "roleChangeRequests"), orderBy("createdAt", "desc"))
+  
+      const unsubscribe = onSnapshot(
+        q,
+        (querySnapshot) => {
+          const requestsData: RoleChangeRequest[] = []
+          querySnapshot.forEach((doc) => {
+            const data = doc.data() as Omit<RoleChangeRequest, "id">
+            requestsData.push({
+              id: doc.id,
+              ...data,
+            })
           })
-        })
-        setRequests(requestsData)
-        setLoading(false)
-      },
-      (error) => {
-        console.error("Error fetching role requests:", error)
-        setLoading(false)
-      },
-    )
-
-    return unsubscribe
-  }
+          setRequests(requestsData)
+          setLoading(false)
+        },
+        (error) => {
+          console.error("Error fetching role requests:", error)
+          setLoading(false)
+        },
+      )
+  
+      return unsubscribe
+    }
 
   const handleViewDetails = (request: RoleChangeRequest) => {
     setSelectedRequest(request)
@@ -117,13 +119,14 @@ export default function AdminRoleRequestsPage() {
       })
 
       if (status === "approved") {
-        // Update user's role in the users collection
         await updateDoc(doc(db, "users", selectedRequest.userId), {
           role: selectedRequest.requestedRole,
         })
       }
 
-      toast.success(`Request ${status === "approved" ? "approved" : "rejected"} successfully`)
+      toast.success(`Request ${status === "approved" ? "approved" : "rejected"} successfully`,{
+        style: { color : 'green'}
+      })
       setOpenDialog(false)
     } catch (error) {
       console.error(`Error ${status} request:`, error)
@@ -165,13 +168,13 @@ export default function AdminRoleRequestsPage() {
     );
   }
 
-  if (!isAdmin) {
+  if ( role !== 'superadmin' ) {
     return null;
   }
 
   return (
     <>
-    <Toaster position="top-right" />
+    <Toaster  className='text-green-500' />
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 px-4 py-8 pt-10 pb-20">
      <div className="max-w-6xl mx-auto bg-white border-none shadow-lg p-5">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -339,26 +342,26 @@ export default function AdminRoleRequestsPage() {
                 <>
                   <Button
                     variant="outline"
-                    className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    className="border-red-200 text-red-600 bg-red-100 hover:bg-red-200 hover:text-red-700"
                     onClick={() => handleUpdateStatus("rejected")}
                     disabled={isProcessing}
                   >
                     {isProcessing ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                     ) : (
-                      <XCircle className="mr-2 h-4 w-4" />
+                      <XCircle className="mr-1 h-4 w-4" />
                     )}
                     Reject Request
                   </Button>
                   <Button
-                    className="bg-green-600 hover:bg-green-700"
+                    className="bg-green-700 hover:bg-green-800"
                     onClick={() => handleUpdateStatus("approved")}
                     disabled={isProcessing}
                   >
                     {isProcessing ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-1 h-4 w-4 animate-spin" />
                     ) : (
-                      <CheckCircle className="mr-2 h-4 w-4" />
+                      <CheckCircle className="mr-1 h-4 w-4" />
                     )}
                     Approve Request
                   </Button>
@@ -377,3 +380,4 @@ export default function AdminRoleRequestsPage() {
     </>
   )
 }
+export default RoleRequestsPage;

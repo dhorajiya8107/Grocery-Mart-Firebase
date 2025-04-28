@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, where, getDocs } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, where, getDocs, getDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db } from "@/app/src/firebase";
+import { auth, db } from "@/app/src/firebase";
 import { toast, Toaster } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -33,71 +33,96 @@ interface RoleChangeRequest {
 
 function YourRequest() {
   const [requests, setRequests] = useState<RoleChangeRequest[]>([]);
+  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<RoleChangeRequest | null>(null);
   const [adminNotes, setAdminNotes] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
+  const [role, setRole] = useState<string | null>(null);
 
+  // If user is login then set userId otherwise null
   useEffect(() => {
-    const auth = getAuth()
-
-    const unsubscribe = onAuthStateChanged(auth, async (authUser) => {
-      if (!authUser) {
-        router.push("/")
-        return
+    const unsubscribe = onAuthStateChanged(getAuth(), (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        setUserId(null); 
+       if (!auth.currentUser) {
+        router.replace('/');
+       return;
       }
-
-      try {
-        // const userDoc = await getDocs(
-        //   query(collection(db, "users"), where("id", "==", authUser.uid), where("role", "in", ["admin", "superadmin", "user"])),
-        // )
-        
-
-        // if (userDoc.empty) {
-        //   toast.error("You don't have permission to access this page")
-        //   router.push("/")
-        //   return
-        // }
-
-        setIsAdmin(true)
-        fetchRoleRequests()
-      } catch (error) {
-        console.error("Error checking admin status:", error)
-        router.push("/")
       }
-    })
+      setLoading(false);
+    });
 
-    return () => unsubscribe()
-  }, [router])
+    return () => unsubscribe();
+  }, []);
 
-  const fetchRoleRequests = () => {
-    const q = query(collection(db, "roleChangeRequests"), orderBy("createdAt", "desc"))
+  // Checking login user role
+    useEffect(() => {
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          setLoading(true);
+          try {
+            const userRef = doc(db, 'users', user.uid);
+            const userSnap = await getDoc(userRef);
+    
+            if (userSnap.exists()) {
+              const userRole = userSnap.data()?.role;
+              setRole(userRole);
+    
+              if (userRole !== 'admin' && userRole !== 'user') {
+                router.push('/');
+              }
+            } else {
+              router.push('/');
+            }
+          } catch (error) {
+            console.error('Error checking user role:', error);
+            router.push('/');
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          router.push('/');
+        }
+      });
+    
+      return () => unsubscribe();
+    }, [router]);
 
-    const unsubscribe = onSnapshot(
-      q,
-      (querySnapshot) => {
-        const requestsData: RoleChangeRequest[] = []
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as Omit<RoleChangeRequest, "id">
-          requestsData.push({
-            id: doc.id,
-            ...data,
-          })
-        })
-        setRequests(requestsData)
-        setLoading(false)
-      },
-      (error) => {
-        console.error("Error fetching role requests:", error)
-        setLoading(false)
-      },
-    )
-
-    return unsubscribe
-  }
+    useEffect(() => {
+      if (!userId) return;
+  
+      const q = query(
+        collection(db, "roleChangeRequests"),
+        where('userId', '==', userId)
+      );
+  
+      const unsubscribe = onSnapshot(
+        q,
+        (querySnapshot) => {
+          const requestsData: RoleChangeRequest[] = [];
+          querySnapshot.forEach((doc) => {
+            const data = doc.data() as Omit<RoleChangeRequest, "id">;
+            requestsData.push({
+              id: doc.id,
+              ...data,
+            });
+          });
+          setRequests(requestsData);
+          setLoading(false);
+        },
+        (error) => {
+          console.error("Error fetching role requests:", error);
+          setLoading(false);
+        }
+      );
+  
+      return () => unsubscribe();
+    }, [userId]);
 
   const handleViewDetails = (request: RoleChangeRequest) => {
     setSelectedRequest(request)
@@ -165,7 +190,7 @@ function YourRequest() {
     );
   }
 
-  if (!isAdmin) {
+  if (role !== 'admin' && role !== 'user') {
     return null;
   }
 

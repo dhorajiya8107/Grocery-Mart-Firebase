@@ -2,15 +2,22 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { db } from "@/app/src/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import LogInPage from "@/app/auth/LogIn";
 import { toast } from "sonner";
 import { Toaster } from "sonner";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper as SwiperType } from "swiper";
 
-import Atta from '../../../images/Grocery/Atta.jpg'
+// Import Swiper styles
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+
 import Image from "next/image";
+import { Autoplay, Navigation, Parallax } from "swiper/modules";
  
 interface Product {
   id: string;
@@ -43,6 +50,7 @@ const CategoryPage = () => {
   const router = useRouter();
   const [activeIndex, setActiveIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
+  const swiperRef = useRef<SwiperType | null>(null);
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0])
@@ -113,8 +121,6 @@ const CategoryPage = () => {
               if (productImagesDoc.exists()) {
                 const imagesData = productImagesDoc.data() as ProductImages
                 const images: string[] = []
-
-                // Extract all imageUrl fields (imageUrl, imageUrl1, imageUrl2, etc.)
                 let index = 0
                 while (imagesData[`imageUrl${index === 0 ? "" : index}`]) {
                   images.push(imagesData[`imageUrl${index === 0 ? "" : index}`])
@@ -123,7 +129,6 @@ const CategoryPage = () => {
 
                 setProductImages(images)
               } else {
-                // If no additional images, just use the main product image
                 setProductImages([product.imageUrl])
               }
             } catch (error) {
@@ -407,12 +412,36 @@ const CategoryPage = () => {
                     </div>
                     )} */}
 
-                    <div className="w-full mb-4">
-                        <img
+                    <div className="w-80 mb-4">
+                        {/* <img
                           src={productImages[activeIndex] || product.imageUrl}
                           alt={`${product.productName}`}
                           className="w-full h-80 object-contain rounded-md"
-                        />
+                        /> */}
+                        <Swiper
+                          modules={[Autoplay, Navigation, Parallax]}
+                          spaceBetween={0}
+                          slidesPerView={1}
+                          // autoplay={{ delay: 5000, disableOnInteraction: false }}
+                          className="w-full rounded-md"
+                          onSwiper={(swiper) => (swiperRef.current = swiper)}
+                          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+                        >
+                          {productImages.map((image, index) => (
+                            <SwiperSlide key={index}>
+                              <div
+                                className={`cursor-pointer w-full rounded-md`}
+                                onClick={() => setActiveIndex(index)}
+                              >
+                                <img
+                                  src={image || "/placeholder.svg"}
+                                  alt={`${product.productName} ${index > 0 ? index : ""}`}
+                                  className="w-full h-80 object-contain rounded-md"
+                                />
+                              </div>
+                            </SwiperSlide>
+                          ))}
+                        </Swiper>
                       </div>
 
                       {productImages.length > 1 && (
@@ -423,7 +452,8 @@ const CategoryPage = () => {
                               className={`cursor-pointer min-w-16 h-16 border-2 rounded-md ${
                                 activeIndex === index ? "border-green-700" : "border-gray-200"
                               }`}
-                              onClick={() => setActiveIndex(index)}
+                              // onClick={() => setActiveIndex(index)}
+                              onClick={() => { swiperRef.current?.slideTo(index) }}
                             >
                               <img
                                 src={image || "/placeholder.svg"}

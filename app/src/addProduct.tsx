@@ -160,7 +160,9 @@ const AddProductForm = () => {
         createdAt: new Date().toISOString(),
       })
 
-      toast.success("Product added successfully");
+      toast.success("Product added successfully" , {
+        style: { color : 'green'}
+      });
       setImagePreviews([]);
       reset()
     } catch (error) {
@@ -205,7 +207,7 @@ const AddProductForm = () => {
 
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster />
       <Card className="max-w-5xl mx-auto shadow-lg">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">

@@ -1,33 +1,34 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { doc, setDoc, serverTimestamp, collection, addDoc } from "firebase/firestore"
-import { db } from "@/app/src/firebase"
-import { toast, Toaster } from "sonner"
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { doc, setDoc, serverTimestamp, collection, addDoc } from "firebase/firestore";
+import { db } from "@/app/src/firebase";
+import { toast, Toaster } from "sonner";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useRouter } from "next/navigation";
 
 interface UserData {
-  id: string
-  name: string
-  email: string
-  role: string
-  phoneNumber?: string
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  phoneNumber?: string;
 }
 
 const availableRoles = [
   { id: "admin", name: "Admin" },
-  { id: "manager", name: "Manager" },
   { id: "user", name: "User" },
   { id: "editor", name: "Editor" },
+  { id: "manager", name: "Manager" },
   { id: "analyst", name: "Analyst" },
   { id: "support", name: "Support" },
 ]
@@ -38,14 +39,15 @@ const formSchema = z.object({
   currentRole: z.string(),
   requestedRole: z.string().min(1, "Please select a role"),
   reason: z.string().min(10, "Please provide a reason with at least 10 characters"),
-  duties: z.string().min(20, "Please describe your duties in at least 20 characters"),
+  duties: z.string().min(10, "Please describe your duties in at least 10 characters"),
   phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
 })
 
-type FormValues = z.infer<typeof formSchema>
+type FormValues = z.infer<typeof formSchema>;
 
 export function RoleChangeForm({ userData }: { userData: UserData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -62,7 +64,7 @@ export function RoleChangeForm({ userData }: { userData: UserData }) {
 
   const onSubmit = async (data: FormValues) => {
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       await addDoc(collection(db, "roleChangeRequests"), {
         userId: userData.id,
@@ -88,7 +90,9 @@ export function RoleChangeForm({ userData }: { userData: UserData }) {
         )
       }
 
-      toast.success("Role change request submitted successfully")
+      toast.success("Role change request submitted successfully",{
+        style: { color: 'green'}
+      })
       form.reset({
         ...data,
         reason: "",
@@ -96,16 +100,17 @@ export function RoleChangeForm({ userData }: { userData: UserData }) {
         requestedRole: "",
       })
     } catch (error) {
-      console.error("Error submitting role change request:", error)
-      toast.error("Failed to submit request. Please try again.")
+      console.error("Error submitting role change request:", error);
+      toast.error("Failed to submit request. Please try again.");
     } finally {
-      setIsSubmitting(false)
+      router.push("/requests");
+      setIsSubmitting(false);
     }
   }
 
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster />
       <Card className="max-w-2xl mx-auto shadow-lg">
         <CardHeader className="">
           <CardTitle className="text-xl">Role Change Request Application</CardTitle>
@@ -163,18 +168,29 @@ export function RoleChangeForm({ userData }: { userData: UserData }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Requested Role</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a role" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {availableRoles.map((role) => (
-                            <SelectItem key={role.id} value={role.id}>
-                              {role.name}
-                            </SelectItem>
-                          ))}
+                        {availableRoles.map((role) => (
+                          <SelectItem 
+                            key={role.id} 
+                            value={role.id}
+                            disabled={
+                              role.id === "editor" ||
+                              role.id === "analyst" || 
+                              role.id === "manager" || 
+                              role.id === "support" || 
+                              (role.id === "admin" && form.getValues("currentRole") === "admin") || 
+                              (role.id === "user" && form.getValues("currentRole") === "user")
+                            }
+                          >
+                            {role.name}
+                          </SelectItem>
+                        ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
