@@ -2,6 +2,7 @@
 
 import type React from "react";
 
+<<<<<<< HEAD
 import { auth, db } from "@/app/src/firebase";
 import { CustomPagination } from "@/components/CustomPagination";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -15,6 +16,20 @@ import { Calendar, CalendarX2, Edit, Ellipsis, Eye, IndianRupee, Layers, Package
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
+=======
+import { useRouter } from "next/navigation";
+import { collection, doc, query, setDoc, getDoc, onSnapshot, deleteDoc, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { auth, db } from "@/app/src/firebase";
+import { toast } from "sonner";
+import { Toaster } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Search, Edit, Trash2, Plus, Upload, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { CustomPagination } from "@/components/CustomPagination";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
 
 interface Product {
   id: string;
@@ -107,10 +122,14 @@ const EditProduct = () => {
             discountedPrice: Number.parseFloat(data.discountedPrice),
             imageUrl: data.imageUrl,
             quantity: data.quantity || "0",
+<<<<<<< HEAD
             category: data.category,
             buckleNumber: data.buckleNumber,
             expiresAt: data.expiresAt,
             manufacturedAt: data.manufacturedAt,
+=======
+            category: data.category || "Uncategorized",
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
           } as Product
         })
 
@@ -184,12 +203,12 @@ const EditProduct = () => {
     }
   }, [products, selectedProduct])
 
-  // Filtered products by searching
   const filteredProducts = products.filter(
     (product) =>
       product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+<<<<<<< HEAD
       product.quantity?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.discountedPrice?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.buckleNumber?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -199,11 +218,16 @@ const EditProduct = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
+=======
+      product.discountedPrice?.toString().includes(searchTerm.toLowerCase()),
+  )
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
 
   const indexOfLastCategory = currentPage * itemsPerPage;
   const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstCategory, indexOfLastCategory);
 
+<<<<<<< HEAD
   // Handle view product
   const handleViewClick = (product: Product) => {
     setSelectedProduct(product); 
@@ -226,6 +250,22 @@ const EditProduct = () => {
   }
 
   // Handle delete product
+=======
+  const handleEditClick = (product: Product) => {
+    setSelectedProduct(product);
+    setEditForm({ ...product });
+
+    const images = productImages[product.id] || [];
+
+    setSelectedProductImages(images.length > 0 ? images : product.imageUrl ? [product.imageUrl] : []);
+    setImagesToDelete([]);
+    setNewImages([]);
+    setNewImagePreviews([]);
+    setActiveTab("details");
+    setIsEditModalOpen(true);
+  }
+
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
   const handleDeleteClick = (product: Product) => {
     setSelectedProduct(product);
     setIsDeleteModalOpen(true);
@@ -241,6 +281,7 @@ const EditProduct = () => {
       })
     }
   }
+<<<<<<< HEAD
 
   // Converting image file to base64 url
   const convertToBase64 = (file: File): Promise<string> => {
@@ -297,6 +338,59 @@ const EditProduct = () => {
   }
 
   // Handle edit product details
+=======
+
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      }
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    })
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const fileArray = Array.from(files);
+      setNewImages((prev) => [...prev, ...fileArray]);
+
+      try {
+        const newPreviews = await Promise.all(fileArray.map((file) => convertToBase64(file)))
+        setNewImagePreviews((prev) => [...prev, ...newPreviews]);
+      } catch (error) {
+        console.error("Error creating previews:", error);
+        toast.error("Failed to create image previews");
+      }
+    }
+  }
+
+  const removeNewImage = (index: number) => {
+    const updatedImages = [...newImages];
+    updatedImages.splice(index, 1);
+    setNewImages(updatedImages);
+
+    const updatedPreviews = [...newImagePreviews];
+    updatedPreviews.splice(index, 1);
+    setNewImagePreviews(updatedPreviews);
+  }
+
+  const toggleImageForDeletion = (index: number) => {
+    if (imagesToDelete.includes(index)) {
+      setImagesToDelete(imagesToDelete.filter((i) => i !== index));
+    } else {
+      setImagesToDelete([...imagesToDelete, index]);
+    }
+  }
+
+  const clearAllNewImages = () => {
+    setNewImages([]);
+    setNewImagePreviews([]);
+  }
+
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
   const handleSaveEdit = async () => {
     if (!editForm || !selectedProduct) return;
 
@@ -341,9 +435,13 @@ const EditProduct = () => {
       setImagesToDelete([]);
       setNewImages([]);
       setNewImagePreviews([]);
+<<<<<<< HEAD
       toast.success("Product updated successfully!",{
         style: { color: "green" }
       });
+=======
+      toast.success("Product updated successfully!");
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
     } catch (error) {
       console.error("Error updating product:", error);
       toast.error("Failed to update product");
@@ -364,9 +462,13 @@ const EditProduct = () => {
 
       setIsDeleteModalOpen(false);
       setSelectedProduct(null);
+<<<<<<< HEAD
       toast.success("Product deleted successfully!",{
         style: { color: "red" }
       });
+=======
+      toast.success("Product deleted successfully!");
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error("Failed to delete product");
@@ -400,7 +502,11 @@ const EditProduct = () => {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold">Product Management</h1>
             <Button onClick={handleAddProductClick} className="bg-green-700 hover:bg-green-800 text-white">
+<<<<<<< HEAD
               <Plus className="h-4 w-4" /> Add Product
+=======
+              <Plus className="mr-2 h-4 w-4" /> Add Product
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
             </Button>
           </div>
 
@@ -451,7 +557,11 @@ const EditProduct = () => {
                                 <img
                                   src={product.imageUrl || "/placeholder.svg"}
                                   alt={product.productName}
+<<<<<<< HEAD
                                   className="h-12 w-12 object-cover"
+=======
+                                  className="h-10 w-10 rounded-md object-cover"
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement
                                     target.src = "/placeholder.svg?height=40&width=40"
@@ -484,6 +594,7 @@ const EditProduct = () => {
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
+<<<<<<< HEAD
                         <div
                             className={`text-sm font-medium ${
                               Number.parseInt(product.quantity) > 0
@@ -501,6 +612,12 @@ const EditProduct = () => {
                                 Low Stock
                               </span>
                             )}
+=======
+                          <div
+                            className={`text-sm ${Number.parseInt(product.quantity) > 0 ? "text-green-700" : "text-red-600"}`}
+                          >
+                            {Number.parseInt(product.quantity) > 0 ? product.quantity : "Out of stock"}
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -574,9 +691,16 @@ const EditProduct = () => {
         </div>
       </div>
 
+<<<<<<< HEAD
       {selectedProduct && (
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
           <DialogContent className="sm:max-w-2xl md:max-w-xl max-h-[90vh] overflow-hidden flex flex-col">
+=======
+      {/* Edit Product Modal with Tabs and Scrollable Content */}
+      {selectedProduct && (
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
             <DialogHeader className="pb-2">
               <DialogTitle>Edit Product: {selectedProduct.productName}</DialogTitle>
             </DialogHeader>
@@ -680,7 +804,11 @@ const EditProduct = () => {
                       {selectedProductImages.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           {selectedProductImages.map((imageUrl, index) => (
+<<<<<<< HEAD
                             <div key={index} className="relative border rounded-lg overflow-hidden group w-40 h-40">
+=======
+                            <div key={index} className="relative border rounded-lg overflow-hidden group h-32">
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
                               <img
                                 src={imageUrl || "/placeholder.svg?height=128&width=128"}
                                 alt={`Product Image ${index + 1}`}
@@ -760,7 +888,11 @@ const EditProduct = () => {
                       {newImagePreviews.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
                           {newImagePreviews.map((preview, index) => (
+<<<<<<< HEAD
                             <div key={`new-${index}`} className="relative border rounded-lg overflow-hidden w-40 h-40">
+=======
+                            <div key={`new-${index}`} className="relative border rounded-lg overflow-hidden h-32">
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
                               <img
                                 src={preview || "/placeholder.svg?height=128&width=128"}
                                 alt={`New image ${index + 1}`}
@@ -792,6 +924,25 @@ const EditProduct = () => {
                         </div>
                       )}
                     </div>
+<<<<<<< HEAD
+=======
+
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <label htmlFor="imageUrl" className="text-right text-sm font-medium">
+                        Main Image URL
+                      </label>
+                      <Input
+                        id="imageUrl"
+                        name="imageUrl"
+                        value={editForm?.imageUrl || ""}
+                        onChange={handleInputChange}
+                        className="col-span-3"
+                      />
+                      <p className="text-xs text-gray-500 col-span-3 col-start-2">
+                        This will be overridden if you upload new images or change the order
+                      </p>
+                    </div>
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
                   </div>
                 </TabsContent>
               </div>
@@ -809,6 +960,7 @@ const EditProduct = () => {
         </Dialog>
       )}
 
+<<<<<<< HEAD
       {selectedProduct && (
         <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
           <DialogContent className="sm:max-w-2xl md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -887,6 +1039,28 @@ const EditProduct = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+=======
+      {/* Delete Confirmation Modal */}
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>Are you sure you want to delete the product "{selectedProduct?.productName}"?</p>
+            <p className="text-sm text-red-500 mt-2">This action cannot be undone.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleDeleteConfirm} className="bg-red-600 text-white hover:bg-red-700">
+              Delete Product
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+>>>>>>> 59873b96c42cfe60dc7dfeab75aca9d342466692
     </>
   )
 }
