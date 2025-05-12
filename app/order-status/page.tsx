@@ -205,6 +205,16 @@ const OrderStatus = () => {
     }
   };
 
+  // const  userIdCounts: Record<string, number> = {};
+
+  // orders.forEach(order => {
+  //   userIdCounts[order.userId] = (userIdCounts[order.userId] || 0) + 1;
+  // });
+
+  // console.log(userIdCounts);
+
+  
+
   const filteredOrders = orders.filter((order) => {
     const userAddress = address.find((address) => address.userId === order.userId);
     const foundUser = users.find((u) => u.userId === order.userId);

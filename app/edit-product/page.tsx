@@ -190,8 +190,7 @@ const EditProduct = () => {
       product.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.quantity?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.discountedPrice?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.buckleNumber?.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.buckleNumber?.toString().includes(searchTerm.toLowerCase()) ||
       product.discountedPrice?.toString().includes(searchTerm.toLowerCase()),
   )
 
