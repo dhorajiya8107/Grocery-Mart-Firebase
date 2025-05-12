@@ -222,6 +222,7 @@ const OrderStatus = () => {
     return (
       order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.orderStatus?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.totalAmount?.toString().includes(searchTerm.toLowerCase()) ||
       userAddress?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       userAddress?.phoneNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       foundUser?.email?.toLowerCase().includes(searchTerm.toLowerCase())
