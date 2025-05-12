@@ -1,17 +1,15 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { collection, doc, getDocs, query, setDoc, getDoc, where, onSnapshot, orderBy, limit } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-import { db } from '@/app/src/firebase';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import LogInPage from '@/app/auth/LogIn';
-import { toast } from 'sonner';
-import { Toaster } from 'sonner';
+import { db } from '@/app/src/firebase';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { collection, doc, getDocs, onSnapshot, orderBy, query, setDoc, where } from 'firebase/firestore';
 import { Filter, Search } from 'lucide-react';
-import Image from "next/image";
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast, Toaster } from 'sonner';
 
 interface Product {
   id: string;

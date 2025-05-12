@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { collection, doc, getDoc, onSnapshot, query, setDoc } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db } from "../src/firebase";
-import { toast, Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Info, Minus, Plus, X, ArrowRight, ShoppingBag, InfoIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, doc, getDoc, onSnapshot, query, setDoc } from "firebase/firestore";
+import { ArrowRight, Info, InfoIcon, Minus, Plus, ShoppingBag, ShoppingCart, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast, Toaster } from "sonner";
+import { db } from "../src/firebase";
 
 interface Product {
   id: string;

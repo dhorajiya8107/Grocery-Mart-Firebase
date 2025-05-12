@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react'
+import React from 'react';
 
 const Terms = () => {
   return (
@@ -8,4 +8,4 @@ const Terms = () => {
   )
 }
 
-export default Terms
+export default Terms;

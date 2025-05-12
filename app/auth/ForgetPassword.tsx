@@ -1,15 +1,15 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../src/firebase';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import TextInput from '@/components/form-fields/TextInput';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { ArrowLeft, KeyRound } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { auth } from '../src/firebase';
  
 // Validation schema using Zod
 const schema = z.object({

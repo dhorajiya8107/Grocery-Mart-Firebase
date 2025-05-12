@@ -1,14 +1,13 @@
 "use client"
 
-import { ChevronRight, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Send, Twitter } from "lucide-react"
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from "firebase/firestore"
+import { ChevronRight, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react"
+import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import type React from "react"
 import { useEffect, useState } from "react"
-import { collection, doc, getDoc, onSnapshot, orderBy, query } from "firebase/firestore"
-import { auth, db } from "../src/firebase"
-import Image from "next/image"
 import Logo from "../../images/Logo.png"
+import { auth, db } from "../src/firebase"
 
 interface Category {
   id: string
@@ -140,7 +139,7 @@ const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/faqs"
+                  href="/FAQs"
                   className="text-sm hover:text-green-700 transition-colors duration-300 flex items-center gap-2"
                 >
                   FAQs

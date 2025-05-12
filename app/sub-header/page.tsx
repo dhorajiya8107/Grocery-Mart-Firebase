@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { collection, getDocs, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { db } from '../src/firebase';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import { db } from '../src/firebase';
 
 const SubHeader = () => {
   const [categories, setCategories] = useState<string[]>([]);

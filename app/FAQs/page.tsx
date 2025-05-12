@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react'
+import React from 'react';
 
 const FAQs = () => {
   return (
@@ -8,4 +8,4 @@ const FAQs = () => {
   )
 }
 
-export default FAQs
+export default FAQs;

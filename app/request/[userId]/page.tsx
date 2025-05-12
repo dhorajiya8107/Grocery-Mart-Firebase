@@ -1,11 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { auth, db } from "@/app/src/firebase";
+import { db } from "@/app/src/firebase";
 import { RoleChangeForm } from "@/components/role-change-form";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface UserData {
   id: string

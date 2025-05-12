@@ -1,25 +1,25 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 
-import { useState, useEffect } from "react";
-import { collection, addDoc, getDocs, doc, setDoc } from "firebase/firestore";
 import { db } from "@/app/src/firebase";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, PackagePlus, Upload, X } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { toast, Toaster } from "sonner";
-import { Controller, useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { addDoc, collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { CalendarIcon, PackagePlus, Upload, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast, Toaster } from "sonner";
+import { z } from "zod";
 
 type Category = {
   id: string;
@@ -160,8 +160,8 @@ const AddProductForm = () => {
         createdAt: new Date().toISOString(),
       })
 
-      toast.success("Product added successfully" , {
-        style: { color : 'green'}
+      toast.success("Product added successfully", {
+        style: { color: 'green' }
       });
       setImagePreviews([]);
       reset()
@@ -191,18 +191,18 @@ const AddProductForm = () => {
     if (files && files.length > 0) {
       const fileArray = Array.from(files);
       setValue("images", [...watch("images"), ...fileArray]);
-  
+
       try {
         const newPreviews = await Promise.all(fileArray.map((file) => convertToBase64(file)));
         setImagePreviews((prev) => [...prev, ...newPreviews]);
       } catch (error) {
         console.error("Error creating previews:", error);
       }
-  
+
       e.target.value = '';
     }
   };
-  
+
   const removeImage = (index: number) => {
     const updatedImages = [...watch("images")];
     updatedImages.splice(index, 1);
@@ -362,7 +362,7 @@ const AddProductForm = () => {
                   />
                   {errors.buckleNumber && <p className="text-red-500 text-sm">{errors.buckleNumber.message}</p>}
                 </div>
-
+                
                 <div className="space-y-2">
                   <Label htmlFor="manufacturedDate" className="font-medium">
                     Manufactured Date <span className="text-red-500">*</span>
@@ -469,7 +469,7 @@ const AddProductForm = () => {
                         size="sm"
                         className="text-red-600 hover:bg-red-50"
                       >
-                        Clear All 
+                        Clear All
                       </Button>
                     )}
                   </div>

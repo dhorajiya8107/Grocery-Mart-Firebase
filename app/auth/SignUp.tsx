@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth, db } from '../src/firebase';
-import { Button } from '@/components/ui/button';
 import TextInput from '@/components/form-fields/TextInput';
-import { useRouter } from 'next/navigation';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Mail, UserIcon, UserRoundPlus } from 'lucide-react';
-import  AppleLogo  from '../../images/Applelogo.png';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { UserRoundPlus } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import * as z from 'zod';
+import AppleLogo from '../../images/Applelogo.png';
+import { auth, db } from '../src/firebase';
  
 // Validation schema using Zod
 const schema = z

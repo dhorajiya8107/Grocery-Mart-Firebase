@@ -1,9 +1,9 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationNext, PaginationPrevious, } from "./ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "./ui/select";
-import { cn } from "@/lib/utils";
 
 export interface CustomPaginationProps {
   totalCount: number;

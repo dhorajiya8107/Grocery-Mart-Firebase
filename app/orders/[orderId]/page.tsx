@@ -1,19 +1,19 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
-import { collection, doc, getDoc, getDocs, getFirestore, onSnapshot, query, where } from 'firebase/firestore';
 import { auth, db } from '@/app/src/firebase';
 import InvoicePdf, { InvoicePdfRef } from '@/app/src/invoicePdf';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas-pro';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Separator } from '@radix-ui/react-separator';
-import { ArrowLeft, Copy, Download, HelpCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Separator } from '@radix-ui/react-separator';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
+import html2canvas from 'html2canvas-pro';
+import jsPDF from 'jspdf';
+import { ArrowLeft, Copy, Download, HelpCircle } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
 type Product = {

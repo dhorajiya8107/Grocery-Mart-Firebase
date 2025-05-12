@@ -1,20 +1,20 @@
 'use client';
 
+import TextInput from '@/components/form-fields/TextInput';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { LogIn } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import AppleLogo from '../../images/Applelogo.png';
 import { auth, db } from '../src/firebase';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import TextInput from '@/components/form-fields/TextInput';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ForgotPasswordPage from './ForgetPassword';
-import { LogIn } from 'lucide-react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import  AppleLogo  from '../../images/Applelogo.png';
-import Image from 'next/image';
  
 // Validation schema using Zod
 const schema = z.object({

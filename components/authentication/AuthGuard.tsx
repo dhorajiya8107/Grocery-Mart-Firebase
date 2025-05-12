@@ -1,11 +1,11 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from 'react';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/app/src/firebase';
-import { useRouter, usePathname } from 'next/navigation';
-import Header from '@/app/header/page';
 import Footer from '@/app/footer/page';
+import Header from '@/app/header/page';
+import { auth } from '@/app/src/firebase';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { usePathname, useRouter } from 'next/navigation';
+import React, { Suspense, useEffect, useState } from 'react';
 
 interface AuthGuardProps {
   children: React.ReactNode;

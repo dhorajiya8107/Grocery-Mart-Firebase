@@ -1,15 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
-import { collection, getDocs, query, limit, orderBy, doc, setDoc, where, onSnapshot } from "firebase/firestore";
-import { auth, db } from "./src/firebase";
-import { useParams, useRouter } from "next/navigation";
+import { collection, doc, getDocs, onSnapshot, orderBy, query, setDoc, where } from "firebase/firestore";
 import Image from "next/image";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Navigation, Autoplay, Parallax } from "swiper/modules";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
+import { Autoplay, Navigation, Pagination, Parallax } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { auth, db } from "./src/firebase";
 
+import tr from "../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
+import BabyCare from "../images/Home/BabyCare.jpg";
 import Cat1 from "../images/Home/Cat1.png";
 import Cat2 from "../images/Home/Cat2.png";
 import Cat3 from "../images/Home/Cat3.png";
@@ -19,15 +21,14 @@ import Cat6 from "../images/Home/Cat6.png";
 import Cat7 from "../images/Home/Cat7.png";
 import Cat8 from "../images/Home/Cat8.png";
 import Cat9 from "../images/Home/Cat9.png";
-import BabyCare from "../images/Home/BabyCare.jpg";
 import Protein from "../images/Home/Protien.jpg";
 import Tea from "../images/Home/Tea.jpg";
-import tr from "../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 
-import "swiper/css";
-import "swiper/css/pagination";``
-import "swiper/css/navigation";
 import { ChevronRight } from "lucide-react";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+``
 
 interface Product {
   id: string;

@@ -1,20 +1,19 @@
 'use client';
 
+import { CustomPagination } from '@/components/CustomPagination';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { Edit, Search, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast, Toaster } from 'sonner';
 import * as yup from 'yup';
 import { auth, db } from '../src/firebase';
-import { CustomPagination } from '@/components/CustomPagination';
-import { Edit, Pencil, Search, Trash2 } from 'lucide-react';
  
 interface Category {
   id: string;

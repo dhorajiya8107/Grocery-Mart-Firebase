@@ -1,14 +1,13 @@
 "use client";
 
-import { collection, doc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
-import type React from "react";
-import { useEffect, useState } from "react";
-import { db } from "../src/firebase";
 import { getAuth } from "firebase/auth";
-import { toast, Toaster } from "sonner";
+import { collection, doc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import React from "react";
+import { useEffect, useState } from "react";
+import { toast, Toaster } from "sonner";
 import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
+import { db } from "../src/firebase";
 
 interface Product {
   id: string;

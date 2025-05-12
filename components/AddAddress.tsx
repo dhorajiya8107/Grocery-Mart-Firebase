@@ -1,19 +1,18 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useState } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import { Button } from "@/components/ui/button";
-import FloatingLabelInput from "@/components/form-fields/FloatingLabelInput";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { collection, doc, getDocs, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
 import { db } from "@/app/src/firebase";
-import { Home, Briefcase, Hotel, MapPin } from "lucide-react";
-import AddressTypeButton from "./form-fields/AddressTypeButton";
+import FloatingLabelInput from "@/components/form-fields/FloatingLabelInput";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, doc, getDocs, query, where, writeBatch } from "firebase/firestore";
+import { Briefcase, Home, Hotel, MapPin } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
+import * as yup from "yup";
+import AddressTypeButton from "./form-fields/AddressTypeButton";
 
 // Validation schema using yup
 const schema = yup.object().shape({

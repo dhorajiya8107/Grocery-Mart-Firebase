@@ -1,16 +1,14 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { collection, doc, getDocs, query, setDoc, getDoc, where, orderBy, onSnapshot } from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-import { db } from '@/app/src/firebase';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import LogInPage from '@/app/auth/LogIn';
-import { toast } from 'sonner';
-import { Toaster } from 'sonner';
+import { db } from '@/app/src/firebase';
 import { Input } from '@/components/ui/input';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { collection, doc, getDocs, onSnapshot, orderBy, query, setDoc } from 'firebase/firestore';
 import { Search } from 'lucide-react';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast, Toaster } from 'sonner';
 import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 interface Product {
   id: string;

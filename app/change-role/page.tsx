@@ -1,16 +1,16 @@
 'use client';
 
-import { collection, doc, getDoc, getDocs, onSnapshot, updateDoc } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react'
-import { auth, db } from '../src/firebase';
+import { CustomPagination } from '@/components/CustomPagination';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { toast, Toaster } from 'sonner';
-import { CustomPagination } from '@/components/CustomPagination';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { collection, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { Search, Shield, UserIcon, Users } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast, Toaster } from 'sonner';
+import { auth, db } from '../src/firebase';
  
 type User = {
   id: string;

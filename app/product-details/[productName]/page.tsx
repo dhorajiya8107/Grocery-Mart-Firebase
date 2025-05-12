@@ -1,22 +1,20 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
-import { useEffect, useRef, useState } from "react";
+import LogInPage from "@/app/auth/LogIn";
 import { db } from "@/app/src/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import LogInPage from "@/app/auth/LogIn";
-import { toast } from "sonner";
-import { Toaster } from "sonner";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { collection, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc } from "firebase/firestore";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast, Toaster } from "sonner";
 import { Swiper as SwiperType } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-import Image from "next/image";
 import { Autoplay, Navigation, Parallax } from "swiper/modules";
  
 interface Product {

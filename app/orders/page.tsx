@@ -1,15 +1,14 @@
 'use client';
 
-import { collection, getDocs, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
-import { auth, db } from '../src/firebase';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
-import { DateTime } from 'luxon';
 import { CustomPagination } from '@/components/CustomPagination';
-import { AlertCircle, ArrowRight, Calendar, CheckCircle, ChevronRight, Clock, DollarSign, Info, Package, Truck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { CardContent } from '@/components/ui/card';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { AlertCircle, ArrowRight, CheckCircle, ChevronRight, Info, Package, Truck } from 'lucide-react';
+import { DateTime } from 'luxon';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { auth, db } from '../src/firebase';
 
 type Product = {
     id: string;

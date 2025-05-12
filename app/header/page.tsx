@@ -1,24 +1,23 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { signOut, User, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/app/src/firebase";
+import AddAddressPage from "@/components/AddAddress";
+import { Input } from "@/components/ui/input";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { ChevronDown, KeyRound, LogOut, MapPin, MessageSquare, Package, Pencil, Plus, Search, Settings, ShoppingCart, UserIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React from "react";
+import { useEffect, useRef, useState } from "react";
+import Logo from "../../images/Logo.png";
+import ChangePasswordPage from "../auth/ChangePassword";
+import ForgotPasswordPage from "../auth/ForgetPassword";
 import LogInPage from "../auth/LogIn";
 import SignUpPage from "../auth/SignUp";
-import ChangePasswordPage from "../auth/ChangePassword";
-import SubHeader from "../sub-header/page";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
-import Image from "next/image";
-import Logo from "../../images/Logo.png";
-import { Input } from "@/components/ui/input";
-import { ChevronDown, KeyRound, LogOut, MapPin, MessageSquare, Package, Pencil, Plus, Search, Settings, ShoppingCart, UserIcon } from "lucide-react";
 import SearchBar from "../search-bar/page";
-import AddAddressPage from "@/components/AddAddress";
-import ForgotPasswordPage from "../auth/ForgetPassword";
-import CartPage from "../cart/page";
+import SubHeader from "../sub-header/page";
 
 
 interface Product {

@@ -1,17 +1,16 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { auth, db } from '../src/firebase';
-import { collection, doc, getDoc, getDocs, orderBy, query, updateDoc, where } from 'firebase/firestore';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { CustomPagination } from '@/components/CustomPagination';
-import { ArrowRight, CheckCircle, Info, Package, Search, Truck } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@radix-ui/react-select';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { collection, doc, getDoc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import { ArrowRight, CheckCircle, Info, Package, Search, Truck } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { auth, db } from '../src/firebase';
 
 type User = {
   email: string;

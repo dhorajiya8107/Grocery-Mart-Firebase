@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import AddAddressPage from "@/components/AddAddress";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   collection,
@@ -13,22 +18,14 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { db } from "../src/firebase";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import successAnimation from "../../animation/Animation - 1742460011298.json";
-import dynamic from "next/dynamic";
-import { Button } from "@/components/ui/button";
 import { Briefcase, Check, CreditCard, Home, Hotel, InfoIcon, MapPin, Package, ShieldCheck, Truck, Wallet } from "lucide-react";
-import AddAddressPage from "@/components/AddAddress";
+import dynamic from "next/dynamic";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
-import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import Image from 'next/image';
+import successAnimation from "../../animation/Animation - 1742460011298.json";
 import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
+import { db } from "../src/firebase";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false })
 

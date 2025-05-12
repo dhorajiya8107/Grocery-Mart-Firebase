@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useEffect, useState, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
+import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
 import html2canvas from 'html2canvas-pro';
 import jsPDF from "jspdf";
-import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
-import { auth, db } from "./firebase";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import Link from "next/link";
 import Image from 'next/image';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Logo from '../../images/Logo.png';
-import { onAuthStateChanged } from "firebase/auth";
-import { Separator } from "@/components/ui/separator";
+import { auth, db } from "./firebase";
  
 interface InvoicePdfProps {
   orderId: string;

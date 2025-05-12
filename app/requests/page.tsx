@@ -1,19 +1,15 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp, where, getDocs, getDoc } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/app/src/firebase";
-import { toast, Toaster } from "sonner";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { collection, doc, getDoc, onSnapshot, query, where } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Toaster } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, CheckCircle, XCircle, Clock, Eye } from "lucide-react";
 
 interface RoleChangeRequest {
   id: string

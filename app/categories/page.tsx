@@ -1,17 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { StaticImageData } from 'next/image';
+import Image, { StaticImageData } from 'next/image';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import Cat1 from '../../images/Home/Cat1.png';
-import Cat2 from '../../images/Home/Cat2.png';
-import Cat3 from '../../images/Home/Cat3.png';
-import Cat4 from '../../images/Home/Cat4.png';
-import Cat5 from '../../images/Home/Cat5.png';
-import Cat6 from '../../images/Home/Cat6.png';
-import Cat7 from '../../images/Home/Cat7.png';
-import Cat8 from '../../images/Home/Cat8.png';
-import Cat9 from '../../images/Home/Cat9.png';
 import Cat10 from '../../images/Home/Cat10.png';
 import Cat11 from '../../images/Home/Cat11.png';
 import Cat12 from '../../images/Home/Cat12.png';
@@ -21,15 +13,22 @@ import Cat15 from '../../images/Home/Cat15.png';
 import Cat16 from '../../images/Home/Cat16.png';
 import Cat17 from '../../images/Home/Cat17.png';
 import Cat18 from '../../images/Home/Cat18.png';
-import { useParams, useRouter } from 'next/navigation';
+import Cat2 from '../../images/Home/Cat2.png';
+import Cat3 from '../../images/Home/Cat3.png';
+import Cat4 from '../../images/Home/Cat4.png';
+import Cat5 from '../../images/Home/Cat5.png';
+import Cat6 from '../../images/Home/Cat6.png';
+import Cat7 from '../../images/Home/Cat7.png';
+import Cat8 from '../../images/Home/Cat8.png';
+import Cat9 from '../../images/Home/Cat9.png';
 
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
 import { Input } from '@/components/ui/input';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
-import { db } from '../src/firebase';
 import { Search } from 'lucide-react';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import { db } from '../src/firebase';
 
 interface Category {
   name: string;

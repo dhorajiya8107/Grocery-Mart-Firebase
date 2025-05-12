@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { auth } from "@/app/src/firebase";
-import { signInWithEmailAndPassword, signOut, updatePassword } from "firebase/auth";
-import { Button } from "@/components/ui/button";
-import TextInput from "@/components/form-fields/TextInput";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useRouter } from "next/navigation";
 import successAnimation from '@/animation/Animation - 1742460011298.json';
-import dynamic from 'next/dynamic';
+import { auth } from "@/app/src/firebase";
+import TextInput from "@/components/form-fields/TextInput";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signInWithEmailAndPassword, signOut, updatePassword } from "firebase/auth";
 import { Lock } from "lucide-react";
+import dynamic from 'next/dynamic';
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import * as z from "zod";
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
  
 // 494 577
