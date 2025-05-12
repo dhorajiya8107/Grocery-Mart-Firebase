@@ -260,6 +260,10 @@ const AddCategories = () => {
       console.error('Error updating category:', error);
     }
   };
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const indexOfLastCategory = currentPage * itemsPerPage;
   const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;

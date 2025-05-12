@@ -88,6 +88,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
           discountedPrice: parseFloat(data.discountedPrice),
           imageUrl: data.imageUrl,
           quantity: data.quantity || '0',
+          category: data.category,
         } as Product;
       })
       

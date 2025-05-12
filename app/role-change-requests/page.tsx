@@ -185,7 +185,7 @@ const RoleRequestsPage = () =>  {
       </div>
 
       <Tabs defaultValue="pending" className="w-full">
-        <TabsList className="mb-4">
+        <TabsList className="mb-4 h-12 rounded-2xl">
           <TabsTrigger value="pending">
             Pending
             <Badge className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200">
@@ -260,16 +260,17 @@ const RoleRequestsPage = () =>  {
 
       {selectedRequest && (
         <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-          <DialogContent className="max-w-7xl">
+          <DialogContent className="sm:max-w-3xl">
             <DialogHeader>
               <DialogTitle>Role Change Request Details</DialogTitle>
               <DialogDescription>Review the application details before making a decision</DialogDescription>
             </DialogHeader>
 
+            <div className="overflow-y-auto max-h-[465px]">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4 text-sm">
-              <div className="space-y-4">
+              <div className="space-y-4 text-gray-600">
                 <div className="space-y-1">
-                  <h3 className="text-lg font-medium text-gray-500">Applicant Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-700">Applicant Information</h3>
                   <p>
                     <span className="font-medium">Name:</span> {selectedRequest.name}
                   </p>
@@ -285,7 +286,7 @@ const RoleRequestsPage = () =>  {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-lg font-medium text-gray-500">Role Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-700">Role Information</h3>
                   <p>
                     <span className="font-medium">Current Role:</span> {selectedRequest.currentRole}
                   </p>
@@ -294,40 +295,36 @@ const RoleRequestsPage = () =>  {
                   </p>
                 </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-lg font-medium text-gray-500">Request Status</h3>
+                <div className="space-y-1 ">
+                  <h3 className="text-lg font-semibold text-gray-700">Request Status</h3>
                   <div className="flex items-center">
                     {selectedRequest.status === "pending" && <Clock className="h-4 w-4 text-yellow-500 mr-1" />}
                     {selectedRequest.status === "approved" && <CheckCircle className="h-4 w-4 text-green-700 mr-1" />}
                     {selectedRequest.status === "rejected" && <XCircle className="h-4 w-4 text-red-500 mr-1" />}
                     <span className="capitalize">{selectedRequest.status}</span>
                   </div>
-                  <p>
-                    <span className="font-medium">Submitted:</span> {formatDate(selectedRequest.createdAt)}
-                  </p>
+                  <p><strong>Submitted:</strong> {formatDate(selectedRequest.createdAt)}</p>
                   {selectedRequest.updatedAt && (
-                    <p>
-                      <span className="font-medium">Last Updated:</span> {formatDate(selectedRequest.updatedAt)}
-                    </p>
+                    <p><strong>Last Updated:</strong> {formatDate(selectedRequest.updatedAt)}</p>
                   )}
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-4 text-gray-600">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-gray-500">Reason for Change</h3>
+                  <h3 className="text-lg font-semibold text-gray-700">Reason for Change</h3>
                   <div className="bg-gray-50 p-3 rounded-md text-sm break-words">{selectedRequest.reason}</div>
                 </div>
 
                 <div className="space-y-2">
-                  <h3 className="text-lg font-medium text-gray-500">Duties & Responsibilities</h3>
+                  <h3 className="text-lg font-semibold text-gray-700">Duties & Responsibilities</h3>
                   <div className="bg-gray-50 p-3 rounded-md text-sm break-words">{selectedRequest.duties}</div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-2 border-t pt-4">
-              <h3 className="text-lg font-medium text-gray-500">Admin Notes</h3>
+              <h3 className="text-lg font-semibold text-gray-700">Admin Notes</h3>
               <Textarea
                 placeholder="Add notes about this request (only visible to admins)"
                 value={adminNotes}
@@ -335,6 +332,7 @@ const RoleRequestsPage = () =>  {
                 disabled={selectedRequest.status !== "pending" || isProcessing}
                 className=""
               />
+            </div>
             </div>
 
             <DialogFooter className="flex flex-col sm:flex-row gap-2">

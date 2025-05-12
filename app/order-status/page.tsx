@@ -218,6 +218,10 @@ const OrderStatus = () => {
     );
   });
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
   const indexOfLastCategory = currentPage * itemsPerPage;
   const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
   const currentOrders = filteredOrders.slice(indexOfFirstCategory, indexOfLastCategory);

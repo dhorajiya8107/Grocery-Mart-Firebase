@@ -31,7 +31,7 @@ interface RoleChangeRequest {
   notes?: string
 }
 
-function YourRequest() {
+const YourRequest = () => {
   const [requests, setRequests] = useState<RoleChangeRequest[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -123,40 +123,6 @@ function YourRequest() {
   
       return () => unsubscribe();
     }, [userId]);
-
-  const handleViewDetails = (request: RoleChangeRequest) => {
-    setSelectedRequest(request)
-    setAdminNotes(request.notes || "")
-    setOpenDialog(true)
-  }
-
-  const handleUpdateStatus = async (status: "approved" | "rejected") => {
-    if (!selectedRequest) return
-
-    setIsProcessing(true)
-    try {
-      await updateDoc(doc(db, "roleChangeRequests", selectedRequest.id), {
-        status,
-        notes: adminNotes,
-        updatedAt: serverTimestamp(),
-      })
-
-      if (status === "approved") {
-        // Update user's role in the users collection
-        await updateDoc(doc(db, "users", selectedRequest.userId), {
-          role: selectedRequest.requestedRole,
-        })
-      }
-
-      toast.success(`Request ${status === "approved" ? "approved" : "rejected"} successfully`)
-      setOpenDialog(false)
-    } catch (error) {
-      console.error(`Error ${status} request:`, error)
-      toast.error(`Failed to ${status} request. Please try again.`)
-    } finally {
-      setIsProcessing(false)
-    }
-  }
 
   const getStatusBadge = (status: string) => {
     switch (status) {

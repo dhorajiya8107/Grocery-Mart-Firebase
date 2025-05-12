@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
+import * as yup from "yup";
+
+import { InferType } from 'yup';
 import { doc, setDoc, serverTimestamp, collection, addDoc } from "firebase/firestore";
 import { db } from "@/app/src/firebase";
 import { toast, Toaster } from "sonner";
@@ -33,35 +35,56 @@ const availableRoles = [
   { id: "support", name: "Support" },
 ]
 
-const formSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  currentRole: z.string(),
-  requestedRole: z.string().min(1, "Please select a role"),
-  reason: z.string().min(10, "Please provide a reason with at least 10 characters"),
-  duties: z.string().min(10, "Please describe your duties in at least 10 characters"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits"),
-})
+// Validation schema using yup
+const formSchema = yup.object().shape({
+  name: yup.string()
+    .min(1, 'Name is required')
+    .required('Name is required'),
 
-type FormValues = z.infer<typeof formSchema>;
+  email: yup.string()
+    .email('Invalid email address')
+    .required('Email is required'),
+
+  currentRole: yup.string(),
+
+  requestedRole: yup.string()
+    .min(1, 'Please select a role')
+    .required('Please select a role'),
+
+  reason: yup.string()
+    .min(10, 'Please provide a reason with at least 10 characters')
+    .required('Reason is required'),
+
+  duties: yup.string()
+    .min(10, 'Please describe your duties in at least 10 characters')
+    .required('Duties are required'),
+
+  phoneNumber: yup.string()
+    .matches(/^\d{10}$/, 'Enter valid phone number.')
+    .required('Enter valid phone number.'),
+});
+
+type FormValues = InferType<typeof formSchema>;
 
 export function RoleChangeForm({ userData }: { userData: UserData }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
+  // Apply validation
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: yupResolver(formSchema),
     defaultValues: {
       name: userData.name,
       email: userData.email,
       currentRole: userData.role,
-      requestedRole: "",
-      reason: "",
-      duties: "",
-      phoneNumber: userData.phoneNumber || "",
+      requestedRole: '',
+      reason: '',
+      duties: '',
+      phoneNumber: userData.phoneNumber || '',
     },
-  })
+  });
 
+  // Handle submit and add data to firestore
   const onSubmit = async (data: FormValues) => {
 
     setIsSubmitting(true);
@@ -221,8 +244,6 @@ export function RoleChangeForm({ userData }: { userData: UserData }) {
               </div>
 
               
-
-              {/* Application Details Section */}
               <div className="space-y-4 pt-2 border-t">
                 <h3 className="text-md font-medium text-gray-700">Application Details</h3>
 

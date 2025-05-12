@@ -171,21 +171,38 @@ const AddProductForm = () => {
     }
   }
 
+  // const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = e.target.files;
+  //   if (files && files.length > 0) {
+  //     const fileArray = Array.from(files);
+  //     setValue("images", [...watch("images"), ...fileArray]);
+
+  //     try {
+  //       const newPreviews = await Promise.all(fileArray.map((file) => convertToBase64(file)));
+  //       setImagePreviews((prev) => [...prev, ...newPreviews]);
+  //     } catch (error) {
+  //       console.error("Error creating previews:", error);
+  //     }
+  //   }
+  // }
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const fileArray = Array.from(files);
       setValue("images", [...watch("images"), ...fileArray]);
-
+  
       try {
         const newPreviews = await Promise.all(fileArray.map((file) => convertToBase64(file)));
         setImagePreviews((prev) => [...prev, ...newPreviews]);
       } catch (error) {
         console.error("Error creating previews:", error);
       }
+  
+      e.target.value = '';
     }
-  }
-
+  };
+  
   const removeImage = (index: number) => {
     const updatedImages = [...watch("images")];
     updatedImages.splice(index, 1);
@@ -246,7 +263,7 @@ const AddProductForm = () => {
                     control={control}
                     render={({ field }) => (
                       <Select onValueChange={field.onChange} value={field.value} defaultValue="">
-                        <SelectTrigger id="category" className="h-11">
+                        <SelectTrigger id="category" className="h-11 w-full">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>

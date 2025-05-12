@@ -24,6 +24,7 @@ export default function RoleChangePage() {
   const [role, setRole] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
+  // Checking login role
   useEffect(() => {
     const auth = getAuth();
 

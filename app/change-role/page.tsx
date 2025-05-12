@@ -128,6 +128,10 @@ const ChangeRole = () => {
   if (role !== 'superadmin') {
     return ;
   }
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+  
   const indexOfLastCategory = currentPage * itemsPerPage;
   const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstCategory, indexOfLastCategory);

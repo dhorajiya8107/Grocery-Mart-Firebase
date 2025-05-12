@@ -17,11 +17,19 @@ import { toast } from "sonner";
 
 // Validation schema using yup
 const schema = yup.object().shape({
-  address: yup.string().min(1, "Building name is required").required("Building name is required"),
-  floor: yup.string().optional(),
-  area: yup.string().min(4, "Area is required").required("Area is required"),
-  landmark: yup.string().optional(),
-  name: yup.string().min(3, "Name is required").required("Name is required"),
+  address: yup.string()
+    .min(1, "Building name is required")
+    .required("Building name is required"),
+  floor: yup.string()
+    .optional(),
+  area: yup.string()
+    .min(4, "Area is required")
+    .required("Area is required"),
+  landmark: yup.string()
+    .optional(),
+  name: yup.string()
+    .min(3, "Name is required")
+    .required("Name is required"),
   phoneNumber: yup
     .string()
     .matches(/^\d{10}$/, "Enter valid phone number.")
@@ -242,7 +250,6 @@ const AddAddressPage: React.FC<AddAddressPageProps> = ({ activeDialog, setActive
     setSelectedAddress(selectedAddressId);
   
     try {
-      // Get only the addresses of the current user
       const addressesSnapshot = await getDocs(query(collection(db, "addresses"), where("userId", "==", userId)));
   
       const batch = writeBatch(db);
