@@ -32,6 +32,7 @@ const LogInPage: React.FC<LogInPageProps> = ({ activeDialog, setActiveDialog }) 
   const [error, setError] = useState('');
   const [open, setOpen] = useState(false);
   const [preFilledEmail, setPreFilledEmail] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Apply validation
   const form = useForm({
@@ -163,10 +164,18 @@ useEffect(() => {
                 <TextInput
                   control={control}
                   name="password"
+                  //  type={showPassword ? "text" : "password"}
                   type="password"
                   label="Password"
                   placeHolder="Enter your password"
                 />
+                {/* <button 
+                      type="button"
+                      className="absolute right-8 top-2/3 transform -translate-y-1/2 text-gray-500 text-xs"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button> */}
               </div>
 
               <div className="text-end text-sm mb-5">
