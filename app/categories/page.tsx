@@ -94,20 +94,24 @@ const Categories = () => {
     <>
       <div className='flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen'>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-xl font-bold pl-10 mb-3 capitalize justify-start items-center flex bg-white w-full h-12">Product Categories</h1>
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              type="text"
-              placeholder="Search by category name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border border-gray-300 pl-10 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
-            />
-          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <h1 className="text-2xl font-bold text-gray-800 capitalize">Product Categories</h1>
+              <div className="flex items-center gap-3">
+                {/* Search Bar */}
+                <div className="relative flex-grow max-w-md">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <Input
+                    type="text"
+                    placeholder="Search category name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-white border border-gray-200 pl-10 py-2 rounded-lg focus:outline-none transition"
+                  />
+                </div>
+              </div>
+           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
             {filteredCategories.map((category, index) => (
               <div className='pt-2' key={index} onClick={() => router.push(`/categories/${category.name.replace(/\s+/g, '-')}`)}>

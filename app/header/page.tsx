@@ -5,7 +5,7 @@ import AddAddressPage from "@/components/AddAddress";
 import { Input } from "@/components/ui/input";
 import { onAuthStateChanged, signOut, User } from "firebase/auth";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
-import { ChevronDown, KeyRound, LogOut, MapPin, MessageSquare, Package, Pencil, Plus, Search, Settings, ShoppingCart, UserIcon } from "lucide-react";
+import { ChevronDown, KeyRound, LogOut, LogOutIcon, MapPin, MessageSquare, Package, Pencil, Plus, Search, Settings, ShoppingCart, UserIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -18,6 +18,7 @@ import LogInPage from "../auth/LogIn";
 import SignUpPage from "../auth/SignUp";
 import SearchBar from "../search-bar/page";
 import SubHeader from "../sub-header/page";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 
 interface Product {
@@ -43,6 +44,7 @@ const Header = ({ user }: { user: User | null }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
   const [preFilledEmail, setPreFilledEmail] = useState('');
+  const [isLogOutModalOpen, setIsLogOutModalOpen] = useState(false);
 
   const { useSearchParams } = require('next/navigation');
   const searchParams = useSearchParams();
@@ -146,12 +148,18 @@ const Header = ({ user }: { user: User | null }) => {
     return () => unsubscribeAuth()
   }, [])
 
-  // Logout function
+  // Handle logout click
+  const handleLogOutClick = () => {
+    setMenuOpen(false);
+    setIsLogOutModalOpen(true);
+  }
+
+  //Handle logout function
   const handleLogout = async () => {
     try {
       await signOut(auth);
       console.log("Logout Successfully!", user?.email);
-      setMenuOpen(false);
+      setIsLogOutModalOpen(false);
       window.location.reload();
     } catch (error) {
       console.error("Logout failed:", error);
@@ -464,7 +472,7 @@ const Header = ({ user }: { user: User | null }) => {
                     </div>
                     <button
                       className="w-full text-sm text-left py-2 px-4 flex items-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 rounded-md mb-2"
-                      onClick={handleLogout}
+                      onClick={handleLogOutClick}
                     >
                       <LogOut className="w-4 h-4 text-red-500" /> Logout
                     </button>
@@ -510,6 +518,29 @@ const Header = ({ user }: { user: User | null }) => {
           </form>
         </div>
       </header>
+
+      <AlertDialog open={isLogOutModalOpen} onOpenChange={setIsLogOutModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <div className="flex items-center space-x-2 mb-3 text-gray-700">
+                <div className="bg-red-50 p-2 rounded-full">
+                  <LogOutIcon className="h-5 w-5 text-red-500" />
+                </div>
+                <div className="text-xl font-semibold">Confirm Logout</div>
+              </div>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to Logout?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsLogOutModalOpen(false)} >Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} className="text-red-500 bg-red-100 hover:bg-red-200">Logout</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+            
       {pathname !== "/search-bar" && pathname !== "/checkout" && pathname !== "/" && <SubHeader />}
       {activeDialog === "sign-up" && <SignUpPage activeDialog={activeDialog} setActiveDialog={setActiveDialog} />}
       {activeDialog === "log-in" && <LogInPage activeDialog={activeDialog} setActiveDialog={setActiveDialog} />}

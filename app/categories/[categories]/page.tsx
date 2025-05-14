@@ -226,15 +226,6 @@ const CategoryPage = () => {
     
     const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
 
-    // console.log('Most Seller IDs:', [...mostSellerIds]);
-    
-
-  // useEffect(() => {
-  //   if (cart.length > 0) {
-  //     localStorage.setItem('cart', JSON.stringify(cart));
-  //   }
-  // }, [cart]);
-
   const updateCart = async (updatedCart: Product[]) => {
     try {
       const auth = getAuth();
@@ -389,34 +380,38 @@ const CategoryPage = () => {
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <h1 className="text-2xl font-bold text-gray-800 capitalize">{formattedCategory}</h1>
-          <div className="flex items-center gap-2">
-            <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className="max-w-[200px] h-9 text-sm bg-white">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="featured"><Filter className="w-4 h-4" />Filter</SelectItem>
-                <SelectItem value="price-low">Price: Low to High</SelectItem>
-                <SelectItem value="price-high">Price: High to Low</SelectItem>
-                <SelectItem value="discount">Highest Discount</SelectItem>
-                <SelectItem value="most-seller">Most Seller</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <div className="flex items-center gap-3">
+              {/* Search Bar */}
+              <div className="relative flex-grow max-w-md">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-white border border-gray-200 pl-10 py-2 rounded-lg focus:outline-none transition"
+                />
+              </div>
+              
+              <Select value={sortOption} onValueChange={setSortOption}>
+                <SelectTrigger className="w-[160px] h-10 text-sm bg-white border-gray-200 hover:border-gray-300 focus:ring-2 focus:ring-gray-300">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="featured" className="flex items-center gap-2">
+                    <Filter className="w-4 h-4" />
+                    <span>Featured</span>
+                  </SelectItem>
+                  <SelectItem value="price-low">Price: Low to High</SelectItem>
+                  <SelectItem value="price-high">Price: High to Low</SelectItem>
+                  <SelectItem value="discount">Highest Discount</SelectItem>
+                  <SelectItem value="most-seller">Most Popular</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
         </div>
-      {/* Search Bar */}
-      <div className="relative mb-6">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" />
-        </div>
-        <Input
-          type="text"
-          placeholder="Search by products name or description or price..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white border border-gray-300 pl-10 py-3 rounded-lg focus:outline-none focus:ring-2 transition"
-          />
-      </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
         {products && filteredProducts.map((product) => {
           const productInCart = cart.find(item => item.id === product.id);
@@ -460,7 +455,7 @@ const CategoryPage = () => {
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-full h-full object-cover p-2"
+                  className="w-full h-full object-cover p-2 pt-0 rounded-2xl"
                 />
                 {/* <Image 
                     src={images[0]}
@@ -541,11 +536,11 @@ const CategoryPage = () => {
         })}
         </div>
         {filteredProducts.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-16">
-              <div className="text-xl font-medium text-gray-700 mb-2">No products found</div>
-              <p className="text-gray-500">We couldn't find any products matching "{searchTerm}"</p>
-            </div>
-            )}
+          <div className="flex flex-col items-center justify-center py-16 bg-white rounded-lg shadow-sm mt-6">
+            <div className="text-xl font-medium text-gray-700 mb-2">No products found</div>
+            <p className="text-gray-500">We couldn't find any products matching "{searchTerm}"</p>
+          </div>
+        )}
       </div>
     </div>
 

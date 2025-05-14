@@ -1,29 +1,27 @@
-"use client"
+"use client";
 
-import { collection, doc, getDoc, onSnapshot, orderBy, query } from "firebase/firestore"
-import { ChevronRight, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import Logo from "../../images/Logo.png"
-import { auth, db } from "../src/firebase"
+import { collection, doc, getDoc, onSnapshot, orderBy, query } from "firebase/firestore";
+import { ChevronRight, Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import Logo from "../../images/Logo.png";
+import { auth, db } from "../src/firebase";
 
 interface Category {
-  id: string
-  name: string
-  order: number
+  id: string;
+  name: string;
+  order: number;
 }
 
 const Footer = () => {
-  const router = useRouter();
   const [year, setYear] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const collectionRef = collection(db, "categories")
-    const q = query(collectionRef, orderBy("order"))
+    const collectionRef = collection(db, "categories");
+    const q = query(collectionRef, orderBy("order"));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const categoryList = querySnapshot.docs.map((doc) => ({
@@ -31,14 +29,14 @@ const Footer = () => {
         name: doc.data().name,
         order: doc.data().order || 0,
       }))
-      setCategories(categoryList)
+      setCategories(categoryList);
     })
 
-    return () => unsubscribe()
+    return () => unsubscribe();
   }, [])
 
   useEffect(() => {
-    setYear(new Date().getFullYear().toString())
+    setYear(new Date().getFullYear().toString());
   }, []);
 
   useEffect(() => {
@@ -83,30 +81,6 @@ const Footer = () => {
               </div>
               <h2 className="text-xl font-bold ml-1">Gr<span className="text-green-700">ocer</span>y Mart</h2>
             </div>
-            {/* <p className="text-sm text-gray-500 mt-4">
-              Your one-stop destination for fresh produce, pantry essentials, and specialty foods. We're committed to
-              quality and sustainability.
-            </p> */}
-            {/* <div className="flex items-center space-x-2 mt-4">
-              <Link
-                href="https://www.facebook.com"
-                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
-              >
-                <Facebook className="h-4 w-4" />
-              </Link>
-              <Link
-                href="https://www.instagram.com"
-                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
-              >
-                <Instagram className="h-4 w-4" />
-              </Link>
-              <Link
-                href="mailto:info@grocerymart.com"
-                className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm hover:bg-green-100 transition-colors duration-300"
-              >
-                <Mail className="h-4 w-4" />
-              </Link>
-            </div> */}
           </div>
 
           {/* Quick Links */}

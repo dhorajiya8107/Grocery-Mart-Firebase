@@ -15,6 +15,8 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Home } from "lucide-react";
 import { Autoplay, Navigation, Parallax } from "swiper/modules";
  
 interface Product {
@@ -37,7 +39,7 @@ interface MostSeller {
   quantity: string;
 }
 
-const CategoryPage = () => {
+const ProductDetailsPage = () => {
   const [cart, setCart] = useState<Product[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -343,8 +345,8 @@ const CategoryPage = () => {
   return (
     <>
       <Toaster />
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
+        <div className="">
+        <div className="container mx-auto px-2 mb-10">
         {products.map((product) => {
           const productInCart = cart.find((item) => item.id === product.id)
           const quantityInCart = productInCart ? Number.parseInt(productInCart.quantity) : 0
@@ -354,16 +356,28 @@ const CategoryPage = () => {
 
           return (
             <div key={product.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="px-6 pt-6 border-b p-6">
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink href="/" className="flex text-lg items-center gap-1 text-green-700 hover:text-green-800">
+                        <Home className="w-4 h-4"/>
+                        <span>Home</span>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink onClick={() => router.push(`/categories/${product.category.replace(/\s+/g, '-')}`)} className="text-lg text-green-700 hover:text-green-800">{product.category}</BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="text-lg text-gray-500">{product.productName}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+              <div className="w-full mx-auto">
               <div className="grid md:grid-cols-2 gap-8">
-
-                <div className="md:hidden px-6 pt-6">
-                    <nav className="text-sm text-gray-500 mb-4">
-                      <span className="text-gray-900 font-medium">Home</span> /
-                      <span className="text-gray-900 font-medium"> {product.category}</span> /
-                      <span> {product.productName}</span>
-                    </nav>
-                  </div>
-
                 {/* Product Image */}
                 <div className={`relative flex justify-center items-center p-8 ${isOutOfStock ? 'bg-white opacity-50' : 'bg-white'}`}>
                   {isOutOfStock && (
@@ -371,51 +385,9 @@ const CategoryPage = () => {
                       <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
                     </div>
                   )}
-                  {/* <img
-                    src={product.imageUrl}
-                    alt={product.productName}
-                    className="w-100 h-auto max-[768px]:ws-120 object-contain rounded-md max-[768px]:-mt-6"
-                  /> */}
 
                   <div className="flex flex-col">
-                    {/* <div className="w-full mb-4">
-                      <Image
-                        src={images[activeIndex]}
-                        alt={`${product.productName}`}
-                        className="w-full h-80 object-contain rounded-md"
-                        width={400}
-                        height={400}
-                      />
-                    </div>
-      
-                    {images.length !== 1 && (
-                      <div className="flex overflow-x-auto gap-2 w-full py-2">
-                      {images.map((image, index) => (
-                        <div 
-                          key={index}
-                          className={`cursor-pointer min-w-16 h-16 border-2 rounded-md ${
-                            activeIndex === index ? 'border-green-700' : 'border-gray-200'
-                          }`}
-                          onClick={() => setActiveIndex(index)}
-                        >
-                          <Image
-                            src={image}
-                            alt={`${product.productName} ${index > 0 ? index : ''}`}
-                            className="w-full h-full object-contain rounded-md"
-                            width={60}
-                            height={60}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    )} */}
-
                     <div className="w-80 mb-4">
-                        {/* <img
-                          src={productImages[activeIndex] || product.imageUrl}
-                          alt={`${product.productName}`}
-                          className="w-full h-80 object-contain rounded-md"
-                        /> */}
                         <Swiper
                           modules={[Autoplay, Navigation, Parallax]}
                           spaceBetween={0}
@@ -470,13 +442,13 @@ const CategoryPage = () => {
                 {/* Product Details */}
                 <div className="min-[768px]:border-l min-[768px]:p-2">
                 <div className="space-y-4 p-6">
-                  <div className="hidden md:block">
+                  {/* <div className="hidden md:block">
                     <nav className="text-sm text-gray-500 mb-4">
                       <span className="text-gray-900 font-medium">Home</span> /
                       <span className="text-gray-900 font-medium"> {product.category}</span> /
                       <span> {product.productName}</span>
                     </nav>
-                  </div>
+                  </div> */}
 
                   <h1 className="text-2xl font-bold text-gray-900">{product.productName}</h1>
                   
@@ -497,10 +469,13 @@ const CategoryPage = () => {
                         <div className="text-gray-500">
                           MRP: <span className="line-through">₹{product.price}</span>
                         </div>
-                        <div className="text-[16px] font-bold">Price: ₹{product.discountedPrice}
-                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded ml-2">
+                        <div className="text-[22px] font-bold items-center flex">₹{product.discountedPrice}
+                          <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-lg ml-2">
                             {(((product.price - product.discountedPrice) / product.price) * 100).toFixed(0)}% OFF
                           </span>
+                        </div>
+                        <div className="-mt-2 text-gray-600">
+                          (Inclusive of all taxes)
                         </div>
                       </>
                     ) : (
@@ -562,6 +537,7 @@ const CategoryPage = () => {
                   </div>
                 </div>
               </div>
+              </div>
             </div>
           )
         })}
@@ -573,4 +549,4 @@ const CategoryPage = () => {
   )
 }
 
-export default CategoryPage;
+export default ProductDetailsPage;

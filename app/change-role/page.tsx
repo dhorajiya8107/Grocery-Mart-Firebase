@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import { auth, db } from '../src/firebase';
- 
+
 type User = {
   id: string;
   email: string;
@@ -36,11 +36,11 @@ const ChangeRole = () => {
         try {
           const userRef = doc(db, 'users', user.uid);
           const userSnap = await getDoc(userRef);
-  
+
           if (userSnap.exists()) {
             const userRole = userSnap.data()?.role;
             setRole(userRole);
-  
+
             if (userRole !== 'superadmin') {
               router.push('/');
             }
@@ -57,16 +57,21 @@ const ChangeRole = () => {
         router.push('/');
       }
     });
-  
+
     return () => unsubscribe();
   }, [router]);
+
+  
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   // Fetch all users with their roles
   useEffect(() => {
     if (role !== 'superadmin') return;
-  
+
     const usersCollection = collection(db, 'users');
-  
+
     const unsubscribe = onSnapshot(
       usersCollection,
       (querySnapshot) => {
@@ -78,22 +83,22 @@ const ChangeRole = () => {
             name: doc.data().name,
           }))
           .filter((user) => user.id !== auth.currentUser?.uid);
-  
+
         setUsers(userList);
       },
       (error) => {
         console.error('Error fetching users:', error);
       }
     );
-  
+
     return () => unsubscribe();
   }, [role]);
-  
+
 
   const filteredUsers = users.filter(
     (user) =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchTerm.toLowerCase())  ||
+      user.role.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -126,12 +131,9 @@ const ChangeRole = () => {
   }
 
   if (role !== 'superadmin') {
-    return ;
+    return;
   }
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
-  
+
   const indexOfLastCategory = currentPage * itemsPerPage;
   const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
   const currentUsers = filteredUsers.slice(indexOfFirstCategory, indexOfLastCategory);
@@ -217,26 +219,26 @@ const ChangeRole = () => {
                     {/* <div className="col-span-4 md:col-span-5 text-right md:text-left text-gray-500 text-sm truncate">
                       {user.email}
                     </div> */}
-                      <div className="col-span-2 flex items-center justify-end gap-2">
-                        <Switch
-                          checked={user.role === "admin"}
-                          onCheckedChange={async (checked) => {
-                            const newRole = checked ? "admin" : "user"
-                            await handleRoleToggle(user.id, newRole)
-                          }}
-                          className="data-[state=checked]:bg-green-700"
-                        />
-                        <Badge
-                          variant={user.role === "admin" ? "default" : "outline"}
-                          className={
-                            user.role === "admin"
-                              ? "bg-green-700 hover:bg-green-700"
-                              : "text-gray-500 border-gray-200"
-                          }
-                        >
-                          {user.role}
-                        </Badge>
-                      </div>
+                    <div className="col-span-2 flex items-center justify-end gap-2">
+                      <Switch
+                        checked={user.role === "admin"}
+                        onCheckedChange={async (checked) => {
+                          const newRole = checked ? "admin" : "user"
+                          await handleRoleToggle(user.id, newRole)
+                        }}
+                        className="data-[state=checked]:bg-green-700"
+                      />
+                      <Badge
+                        variant={user.role === "admin" ? "default" : "outline"}
+                        className={
+                          user.role === "admin"
+                            ? "bg-green-700 hover:bg-green-700"
+                            : "text-gray-500 border-gray-200"
+                        }
+                      >
+                        {user.role}
+                      </Badge>
+                    </div>
                   </li>
                 ))}
 

@@ -229,13 +229,14 @@ const EditProduct = () => {
     setIsDeleteModalOpen(true);
   }
 
+  // Handle input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     if (editForm) {
       setEditForm({
         ...editForm,
-        [name]: name === "price" || name === "discountedPrice" ? Number.parseFloat(value) : value,
+        [name]: name === "price" || name === "discountedPrice" || name === "quantity" ? Number.parseFloat(value) : value,
       })
     }
   }
@@ -449,7 +450,7 @@ const EditProduct = () => {
                                 <img
                                   src={product.imageUrl || "/placeholder.svg"}
                                   alt={product.productName}
-                                  className="h-12 w-12 object-cover"
+                                  className="h-full w-full object-cover"
                                   onError={(e) => {
                                     const target = e.target as HTMLImageElement
                                     target.src = "/placeholder.svg?height=40&width=40"
@@ -678,7 +679,7 @@ const EditProduct = () => {
                       {selectedProductImages.length > 0 ? (
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           {selectedProductImages.map((imageUrl, index) => (
-                            <div key={index} className="relative border rounded-lg overflow-hidden group w-40 h-40">
+                            <div key={index} className="relative border rounded-lg overflow-hidden w-40 h-40">
                               <img
                                 src={imageUrl || "/placeholder.svg?height=128&width=128"}
                                 alt={`Product Image ${index + 1}`}
@@ -812,9 +813,16 @@ const EditProduct = () => {
           <DialogContent className="sm:max-w-2xl md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
             <DialogHeader className="pb-2">
               <DialogTitle>
-                <p className="text-xl text-gray-700">{selectedProduct.productName}</p>
-                <p className="text-sm font-medium">{selectedProduct.description}</p>
-                </DialogTitle>
+                <div className="flex justify-start space-x-4">
+                  <div className="relative border rounded-lg overflow-hidden w-12 h-12">
+                    <img src={selectedProduct.imageUrl} alt="" className="w-full h-full object-cover"/>
+                  </div>
+                  <div className="">
+                    <p className="text-xl text-gray-700">{selectedProduct.productName}</p>
+                    <p className="text-sm font-medium">{selectedProduct.description}</p>
+                  </div>
+                </div>
+              </DialogTitle>
             </DialogHeader>
               <div className="">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

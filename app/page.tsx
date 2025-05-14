@@ -380,11 +380,13 @@ const App = () => {
   }
 
   return (
-    <div className="flex flex-col bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
+    <div className="flex flex-col bg-gradient-to-b bg-white min-h-screen">
       <Toaster />
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="">
         {/* Main Banner */}
         <section className="mt-4 sm:mt-8 mb-12">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            
           <div className="rounded-xl overflow-hidden shadow-lg">
             <Swiper
               modules={[Autoplay, Navigation, Pagination, Parallax]}
@@ -431,17 +433,19 @@ const App = () => {
               </SwiperSlide>
             </Swiper>
           </div>
+          </div>
         </section>
 
         {/* Product Categories */}
         <section className="mb-12">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Product Categories</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Shop by Category</h2>
             <button
               className="flex items-center text-sm text-green-700 font-medium hover:text-green-800 transition-colors cursor-pointer"
               onClick={() => router.push("/categories")}
             >
-              View all
+              View all categories
               <ChevronRight className="w-4 h-4 ml-1" />
             </button>
           </div>
@@ -453,7 +457,7 @@ const App = () => {
             breakpoints={{
               640: { slidesPerView: 3.5, spaceBetween: 20 },
               768: { slidesPerView: 4.5, spaceBetween: 24 },
-              1024: { slidesPerView: 6, spaceBetween: 24 },
+              1024: { slidesPerView: 7, spaceBetween: 24 },
             }}
             autoplay={{ delay: 5000, disableOnInteraction: false }}
             className="w-full"
@@ -464,13 +468,12 @@ const App = () => {
                   className="flex flex-col items-center group cursor-pointer"
                   onClick={() => router.push(`/categories/${category.path.replace(/\s+/g, '-')}`)}
                 >
-                  <div className="relative w-full aspect-square mb-3 overflow-hidden group-hover:scale-105 rounded-full bg-white shadow-md transition-all duration-300 group-hover:shadow-lg">
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-green-100 opacity-50"></div>
+                  <div className="relative w-full aspect-square mb-3 overflow-hidden rounded-full bg-white shadow-md transition-all duration-300 group-hover:shadow-lg">
                     <Image
                       src={category.image}
                       alt={category.name}
                       fill
-                      className="object-cover transition-transform duration-300"
+                      className="object-cover p-3 bg-pink-50 transition-transform duration-300 group-hover:scale-110"
                     />
                   </div>
                   <p className="text-xs sm:text-sm font-medium text-gray-700 text-center line-clamp-2 group-hover:text-green-700">
@@ -480,17 +483,22 @@ const App = () => {
               </SwiperSlide>
             ))}
           </Swiper>
+          </div>
         </section>
 
         {/* Featured Products Section */}
-        <section className="mb-12">
+        <section className="">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Featured Products</h2>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Best Sellers</h2>
+              <p className="text-gray-500 mt-1">Our most popular products based on sales</p>
+            </div>
             <button
               className="flex items-center text-sm text-green-700 font-medium hover:text-green-800 transition-colors cursor-pointer"
               onClick={() => router.push("/products")}
             >
-              View all
+              View all products
               <ChevronRight className="w-4 h-4 ml-1" />
             </button>
           </div>
@@ -534,11 +542,11 @@ const App = () => {
                   
                   {index < 3 && (
                     <div className="absolute right-0 bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded-bl-md rounded-tr-md z-10">
-                      Most seller
+                      Best seller
                     </div>
                   )}
 
-                  <div className="relative w-full aspect-square bg-gray-50">
+                  <div className="relative w-full aspect-square">
                     {isOutOfStock && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
@@ -547,7 +555,7 @@ const App = () => {
                     <img
                       src={product.imageUrl}
                       alt={product.productName}
-                      className="w-full h-full object-contain p-2"
+                      className="w-full h-full object-cover p-2 pt-0 rounded-2xl"
                     />
                   </div>
 
@@ -556,9 +564,11 @@ const App = () => {
                     <h3 className="text-sm font-medium text-gray-800 line-clamp-2 mb-1 h-10">
                       {product.productName}
                     </h3>
-                    <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">
-                      {product.description}
-                    </h3>
+                    <div className="border-b">
+                      <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">
+                        {product.description}
+                      </h3>
+                    </div>
                     <div className="flex justify-between items-center mt-2">
                       <div className="md:flex items-baseline gap-1">
                         {product.price > product.discountedPrice ? (
@@ -627,13 +637,18 @@ const App = () => {
               })}
           </div>
           </Swiper>
+          </div>
         </section>
 
         {/* Categories wise products */}
-        {Object.entries(categoryProducts).map(([category, products]) => (
-          <section key={category} className="mb-8 sm:mb-12">
+        {Object.entries(categoryProducts).map(([category, products], categoryIndex) => (
+          <section key={category} className={`py-12 ${categoryIndex % 2 === 0 ? "bg-white" : "bg-green-50"}`}>
+            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">{category}</h2>
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">{category}</h2>
+                <p className="text-gray-500 mt-1">Fresh picks from our {category.toLowerCase()} collection</p>
+              </div>
               <button
                 className="flex items-center text-sm text-green-700 font-medium hover:text-green-800 transition-colors cursor-pointer"
                 onClick={() => router.push(`/categories/${category.replace(/\s+/g, "-")}`)}
@@ -691,7 +706,7 @@ const App = () => {
                     </div>
                   )}
 
-                  <div className="relative w-full aspect-square bg-gray-50">
+                  <div className="relative w-full aspect-square">
                     {isOutOfStock && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-white bg-black text-sm rounded-xl font-bold p-2">Out of Stock</span>
@@ -700,7 +715,7 @@ const App = () => {
                     <img
                       src={product.imageUrl}
                       alt={product.productName}
-                      className="w-full h-full object-contain p-2"
+                      className="w-full h-full object-cover p-2 pt-0 rounded-2xl"
                     />
                     {/* <Image 
                     src={images[0]}
@@ -713,9 +728,11 @@ const App = () => {
                     <h3 className="text-sm font-medium text-gray-800 line-clamp-2 mb-1 h-10">
                       {product.productName}
                     </h3>
-                    <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">
-                      {product.description}
-                    </h3>
+                    <div className="border-b">
+                      <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">
+                        {product.description}
+                      </h3>
+                    </div>
                     <div className="flex justify-between items-center mt-2">
                       <div className="md:flex items-baseline gap-1">
                         {product.price > product.discountedPrice ? (
@@ -784,8 +801,9 @@ const App = () => {
               })}
           </div>
             </Swiper>
+            </div>
           </section>
-        ))}
+        ))} 
       </div>
     </div>
   )

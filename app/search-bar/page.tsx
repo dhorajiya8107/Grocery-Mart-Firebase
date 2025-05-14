@@ -346,7 +346,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, setSearchTerm }) => {
                       <img
                         src={product.imageUrl}
                         alt={product.productName}
-                        className="w-full h-full object-cover pl-4 pr-4"
+                        className="w-full h-full object-cover p-2 pt-0 rounded-2xl"
                       />
                       {/* <Image 
                         src={images[0]}

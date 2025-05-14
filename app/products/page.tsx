@@ -88,6 +88,7 @@ const Products = () => {
         discountedPrice: parseFloat(data.discountedPrice),
         imageUrl: data.imageUrl,
         quantity: data.quantity || '0',
+        category: data.category,
       } as Product;
     })
     
@@ -105,7 +106,8 @@ const Products = () => {
   const filteredProducts = products.filter(
     (product) =>
       product.productName?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      product.description?.toLowerCase().includes(searchTerm.toLowerCase())  ||
+      product.description?.toLowerCase().includes(searchTerm.toLowerCase())  || 
+      product.category?.toLowerCase().includes(searchTerm.toLowerCase())  ||
       product.discountedPrice?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -358,23 +360,25 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
                 <img
                   src={product.imageUrl}
                   alt={product.productName}
-                  className="w-full h-full object-cover p-2"
+                  className="w-full h-full object-cover p-2 pt-0 rounded-2xl"
                 />
                 {/* <Image 
                   src={images[0]}
                   alt={product.productName} 
                   className="w-full h-full object-cover p-2"
                 /> */}
-                <p className='border-b border-gray-200 mt-3 mr-3 ml-3'></p>
+                {/* <p className='border-b border-gray-200 mt-3 mr-3 ml-3'></p> */}
               </div>
               <div className="p-3">
                     <p className="text-xs text-emerald-700 font-medium line-clamp-1">{product.category}</p>
                     <h3 className="text-sm font-medium text-gray-800 line-clamp-2 mb-1 h-10">
                       {product.productName}
                     </h3>
-                    <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">
-                      {product.description}
-                    </h3>
+                    <div className="">
+                      <h3 className="text-sm text-gray-500 mb-2 line-clamp-1">
+                        {product.description}
+                      </h3>
+                    </div>
                     <div className="flex justify-between items-center mt-2">
                       <div className="md:flex items-baseline gap-1">
                         {product.price > product.discountedPrice ? (
