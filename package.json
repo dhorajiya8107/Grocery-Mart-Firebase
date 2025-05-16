@@ -24,6 +24,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@react-pdf/renderer": "^4.3.0",
     "@shadcn/ui": "^0.0.4",
+    "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "critters": "^0.0.23",

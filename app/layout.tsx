@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthGuard from "@/components/authentication/AuthGuard";
 import { Suspense } from "react";
 import ScrollToTop from "./src/scrollToTop";
+import { Analytics } from '@vercel/analytics/next';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,7 +33,10 @@ export default function RootLayout({
       >
         <AuthGuard>
           <ScrollToTop />
-          <Suspense>{children}</Suspense>
+          <Suspense>
+            {children}
+            <Analytics />
+          </Suspense>
         </AuthGuard>
       </body>
     </html>
