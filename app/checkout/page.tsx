@@ -24,7 +24,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import successAnimation from "../../animation/Animation - 1742460011298.json";
-import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
+// import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 import { db } from "../src/firebase";
 
 const Lottie = dynamic(() => import("lottie-react"), { ssr: false })
@@ -424,20 +424,20 @@ const CheckoutPage = () => {
     }
   }
 
-  const getAllProductImages = (productName: string) => {
-    const images = [];
-    const extensions = ['jpg', 'png', 'jpeg'];
-    try {
-      for (const ext of extensions) {
-        try {
-          const image = require(`../../images/Grocery/${productName}/0.${ext}`);
-          images.push(image);
-        } catch {}
-      }
-    } catch {}
+  // const getAllProductImages = (productName: string) => {
+  //   const images = [];
+  //   const extensions = ['jpg', 'png', 'jpeg'];
+  //   try {
+  //     for (const ext of extensions) {
+  //       try {
+  //         const image = require(`../../images/Grocery/${productName}/0.${ext}`);
+  //         images.push(image);
+  //       } catch {}
+  //     }
+  //   } catch {}
     
-    return images.length > 0 ? images : [tr];
-  };
+  //   return images.length > 0 ? images : [tr];
+  // };
 
   if (loading) {
     return (
@@ -590,7 +590,7 @@ const CheckoutPage = () => {
                       {cart.map((product) => {
                         const matchedProduct = products.find(p => p.id === product.id);
                         const isOutOfStock = matchedProduct ? Number(matchedProduct.quantity) === 0 : false;
-                        const images = getAllProductImages(product.productName);
+                        // const images = getAllProductImages(product.productName);
 
                         return(
                           <div key={product.id} className="flex p-6 gap-4">

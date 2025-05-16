@@ -1,26 +1,7 @@
 'use client';
 
-import Image, { StaticImageData } from 'next/image';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import Cat1 from '../../images/Home/Cat1.png';
-import Cat10 from '../../images/Home/Cat10.png';
-import Cat11 from '../../images/Home/Cat11.png';
-import Cat12 from '../../images/Home/Cat12.png';
-import Cat13 from '../../images/Home/Cat13.png';
-import Cat14 from '../../images/Home/Cat14.png';
-import Cat15 from '../../images/Home/Cat15.png';
-import Cat16 from '../../images/Home/Cat16.png';
-import Cat17 from '../../images/Home/Cat17.png';
-import Cat18 from '../../images/Home/Cat18.png';
-import Cat2 from '../../images/Home/Cat2.png';
-import Cat3 from '../../images/Home/Cat3.png';
-import Cat4 from '../../images/Home/Cat4.png';
-import Cat5 from '../../images/Home/Cat5.png';
-import Cat6 from '../../images/Home/Cat6.png';
-import Cat7 from '../../images/Home/Cat7.png';
-import Cat8 from '../../images/Home/Cat8.png';
-import Cat9 from '../../images/Home/Cat9.png';
 
 import { Input } from '@/components/ui/input';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
@@ -33,40 +14,14 @@ import { db } from '../src/firebase';
 interface Category {
   name: string;
   order: number;
+  imageUrl: string;
 }
 
 const Categories = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const params = useParams();
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
-
-  const categoryImages = {
-    'Vegetables & Fruits': Cat1,
-    'Dairy & Bread': Cat2,
-    'Tea, Coffee & Health Drinks': Cat3,
-    'Atta, Rice & Dal': Cat4,
-    'Munchies': Cat5,
-    'Sauces & Spreads': Cat6,
-    'Body Care': Cat7,
-    'Ice Creams & Frozen Desserts': Cat8,
-    'Cold Drinks & Juices': Cat9,
-    'Dry Fruits & Seeds Mix': Cat10,
-    'Oils and Ghee': Cat11,
-    'Cleaning Essentials': Cat12,
-    'Home & Furnishing': Cat13,
-    'Paan Corner': Cat14,
-    'Baby Care': Cat15,
-    'Cereals & Biscuits': Cat16,
-    'Bakery': Cat17,
-    'Toys & Stationary': Cat18,
-    'default': Cat1,
-  } as const;
-
-  const getCategoryImage = (categoryName: string): StaticImageData => {
-    return categoryImages[categoryName as keyof typeof categoryImages] || categoryImages['default'];
-  };
 
   useEffect(() => {
     const collectionRef = collection(db, 'categories');
@@ -76,6 +31,7 @@ const Categories = () => {
       const categoryList = querySnapshot.docs.map((doc) => ({
         name: doc.data().name,
         order: doc.data().order || 0,
+        imageUrl: doc.data().imageUrl
       }));
       setCategories(categoryList);
       setLoading(false);
@@ -118,9 +74,9 @@ const Categories = () => {
                 <div className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 relative cursor-pointer hover:shadow-lg h-64">
                   <div className='w-full h-full flex flex-col'>
                     <div className="flex items-center justify-center pt-4 pb-2 px-2 h-3/4">
-                      <Image
-                        src={getCategoryImage(category.name)}
-                        alt={category.name}
+                      <img
+                        src={category.imageUrl}
+                        alt={category.imageUrl}
                         className="w-32 h-32 object-contain"
                       />
                     </div>

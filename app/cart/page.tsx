@@ -364,7 +364,6 @@ const CartPage = () => {
                   {cart.map((product) => {
                     const matchedProduct = products.find(p => p.id === product.id);
                     const isOutOfStock = matchedProduct ? Number(matchedProduct.quantity) === 0 : false;
-                    console.log(isOutOfStock);
 
                     return(
                       <Card key={product.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300">

@@ -319,9 +319,7 @@ const ProductDetailsPage = () => {
   const getAllProductImages = (productName: string) => {
     const images = [];
     const extensions = ['jpg', 'png', 'jpeg'];
-    const productNameLower = productName.toLowerCase();
     try {
-      // First try the base name
       for (const ext of extensions) {
         try {
           const image = require(`../../../images/Grocery/${productName}/0.${ext}`);
@@ -406,7 +404,7 @@ const ProductDetailsPage = () => {
                                 <img
                                   src={image || "/placeholder.svg"}
                                   alt={`${product.productName} ${index > 0 ? index : ""}`}
-                                  className="w-full h-80 object-contain rounded-md"
+                                  className="w-full h-80 object-contain"
                                 />
                               </div>
                             </SwiperSlide>
@@ -428,7 +426,7 @@ const ProductDetailsPage = () => {
                               <img
                                 src={image || "/placeholder.svg"}
                                 alt={`${product.productName} ${index > 0 ? index : ""}`}
-                                className="w-full h-full object-contain rounded-md"
+                                className="w-full h-full object-contain rounded-sm"
                                 width={60}
                                 height={60}
                               />
@@ -463,10 +461,10 @@ const ProductDetailsPage = () => {
                   <p className="text-gray-700">{product.description}</p>
 
                   {/* Price */}
-                  <div className="space-y-2 text-xs">
+                  <div className="text-xs">
                     {product.price > product.discountedPrice ? (
                       <>
-                        <div className="text-gray-500">
+                        <div className="text-gray-500 mb-1">
                           MRP: <span className="line-through">₹{product.price}</span>
                         </div>
                         <div className="text-[22px] font-bold items-center flex">₹{product.discountedPrice}
@@ -474,7 +472,7 @@ const ProductDetailsPage = () => {
                             {(((product.price - product.discountedPrice) / product.price) * 100).toFixed(0)}% OFF
                           </span>
                         </div>
-                        <div className="-mt-2 text-gray-600">
+                        <div className="text-gray-600">
                           (Inclusive of all taxes)
                         </div>
                       </>

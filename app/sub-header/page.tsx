@@ -4,6 +4,7 @@ import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { db } from '../src/firebase';
+import { ChevronDown } from 'lucide-react';
 
 const SubHeader = () => {
   const [categories, setCategories] = useState<string[]>([]);
@@ -58,21 +59,6 @@ const SubHeader = () => {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const handleResize = () => {
-  //     if (window.innerWidth < 400) {
-  //       setSortedCategories([...categories].sort((a, b) => a.length - b.length));
-  //     } else {
-  //       setSortedCategories(categories);
-  //     }
-  //   };
-  
-  //   handleResize();
-  //   window.addEventListener("resize", handleResize);
-  
-  //   return () => window.removeEventListener("resize", handleResize);
-  // }, [categories]);
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -115,20 +101,7 @@ const SubHeader = () => {
               className="px-4 py-3 bg-white hover:bg-gray-100 flex items-center justify-between gap-1"
             >
               More
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
+              <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${showMore ? "rotate-180" : ""}`} />
             </button>
             {showMore && (
               <div

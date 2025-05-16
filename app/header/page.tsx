@@ -37,13 +37,13 @@ const Header = ({ user }: { user: User | null }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
   const [cart, setCart] = useState<Product[]>([]);
   const [cartQuantity, setCartQuantity] = useState<number>(0);  
   const [cartAmount, setCartAmount] = useState<number>(0);
   const [role, setRole] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
-  const [preFilledEmail, setPreFilledEmail] = useState('');
   const [isLogOutModalOpen, setIsLogOutModalOpen] = useState(false);
 
   const { useSearchParams } = require('next/navigation');
@@ -58,17 +58,17 @@ const Header = ({ user }: { user: User | null }) => {
     'Search by "Milk"',
     'Search by "Butter"'
   ];
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [isScrolled, setIsScrolled] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
 
   // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10)
+      setIsScrolled(window.scrollY > 10);
     }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll);;
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [])
 
   useEffect(() => {
@@ -142,10 +142,10 @@ const Header = ({ user }: { user: User | null }) => {
         }
       })
 
-      return () => unsubscribeCart()
+      return () => unsubscribeCart();
     })
 
-    return () => unsubscribeAuth()
+    return () => unsubscribeAuth();
   }, [])
 
   // Handle logout click
@@ -174,7 +174,7 @@ const Header = ({ user }: { user: User | null }) => {
         buttonRef.current &&
         !buttonRef.current.contains(event.target as Node)
       ) {
-        setMenuOpen(false)
+        setMenuOpen(false);
       }
     }
 
@@ -186,6 +186,29 @@ const Header = ({ user }: { user: User | null }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [menuOpen])
+
+  useEffect(() => {
+  const handleClickInsideHeader = (event: MouseEvent) => {
+    const target = event.target as Node;
+
+    if (
+      headerRef.current?.contains(target) &&
+      !buttonRef.current?.contains(target)  &&
+      !menuRef.current?.contains(target)
+    ) {
+      setMenuOpen(false);
+    }
+  };
+
+  if (menuOpen) {
+    document.addEventListener("mousedown", handleClickInsideHeader);
+  }
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickInsideHeader);
+  };
+}, [menuOpen]);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,83 +223,81 @@ const Header = ({ user }: { user: User | null }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchTerm !== debouncedSearchTerm) {
-        setDebouncedSearchTerm(searchTerm)
+        setDebouncedSearchTerm(searchTerm);
 
         if (pathname === "/search-bar") {
-          const currentPath = pathname
-          const newSearchParams = new URLSearchParams(searchParams)
+          const currentPath = pathname;
+          const newSearchParams = new URLSearchParams(searchParams);
 
           if (searchTerm.trim() === "") {
-            newSearchParams.delete("q")
+            newSearchParams.delete("q");
           } else {
-            newSearchParams.set("q", searchTerm.trim())
+            newSearchParams.set("q", searchTerm.trim());
           }
 
-          const newUrl = `${currentPath}?${newSearchParams.toString()}`
-          window.history.replaceState(null, "", newUrl)
+          const newUrl = `${currentPath}?${newSearchParams.toString()}`;
+          window.history.replaceState(null, "", newUrl);
 
           if (searchInputRef.current) {
-            searchInputRef.current.focus()
+            searchInputRef.current.focus();
           }
         }
       }
     }, 300)
 
-    return () => clearTimeout(timer)
+    return () => clearTimeout(timer);
   }, [searchTerm, pathname])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
+    const value = e.target.value;
     setSearchTerm(value)
 
     if (pathname === "/search-bar") {
-      const currentPath = pathname
-      const newSearchParams = new URLSearchParams(searchParams)
+      const currentPath = pathname;
+      const newSearchParams = new URLSearchParams(searchParams);
 
       if (value.trim() === "") {
-        newSearchParams.delete("q")
+        newSearchParams.delete("q");
       } else {
-        newSearchParams.set("q", value.trim())
+        newSearchParams.set("q", value.trim());
       }
 
-      const newUrl = `${currentPath}?${newSearchParams.toString()}`
-      window.history.replaceState(null, "", newUrl)
+      const newUrl = `${currentPath}?${newSearchParams.toString()}`;
+      window.history.replaceState(null, "", newUrl);
     }
   }
 
   const handleFocus = (e: React.FocusEvent) => {
     if (pathname !== "/search-bar") {
-      router.push(`/search-bar${searchTerm ? `?q=${encodeURIComponent(searchTerm)}` : ""}`)
+      router.push(`/search-bar${searchTerm ? `?q=${encodeURIComponent(searchTerm)}` : ""}`);
     }
   }
 
   useEffect(() => {
-    const query = searchParams.get("q")
+    const query = searchParams.get("q");
     if (query) {
-      setSearchTerm(query)
+      setSearchTerm(query);
     }
     if (pathname !== `/search-bar` || !searchParams.get("q")) {
-      setSearchTerm("")
+      setSearchTerm("");
     }
   }, [pathname, searchParams])
 
   const handleCartClick = () => {
     if (user) {
-      router.push("/cart")
+      router.push("/cart");
     } else {
-      setActiveDialog("log-in")
-      localStorage.setItem("redirectAfterLogin", "/cart")
+      setActiveDialog("log-in");
+      localStorage.setItem("redirectAfterLogin", "/cart");
     }
   }
 
   useEffect(() => {
-    const redirectPath = localStorage.getItem("redirectAfterLogin")
-    // console.log("User:", user)
-    // console.log("Redirect Path:", redirectPath)
+    const redirectPath = localStorage.getItem("redirectAfterLogin");
 
     if (user && redirectPath) {
-      router.push(redirectPath)
-      localStorage.removeItem("redirectAfterLogin")
+      router.push(redirectPath);
+      localStorage.removeItem("redirectAfterLogin");
     }
   }, [user]);
 
@@ -288,7 +309,7 @@ const Header = ({ user }: { user: User | null }) => {
           onClick={() => setMenuOpen(false)}
         ></div>
       )}
-      <header className={`sticky top-0 z-40 w-full min-h-[99px] border-b bg-white transition-shadow duration-300 ${isScrolled ? "shadow-none" : ""}`}>
+      <header ref={headerRef} className={`sticky top-0 z-40 w-full min-h-[99px] border-b bg-white transition-shadow duration-300 ${isScrolled ? "shadow-none" : ""}`}>
         <div className="relative flex flex-wrap justify-between items-center p-4 md:p-6 z-20">
           <div className="flex items-center cursor-pointer">
             <Link href={"/"} className="flex items-center">
@@ -331,6 +352,7 @@ const Header = ({ user }: { user: User | null }) => {
                   <button
                     className="flex items-center text-md px-2 py-1 sm:px-3 sm:py-2 rounded-full hover:bg-gray-100 transition cursor-pointer"
                     onClick={() => setMenuOpen((prev) => !prev)}
+                    ref={buttonRef}
                   >
                     <UserIcon className="w-5 h-5 text-gray-600 mr-2" />
                     <span className="hidden sm:inline text-gray-700 font-medium">Account</span>

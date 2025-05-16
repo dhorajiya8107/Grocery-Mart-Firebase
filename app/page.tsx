@@ -9,18 +9,7 @@ import { toast, Toaster } from "sonner";
 import { Autoplay, Navigation, Pagination, Parallax } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { auth, db } from "./src/firebase";
-
-import tr from "../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 import BabyCare from "../images/Home/BabyCare.jpg";
-import Cat1 from "../images/Home/Cat1.png";
-import Cat2 from "../images/Home/Cat2.png";
-import Cat3 from "../images/Home/Cat3.png";
-import Cat4 from "../images/Home/Cat4.png";
-import Cat5 from "../images/Home/Cat5.png";
-import Cat6 from "../images/Home/Cat6.png";
-import Cat7 from "../images/Home/Cat7.png";
-import Cat8 from "../images/Home/Cat8.png";
-import Cat9 from "../images/Home/Cat9.png";
 import Protein from "../images/Home/Protien.jpg";
 import Tea from "../images/Home/Tea.jpg";
 
@@ -28,8 +17,11 @@ import { ChevronRight } from "lucide-react";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-``
-
+interface Category {
+  name: string;
+  order: number;
+  imageUrl: string;
+}
 interface Product {
   id: string;
   productName: string;
@@ -46,18 +38,6 @@ interface MostSeller {
   quantity: string;
 }
 
-const categories = [
-  { name: "Vegetables & Fruits", image: Cat1, path: "Vegetables & Fruits" },
-  { name: "Dairy & Bread", image: Cat2, path: "Dairy & Bread" },
-  { name: "Tea, Coffee and More", image: Cat3, path: "Tea, Coffee & Health Drinks" },
-  { name: "Atta, Rice and Dal", image: Cat4, path: "Atta, Rice & Dal" },
-  { name: "Munchies", image: Cat5, path: "Munchies" },
-  { name: "Sauces and Spreads", image: Cat6, path: "Sauces & Spreads" },
-  { name: "Body Care", image: Cat7, path: "Body Care" },
-  { name: "Ice Creams and More", image: Cat8, path: "Ice Creams & Frozen Desserts" },
-  { name: "Cold Drinks", image: Cat9, path: "Cold Drinks & Juices" },
-]
-
 const App = () => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -66,6 +46,7 @@ const App = () => {
   const [cart, setCart] = useState<Product[]>([]);
   const [mostSeller, setMostSeller] = useState<MostSeller[]>([]);
   const [categoryProducts, setCategoryProducts] = useState<Record<string, Product[]>>({});
+  const [categories, setCategories] = useState<Category[]>([]);
   const [activeDialog, setActiveDialog] = useState<"sign-up" | "log-in" | "forget-password" | "change-password" | "address" | null>(null);
 
   useEffect(() => {
@@ -107,6 +88,24 @@ const App = () => {
       unsubscribeAuth();
       if (unsubscribeFromCart) unsubscribeFromCart();
     };
+  }, []);
+
+  // Fetch the categories
+  useEffect(() => {
+    const collectionRef = collection(db, 'categories');
+    const q = query(collectionRef, orderBy('order'));
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const categoryList = querySnapshot.docs.map((doc) => ({
+        name: doc.data().name,
+        order: doc.data().order || 0,
+        imageUrl: doc.data().imageUrl
+      }));
+      setCategories(categoryList);
+      setLoading(false);
+    });
+    
+    return () => unsubscribe();
   }, []);
 
   // Fetch featured products
@@ -356,21 +355,6 @@ const App = () => {
     router.push(`/product-details/${product.id}?${formattedProductName}`);
   };
 
-  const getAllProductImages = (productName: string) => {
-    const images = [];
-    const extensions = ['jpg', 'png', 'jpeg'];
-    try {
-      for (const ext of extensions) {
-        try {
-          const image = require(`../images/Grocery/${productName}/0.${ext}`);
-          images.push(image);
-        } catch {}
-      }
-    } catch {}
-    
-    return images.length > 0 ? images : [tr];
-  };
-
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100">
@@ -466,11 +450,11 @@ const App = () => {
               <SwiperSlide key={index}>
                 <div
                   className="flex flex-col items-center group cursor-pointer"
-                  onClick={() => router.push(`/categories/${category.path.replace(/\s+/g, '-')}`)}
+                  onClick={() => router.push(`/categories/${category.name.replace(/\s+/g, '-')}`)}
                 >
                   <div className="relative w-full aspect-square mb-3 overflow-hidden rounded-full bg-white shadow-md transition-all duration-300 group-hover:shadow-lg">
                     <Image
-                      src={category.image}
+                      src={category.imageUrl}
                       alt={category.name}
                       fill
                       className="object-cover p-3 bg-pink-50 transition-transform duration-300 group-hover:scale-110"
@@ -524,8 +508,6 @@ const App = () => {
                 product.price > product.discountedPrice
                   ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
                   : 0;
-              const isMostSeller = mostSellerIds3.has(product.id);
-              const images = getAllProductImages(product.productName);
 
               return (
                 <SwiperSlide
@@ -685,7 +667,6 @@ const App = () => {
                   ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
                   : 0
               const isMostSeller = mostSellerIds.has(product.id);
-              const images = getAllProductImages(product.productName);
               
 
               return (

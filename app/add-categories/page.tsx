@@ -4,50 +4,39 @@ import { CustomPagination } from '@/components/CustomPagination';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { yupResolver } from '@hookform/resolvers/yup';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { Edit, Search, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { toast, Toaster } from 'sonner';
-import * as yup from 'yup';
 import { auth, db } from '../src/firebase';
  
 interface Category {
   id: string;
   name: string;
   order: number;
+  imageUrl: string;
 }
-
-const schema = yup.object().shape({
-  name: yup.string()
-    .required('Category name is required')
-    .min(3, 'Category name must be at least 3 characters'),
-});
 
 const AddCategories = () => {
   const [role, setRole] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState('');
   const [editCategory, setEditCategory] = useState<Category | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [mode, setMode] = useState('add');
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<{name?: string, imageUrl?: string}>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const { register, handleSubmit, reset, setValue, formState: { errors }, } = useForm<{ name: string }>({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      name: editCategory?.name || '',
-    },
-  });
-
+  const [categoryName, setCategoryName] = useState('');
+  
   // Checking login user role
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -99,7 +88,7 @@ const AddCategories = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch categories data form firestore
+  // Fetch categories data from firestore
   useEffect(() => {
     const fetchCategories = async () => {
       if (!userId) return;
@@ -111,12 +100,14 @@ const AddCategories = () => {
         const fetchedCategories = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           name: doc.data().name,
-          order: doc.data().order,
+          order: doc.data().order || 0,
+          imageUrl: doc.data().imageUrl || ''
         }));
 
         setCategories(fetchedCategories.sort((a, b) => a.order - b.order));
       } catch (error) {
         console.error('Error fetching categories: ', error);
+        toast.error('Failed to fetch categories');
       }
     };
 
@@ -124,57 +115,117 @@ const AddCategories = () => {
   }, [userId]);
 
   const filteredCategories = categories.filter(
-    (categories) =>
-      categories.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      categories.order?.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    (category) =>
+      category.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      category.order?.toString().toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // useEffect(() => {
-  //   if (mode === 'edit' && editCategory?.name) {
-  //     setValue('name', editCategory.name);
-  //   } else {
-  //     setValue('name', newCategory);
-  //   }
-  // }, [mode, editCategory, newCategory, setValue]);
+  const validateForm = (name: string) => {
+    const newErrors: {name?: string, imageUrl?: string} = {};
+    
+    if (!name || name.trim().length < 3) {
+      newErrors.name = 'Category name must be at least 3 characters';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Converting image file to base64 url
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      }
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    })
+  }
+
+  // Handle image upload
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      
+      setSelectedImage(file);
+      
+      // Create preview for the selected image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Handle add new category
-  const handleAddCategory = async (data: { name: string }) => {
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm(categoryName)) {
+      return;
+    }
+
     const isDuplicate = categories.some(
-      (cat) => cat.name.toLowerCase() === data.name.toLowerCase()
+      (cat) => cat.name.toLowerCase() === categoryName.toLowerCase()
     );
 
     if (isDuplicate) {
-      toast.info(`Category "${data.name}" already exists!`, {
-        style: { color: 'red' },
-      })
+      toast.error(`Category "${categoryName}" already exists!`);
       return;
     }
 
     try {
+      // toast.loading('Adding category...', {
+      //   style: { color: "green"}
+      // });
       const collectionRef = collection(db, 'categories');
       const order = categories.length + 1;
 
+      let imageUrl = '';
+      if (selectedImage) {
+        try {
+          imageUrl = await convertToBase64(selectedImage);
+        } catch (error) {
+          console.error('Error processing image:', error);
+          toast.dismiss();
+          toast.error('Failed to process image. Please try a different image.');
+          return;
+        }
+      }
+
       const newDoc = await addDoc(collectionRef, {
-        name: data.name,
+        name: categoryName.trim(),
         order,
+        imageUrl: imageUrl,
       });
 
-      setCategories([...categories, { id: newDoc.id, name: data.name, order }]);
+      setCategories([...categories, { id: newDoc.id, name: categoryName.trim(), order, imageUrl }]);
       setNewCategory('');
+      setCategoryName('');
+      setSelectedImage(null);
+      setImagePreview(null);
       setOpenDialog(false);
-      reset();
-      console.log(`Added category: ${data.name}`);
-      toast.success(`Category "${data.name}" added successfully!`, {
-        style: { color: 'green' },
+      
+      toast.dismiss();
+      toast.success(`Category "${categoryName}" added successfully!`, {
+        style: { color: "green" }
       });
     } catch (error) {
       console.error('Error adding category:', error);
+      toast.dismiss();
+      toast.error('Failed to add category. Please try again.');
     }
   };
 
   // Handle delete category
   const handleDeleteCategory = async (id: string) => {
     try {
+      // toast.loading('Deleting category...',{
+      //   style: { color: "green"}
+      // });
       const collectionRef = collection(db, 'categories');
       const categoryName = categories.find((cat) => cat.id === id)?.name;
       await deleteDoc(doc(collectionRef, id));
@@ -192,12 +243,14 @@ const AddCategories = () => {
       }
 
       setCategories(updatedCategories);
-      console.log(`Deleted category and updated order`);
-      toast.info(`Deleted category name ${categoryName}`, {
-        style: { color: 'red' },
-      })
+      toast.dismiss();
+      toast.success(`Category "${categoryName}" deleted successfully!`, {
+        style: { color: "red"}
+      });
     } catch (error) {
       console.error('Error deleting category:', error);
+      toast.dismiss();
+      toast.error('Failed to delete category. Please try again.');
     }
   };
 
@@ -205,58 +258,85 @@ const AddCategories = () => {
   const openAddDialog = () => {
     setMode('add');
     setNewCategory('');
-    reset({ name: newCategory });
+    setCategoryName('');
+    setSelectedImage(null);
+    setImagePreview(null);
+    setErrors({});
     setOpenDialog(true);
   };
 
   // For opening edit dialog
   const openEditDialog = (category: Category) => {
     setMode('edit');
-    reset({ name: category.name });
-    setOpenDialog(true);
     setEditCategory(category);
-  };
-
-  // Handle edit category name
-  const handleEditCategory = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEditCategory((prev) => (prev ? { ...prev, name: e.target.value } : null));
+    setCategoryName(category.name);
+    setImagePreview(category.imageUrl);
+    setErrors({});
+    setOpenDialog(true);
   };
 
   // Handle update category
-  const handleUpdateCategory = async (data: { name: string }) => {
+  const handleUpdateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
     if (!editCategory) return;
+    
+    if (!validateForm(categoryName)) {
+      return;
+    }
 
     const isDuplicate = categories.some(
       (cat) =>
-        cat.name.toLowerCase() === data.name.toLowerCase() &&
+        cat.name.toLowerCase() === categoryName.toLowerCase() &&
         cat.id !== editCategory.id
     );
 
     if (isDuplicate) {
-      toast.info(`Category "${data.name}" already exists!`, {
-        style: { color: 'red' },
-      });
+      toast.error(`Category "${categoryName}" already exists!`);
       return;
     }
 
     try {
+      // toast.loading('Updating category...', {
+      //   style: { color: "green" }
+      // });
       const collectionRef = collection(db, 'categories');
       const docRef = doc(collectionRef, editCategory.id);
 
-      await updateDoc(docRef, { name: data.name });
+      let updatedImageUrl = editCategory.imageUrl;
+      if (selectedImage) {
+        try {
+          updatedImageUrl = await convertToBase64(selectedImage);
+        } catch (error) {
+          console.error('Error processing image:', error);
+          toast.dismiss();
+          toast.error('Failed to process image. Please try a different image.');
+          return;
+        }
+      }
+
+      await updateDoc(docRef, { 
+        name: categoryName.trim(), 
+        imageUrl: updatedImageUrl 
+      });
 
       setCategories(
         categories.map((cat) =>
-          cat.id === editCategory.id ? { ...cat, name: data.name } : cat
+          cat.id === editCategory.id ? { ...cat, name: categoryName.trim(), imageUrl: updatedImageUrl } : cat
         )
       );
+      
       setOpenDialog(false);
-      reset();
-      toast.success(`Updated category: ${data.name}`, {
-        style: { color: 'green' },
+      setSelectedImage(null);
+      setImagePreview(null);
+      toast.dismiss();
+      toast.success(`Category "${categoryName}" updated successfully!`, {
+        style: { color: "green"}
       });
     } catch (error) {
       console.error('Error updating category:', error);
+      toast.dismiss();
+      toast.error('Failed to update category. Please try again.');
     }
   };
   
@@ -267,35 +347,6 @@ const AddCategories = () => {
   const indexOfLastCategory = currentPage * itemsPerPage;
   const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
   const currentCategories = filteredCategories.slice(indexOfFirstCategory, indexOfLastCategory);
-
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
-
-  // const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
-  // const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
-
-  // for (let i = 1; i <= Math.ceil(filteredCategories.length / itemsPerPage); i++) {
-  //   pageNumbers.push(i);
-  // }
-
-  const handleNext = () => {
-    if (currentPage < Math.ceil(filteredCategories.length / itemsPerPage)) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleFirst = () => {
-    setCurrentPage(1);
-  };
-
-  const handleLast = () => {
-    setCurrentPage(Math.ceil(filteredCategories.length / itemsPerPage));
-  };
 
   if (loading) {
     return (
@@ -311,7 +362,6 @@ const AddCategories = () => {
   
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
 
-
   return (
     <>
       <Toaster />
@@ -321,8 +371,11 @@ const AddCategories = () => {
             <Dialog open={openDialog} onOpenChange={(isOpen) => {
               setOpenDialog(isOpen);
               if (!isOpen) {
-                reset();
+                setCategoryName('');
                 setNewCategory('');
+                setSelectedImage(null);
+                setImagePreview(null);
+                setErrors({});
               }
             }}>
               <div className="flex items-center justify-between">
@@ -330,9 +383,7 @@ const AddCategories = () => {
                 <DialogTrigger asChild>
                   <Button
                     className="text-white bg-green-700 hover:bg-green-700 px-6 text-md border cursor-pointer"
-                    onClick={() => {
-                      openAddDialog();
-                    }}
+                    onClick={openAddDialog}
                   >
                     Add
                   </Button>
@@ -344,37 +395,56 @@ const AddCategories = () => {
                   {mode === 'add' ? "Add New Category" : "Edit Category"}
                 </DialogTitle>
                 <form
-                  onSubmit={handleSubmit(
-                    mode === 'add' ? handleAddCategory : handleUpdateCategory
-                  )}
+                  onSubmit={mode === 'add' ? handleAddCategory : handleUpdateCategory}
                   className="space-y-4"
                 >
-                  <Input
-                    type="text"
-                    {...register('name')}
-                    className={`border ${errors.name ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    onChange={(e) => {
-                      setError('');
-                      // if (mode === 'add') {
-                      //   setNewCategory(e.target.value);
-                      // } else {
-                      //   setNewCategory(e.target.value)
-                      // }
-                      { mode === 'add' ? setNewCategory(e.target.value) : handleEditCategory(e)}
-                    }}
-                    placeholder="Category name"
-                    required
-                  />
-                  {errors.name && (
-                    <span className="text-red-500 text-sm">
-                      {errors.name.message}
-                    </span>
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">Category Name</label>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={categoryName}
+                      className={`mt-1 border ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                      onChange={(e) => {
+                        setCategoryName(e.target.value);
+                        if (mode === 'add') {
+                          setNewCategory(e.target.value);
+                        }
+                      }}
+                      placeholder="Enter category name"
+                      required
+                    />
+                    {errors.name && (
+                      <span className="text-red-500 text-sm">{errors.name}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="image" className="block text-sm font-medium text-gray-700">Category Image</label>
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      className="mt-1 border border-gray-300"
+                      onChange={handleImageUpload}
+                    />
+                    {/* <p className="text-xs text-gray-500 mt-1">Max file size: 5MB</p> */}
+                  </div>
+
+                  {imagePreview && (
+                    <div className="mt-2">
+                      <p className="text-sm font-medium text-gray-700 mb-1">Image Preview:</p>
+                      <img 
+                        src={imagePreview} 
+                        alt="Category preview" 
+                        className="w-24 h-24 object-cover border border-gray-300 rounded-md"
+                      />
+                    </div>
                   )}
 
                   <div className="flex justify-end items-center gap-2">
                     <DialogClose asChild>
-                      <Button className="bg-gray-300 text-gray-800 hover:bg-gray-300 cursor-pointer">
+                      <Button type="button" className="bg-gray-300 text-gray-800 hover:bg-gray-300 cursor-pointer">
                         Cancel
                       </Button>
                     </DialogClose>
@@ -397,7 +467,7 @@ const AddCategories = () => {
             </div>
             <Input
               type="text"
-              placeholder="Search by categories name..."
+              placeholder="Search by category name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full border pl-10 border-gray-300 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 transition"
@@ -410,20 +480,27 @@ const AddCategories = () => {
                 key={category.id}
                 className="items-center justify-between flex border-t border-gray-200 py-4"
               >
-                <div>
-                  <span className=''>
+                <div className="flex items-center">
+                  {category.imageUrl ? (
+                    <img 
+                      src={category.imageUrl} 
+                      alt={category.name}
+                      className="w-10 h-10 object-cover rounded-md mr-3" 
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gray-200 rounded-md mr-3 flex items-center justify-center">
+                      <span className="text-gray-500 text-xs">No img</span>
+                    </div>
+                  )}
+                  <span>
                     {category.order}. {category.name}
                   </span>
                 </div>
                 <div className="gap-2 justify-between flex">
-
                   <Button
                     className="text-blue-500 bg-blue-100 hover:bg-blue-100 border-blue-500 border cursor-pointer"
-                    onClick={() => {
-                      openEditDialog(category);
-                    }}
+                    onClick={() => openEditDialog(category)}
                   >
-                    {/* Edit */}
                     <Edit className="h-4 w-4 mr-1" />
                     Edit
                   </Button>
@@ -432,8 +509,7 @@ const AddCategories = () => {
                       <Button
                         className="text-red-500 bg-red-100 hover:bg-red-100 border-red-500 border cursor-pointer"
                       >
-                        {/* Delete */}
-                        <Trash2  className="w-4 h-4 mr-1" />
+                        <Trash2 className="w-4 h-4 mr-1" />
                         Delete
                       </Button>
                     </DialogTrigger>
@@ -442,7 +518,7 @@ const AddCategories = () => {
                       <p>Are you sure you want to delete this category?</p>
                       <div className="flex justify-end gap-2 mt-4">
                         <DialogClose asChild>
-                          <Button className="bg-gray-300 text-gray-800 hover:bg-gray-300 cursor-pointer">
+                          <Button type="button" className="bg-gray-300 text-gray-800 hover:bg-gray-300 cursor-pointer">
                             Cancel
                           </Button>
                         </DialogClose>

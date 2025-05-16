@@ -9,7 +9,7 @@ import { Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
-import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
+// import tr from "../../images/Grocery/Aashirvaad Shudh Chakki Atta/0.jpg";
 interface Product {
   id: string;
   productName: string;
@@ -276,20 +276,20 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
     router.push(`/product-details/${product.id}?${formattedProductName}`);
   };
 
-  const getAllProductImages = (productName: string) => {
-    const images = [];
-    const extensions = ['jpg', 'png', 'jpeg'];
-    try {
-      for (const ext of extensions) {
-        try {
-          const image = require(`../../images/Grocery/${productName}/0.${ext}`);
-          images.push(image);
-        } catch {}
-      }
-    } catch {}
+  // const getAllProductImages = (productName: string) => {
+  //   const images = [];
+  //   const extensions = ['jpg', 'png', 'jpeg'];
+  //   try {
+  //     for (const ext of extensions) {
+  //       try {
+  //         const image = require(`../../images/Grocery/${productName}/0.${ext}`);
+  //         images.push(image);
+  //       } catch {}
+  //     }
+  //   } catch {}
     
-    return images.length > 0 ? images : [tr];
-  };
+  //   return images.length > 0 ? images : [tr];
+  // };
 
   if (loading) {
     return (
@@ -331,7 +331,7 @@ const mostSellerIds = new Set(filterMostSeller.map(p => p.id));
             ? Math.round(((product.price - product.discountedPrice) / product.price) * 100)
             : 0
           const isMostSeller = mostSellerIds.has(product.id);
-          const images = getAllProductImages(product.productName);
+          // const images = getAllProductImages(product.productName);
 
           return (
             <div key={product.id} className='pt-2' onClick={() => handleProductClick(product)}>
