@@ -51,6 +51,8 @@ const ProductDetailsPage = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [productImages, setProductImages] = useState<string[]>([]);
   const swiperRef = useRef<SwiperType | null>(null);
+  const thumbSwiperRef = useRef<SwiperType | null>(null);
+
 
   const category = Array.isArray(params?.categories)
     ? decodeURIComponent(params.categories[0])
@@ -387,13 +389,15 @@ const ProductDetailsPage = () => {
                   <div className="flex flex-col">
                     <div className="w-80 mb-4">
                         <Swiper
-                          modules={[Autoplay, Navigation, Parallax]}
-                          spaceBetween={0}
-                          slidesPerView={1}
-                          // autoplay={{ delay: 5000, disableOnInteraction: false }}
-                          className="w-full rounded-md"
-                          onSwiper={(swiper) => (swiperRef.current = swiper)}
-                          onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
+                           modules={[Autoplay, Navigation, Parallax]}
+  spaceBetween={0}
+  slidesPerView={1}
+  onSwiper={(swiper) => (swiperRef.current = swiper)}
+  onSlideChange={(swiper) => {
+    setActiveIndex(swiper.activeIndex);
+    thumbSwiperRef.current?.slideTo(swiper.activeIndex);
+  }}
+  className="w-full rounded-md"
                         >
                           {productImages.map((image, index) => (
                             <SwiperSlide key={index}>
@@ -412,7 +416,7 @@ const ProductDetailsPage = () => {
                         </Swiper>
                       </div>
 
-                      {productImages.length > 1 && (
+                      {/* {productImages.length > 1 && (
                         <div className="flex overflow-x-auto gap-2 w-full py-2">
                           {productImages.map((image, index) => (
                             <div
@@ -433,7 +437,43 @@ const ProductDetailsPage = () => {
                             </div>
                           ))}
                         </div>
-                      )}
+                      )} */}
+                      {productImages.length > 1 && (
+                      <div className="relative w-80">
+                      <Swiper
+                        modules={[Navigation]}
+                        spaceBetween={10}
+                        slidesPerView={4.5}
+                        // navigation
+                        className="w-80"
+                        onSwiper={(swiper) => (thumbSwiperRef.current = swiper)}
+                      >
+                        {productImages.map((image, index) => (
+                          <SwiperSlide key={index}>
+                            <div
+                              onClick={() => {
+                                setActiveIndex(index);
+                                swiperRef.current?.slideTo(index);
+                                thumbSwiperRef.current?.slideTo(index);
+                              }}
+                              className={`cursor-pointer border-2 rounded-md w-16 h-16 flex items-center justify-center ${
+                                activeIndex === index ? "border-green-700" : "border-gray-200"
+                              }`}
+                            >
+                              <img
+                                src={image || "/placeholder.svg"}
+                                alt={`Thumbnail ${index}`}
+                                className="w-full h-full object-contain rounded-sm"
+                                width={60}
+                                height={60}
+                              />
+                            </div>
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
+                    </div>
+                    )}
+
                   </div>
 
                 </div>
