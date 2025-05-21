@@ -23,6 +23,7 @@ const Categories = () => {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
 
+  // Fetching all categories in order
   useEffect(() => {
     const collectionRef = collection(db, 'categories');
     const q = query(collectionRef, orderBy('order'));

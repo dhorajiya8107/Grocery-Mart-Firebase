@@ -95,6 +95,7 @@ const ChangeRole = () => {
   }, [role]);
 
 
+  // Filter role by searching
   const filteredUsers = users.filter(
     (user) =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||

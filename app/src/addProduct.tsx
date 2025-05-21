@@ -93,6 +93,7 @@ const AddProductForm = () => {
     },
   })
 
+  // Fetch data from the categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {

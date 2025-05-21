@@ -167,7 +167,10 @@ const Footer = () => {
             <ul className="space-y-3 pl-4">
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-green-700 flex-shrink-0 mt-0.5" />
-                <span className="text-sm">India</span>
+                {/* <span className="text-sm">India</span> */}
+                <Link className="text-sm" target="blank" href="https://www.google.co.in/maps/place/India/@20.7573782,72.1108401,5z/data=!3m1!4b1!4m6!3m5!1s0x30635ff06b92b791:0xd78c4fa1854213a6!8m2!3d20.593684!4d78.96288!16zL20vMDNyazA?entry=ttu&g_ep=EgoyMDI1MDUxMy4xIKXMDSoASAFQAw%3D%3D">
+                  India
+                </Link>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-green-700 flex-shrink-0" />

@@ -293,7 +293,7 @@ const CheckoutPage = () => {
         const cartRef = doc(db, "cart", order.userId)
         await setDoc(cartRef, { products: [] })
 
-        console.log("Payment successful!")
+        // console.log("Payment successful!")
         setPaymentSuccess(true)
         setIsPopoverOpen(false)
 

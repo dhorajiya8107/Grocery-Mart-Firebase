@@ -174,7 +174,7 @@ const AddAddressPage: React.FC<AddAddressPageProps> = ({ activeDialog, setActive
           updatedAt: timestamp,
           defaultAddress: true,
         });
-        console.log("Address updated with ID:", currentAddressId);
+        // console.log("Address updated with ID:", currentAddressId);
       } else {
         addressRef = doc(collection(db, "addresses"));
         batch.set(addressRef, {
@@ -185,7 +185,7 @@ const AddAddressPage: React.FC<AddAddressPageProps> = ({ activeDialog, setActive
           updatedAt: timestamp,
           defaultAddress: true,
         });
-        console.log("New address saved with ID:", addressRef.id);
+        // console.log("New address saved with ID:", addressRef.id);
       }
   
       await batch.commit();
