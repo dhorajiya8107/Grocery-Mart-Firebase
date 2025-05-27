@@ -35,7 +35,7 @@ export default function RootLayout({
           <ScrollToTop />
           <Suspense>
             {children}
-            {/* <Analytics /> */}
+            <Analytics />
           </Suspense>
         </AuthGuard>
       </body>
